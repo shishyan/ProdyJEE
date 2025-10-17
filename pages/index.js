@@ -407,6 +407,18 @@ function StudyPlanCard({ studyPlan, onEdit, onUpdateProgress }) {
             <span className="chapter-name">{studyPlan.chapter_name}</span>
           </div>
         </div>
+        <div className="study-plan-status">
+          <span
+            className="status-badge"
+            style={{
+              backgroundColor: `${getStatusColor(studyPlan.learning_status)}20`,
+              color: getStatusColor(studyPlan.learning_status),
+              borderColor: getStatusColor(studyPlan.learning_status)
+            }}
+          >
+            {studyPlan.learning_status}
+          </span>
+        </div>
       </div>
 
       <div className="study-plan-details">
@@ -983,16 +995,29 @@ function StudyPlanGrid({ subject, onUpdate }) {
     const activeId = active.id
     const overId = over.id
 
+  const handleDragEnd = async (event) => {
+    const { active, over } = event
+
+    if (!over) return
+
+    const activeId = active.id
+    const overId = over.id
+
     // Check if dragging a study plan
     if (activeId.startsWith('studyplan-')) {
       const studyPlanId = activeId.replace('studyplan-', '')
 
-      // If dropping on another study plan (could be same bucket or different bucket)
-      if (overId.startsWith('studyplan-')) {
-        const overStudyPlanId = overId.replace('studyplan-', '')
+      // Only allow drops directly on bucket areas, not on other cards
+      const targetBucket = [
+        { bucket_id: 'backlog', name: 'Backlog', status: 'In Queue' },
+        { bucket_id: 'todo', name: 'To Do', status: 'To Do' },
+        { bucket_id: 'inprogress', name: 'In Progress', status: 'In Progress' },
+        { bucket_id: 'done', name: 'Done', status: 'Done' }
+      ].find(b => b.bucket_id === overId)
 
-        // Find which bucket the active item belongs to
-        const activeBucket = [
+      if (targetBucket) {
+        // Find current bucket of the active item
+        const currentBucket = [
           { bucket_id: 'backlog', name: 'Backlog', status: 'In Queue' },
           { bucket_id: 'todo', name: 'To Do', status: 'To Do' },
           { bucket_id: 'inprogress', name: 'In Progress', status: 'In Progress' },
@@ -1005,52 +1030,21 @@ function StudyPlanGrid({ subject, onUpdate }) {
           return bucketPlans.some(plan => plan.unique_id === studyPlanId)
         })
 
-        // Find which bucket the over item belongs to
-        const overBucket = [
-          { bucket_id: 'backlog', name: 'Backlog', status: 'In Queue' },
-          { bucket_id: 'todo', name: 'To Do', status: 'To Do' },
-          { bucket_id: 'inprogress', name: 'In Progress', status: 'In Progress' },
-          { bucket_id: 'done', name: 'Done', status: 'Done' }
-        ].find(bucket => {
-          const bucketPlans = studyPlans.filter(plan =>
-            plan.subject === selectedSubject?.name &&
-            (!bucket.status || plan.learning_status === bucket.status)
-          )
-          return bucketPlans.some(plan => plan.unique_id === overStudyPlanId)
-        })
-
-        if (activeBucket && overBucket && activeBucket.bucket_id !== overBucket.bucket_id) {
-          // Moving to a different bucket
+        // Only update if moving to a different bucket
+        if (currentBucket && currentBucket.bucket_id !== targetBucket.bucket_id) {
           await fetch(`/api/study-plan/${studyPlanId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ learning_status: overBucket.status })
+            body: JSON.stringify({ learning_status: targetBucket.status })
           })
           fetchData()
         }
-        // If same bucket, we could implement reordering here, but for now just return
-        return
       }
-
-      // If dropping directly on a bucket
-      const targetBucket = [
-        { bucket_id: 'backlog', name: 'Backlog', status: 'In Queue' },
-        { bucket_id: 'todo', name: 'To Do', status: 'To Do' },
-        { bucket_id: 'inprogress', name: 'In Progress', status: 'In Progress' },
-        { bucket_id: 'done', name: 'Done', status: 'Done' }
-      ].find(b => b.bucket_id === overId)
-
-      if (targetBucket) {
-        // Update study plan status based on bucket
-        await fetch(`/api/study-plan/${studyPlanId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ learning_status: targetBucket.status })
-        })
-        fetchData()
-        return
-      }
+      // Ignore drops on other cards - no reordering within buckets for now
     }
+
+    // All other drag operations are disabled since we only use StudyPlan data now
+  }
 
     // All other drag operations are disabled since we only use StudyPlan data now
   }
@@ -1240,10 +1234,6 @@ function StudyPlanGrid({ subject, onUpdate }) {
       <main className="board">
         {selectedSubject && viewMode === 'kanban' && (
           <>
-            <div className="subject-header">
-              <h1>{selectedSubject.name} Kanban Board</h1>
-              <p>Drag study plan topics to organize your learning progress</p>
-            </div>
             <DndContext
               sensors={sensors}
               collisionDetection={closestCorners}
@@ -1672,7 +1662,19 @@ function StudyPlanGrid({ subject, onUpdate }) {
         <div className="modal-overlay">
           <div className="study-plan-modal glass-card">
             <div className="modal-header">
-              <h2>{editingStudyPlan.topic}</h2>
+              <div className="modal-title-section">
+                <h2>{editingStudyPlan.topic}</h2>
+                <span
+                  className="modal-status-badge"
+                  style={{
+                    backgroundColor: `${getStatusColor(editingStudyPlan.learning_status)}20`,
+                    color: getStatusColor(editingStudyPlan.learning_status),
+                    borderColor: getStatusColor(editingStudyPlan.learning_status)
+                  }}
+                >
+                  {editingStudyPlan.learning_status}
+                </span>
+              </div>
               <button className="close-btn" onClick={() => setEditingStudyPlan(null)}>×</button>
             </div>
             <div className="modal-body">
@@ -1703,7 +1705,7 @@ function StudyPlanGrid({ subject, onUpdate }) {
                 
                 {/* Modern Sub-Topics Progress Tracking */}
                 <div className="form-group">
-                  <label>🎯 Learning Progress</label>
+                  <label className="form-label-icon">📊 Learning Progress</label>
                   <div className="progress-tracker">
                     <div className="progress-header">
                       <span className="progress-title">Overall Progress</span>
@@ -1729,7 +1731,7 @@ function StudyPlanGrid({ subject, onUpdate }) {
                       <div key={subTopic.id} className={`subtopic-item ${subTopic.completed ? 'completed' : 'pending'}`}>
                         <div className="subtopic-content">
                           <div className="subtopic-icon">
-                            {subTopic.completed ? '✅' : '⏳'}
+                            {subTopic.completed ? '✓' : '○'}
                           </div>
                           <span className="subtopic-text">{subTopic.text}</span>
                         </div>
@@ -1792,7 +1794,7 @@ function StudyPlanGrid({ subject, onUpdate }) {
                           }
                         }}
                       >
-                        ➕ Add Topic
+                        + Add Topic
                       </button>
                     </div>
                   </div>
@@ -1800,7 +1802,7 @@ function StudyPlanGrid({ subject, onUpdate }) {
 
                 {/* Notes Section */}
                 <div className="form-group">
-                  <label>📝 Notes</label>
+                  <label className="form-label-icon">📝 Notes</label>
                   <textarea 
                     name="notes" 
                     defaultValue={editingStudyPlan.notes} 
@@ -1811,7 +1813,7 @@ function StudyPlanGrid({ subject, onUpdate }) {
 
                 {/* Voice Logging Section */}
                 <div className="form-group">
-                  <label>🎤 Voice Notes</label>
+                  <label className="form-label-icon">�️ Voice Notes</label>
                   <div className="voice-logging">
                     <div className="voice-controls">
                       {!isRecording ? (
@@ -1820,7 +1822,7 @@ function StudyPlanGrid({ subject, onUpdate }) {
                           className="record-btn recording"
                           onClick={startRecording}
                         >
-                          🎤 Start Recording
+                          �️ Start Recording
                         </button>
                       ) : (
                         <button
