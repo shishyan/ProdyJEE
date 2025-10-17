@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import packageJson from '../package.json'
 import {
   DndContext,
   KeyboardSensor,
@@ -357,43 +358,34 @@ function SubTopicCard({ subtopic, chapterName, onEdit, onUpdateProgress }) {
   )
 }
 
-function StudyPlanCard({ studyPlan, onEdit, onUpdateProgress }) {
+function StudyPlanCard({ studyPlan, bucketColor, onEdit, onUpdateProgress, getStatusColor, getProficiencyColor }) {
   const {
     attributes,
     listeners,
     setNodeRef,
+    transform,
+    transition,
     isDragging,
   } = useDraggable({ id: `studyplan-${studyPlan.unique_id}` })
 
-  // Remove all transform and transition to prevent any animation issues
-  const style = {}
-
-  const getStatusColor = (status) => {
-    const colors = {
-      'In Queue': '#6b7280',
-      'To Do': '#3b82f6',
-      'In Progress': '#f59e0b',
-      'Done': '#10b981',
-      'Closed': '#8b5cf6'
-    }
-    return colors[status] || '#6b7280'
-  }
-
-  const getProficiencyColor = (proficiency) => {
-    const colors = {
-      'Novice': '#ef4444',
-      'Competent': '#f59e0b',
-      'Expert': '#3b82f6',
-      'Master': '#10b981'
-    }
-    return colors[proficiency] || '#6b7280'
+  // Bring back drag animation but make dropping more prominent
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition: isDragging ? 'none' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    zIndex: isDragging ? 1000 : 'auto'
   }
 
   return (
     <div
       ref={setNodeRef}
-      style={style}
-      className={`study-plan-card glass-card ${isDragging ? 'dragging' : ''}`}
+      style={{
+        ...style,
+        border: 'none',
+        backgroundColor: 'rgba(255, 255, 255, 0.3)',
+        boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1)'
+      }}
+      className={`study-plan-card ${isDragging ? 'dragging' : ''}`}
+      onClick={(e) => onEdit(studyPlan, e)}
     >
       <div className="study-plan-header">
         <div className="study-plan-info">
@@ -402,25 +394,26 @@ function StudyPlanCard({ studyPlan, onEdit, onUpdateProgress }) {
             {...attributes}
             {...listeners}
             style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+            onClick={(e) => {
+              e.stopPropagation() // Prevent card click when dragging
+            }}
           >
             {studyPlan.topic}
           </h4>
-          <div className="study-plan-meta">
-            <span className="chapter-name">{studyPlan.chapter_name}</span>
-          </div>
         </div>
-        <div className="study-plan-status">
-          <span
-            className="status-badge"
-            style={{
-              backgroundColor: `${getStatusColor(studyPlan.learning_status)}20`,
-              color: getStatusColor(studyPlan.learning_status),
-              borderColor: getStatusColor(studyPlan.learning_status)
-            }}
-          >
-            {studyPlan.learning_status}
-          </span>
-        </div>
+      </div>
+
+      <div className="study-plan-status">
+        <span
+          className="status-badge"
+          style={{
+            backgroundColor: `${getStatusColor(studyPlan.learning_status)}30`,
+            color: getStatusColor(studyPlan.learning_status),
+            border: 'none'
+          }}
+        >
+          {studyPlan.learning_status}
+        </span>
       </div>
 
       <div className="study-plan-details">
@@ -433,8 +426,9 @@ function StudyPlanCard({ studyPlan, onEdit, onUpdateProgress }) {
           <span
             className="proficiency-badge"
             style={{
-              backgroundColor: `${getProficiencyColor(studyPlan.learning_proficiency)}20`,
-              color: getProficiencyColor(studyPlan.learning_proficiency)
+              backgroundColor: `${getProficiencyColor(studyPlan.learning_proficiency)}30`,
+              color: getProficiencyColor(studyPlan.learning_proficiency),
+              border: 'none'
             }}
           >
             {studyPlan.learning_proficiency}
@@ -463,17 +457,27 @@ function StudyPlanCard({ studyPlan, onEdit, onUpdateProgress }) {
 }
 
 // Bucket Component
-function Bucket({ bucket, studyPlans, onEditStudyPlan, onUpdateProgress }) {
+function Bucket({ bucket, studyPlans, onEditStudyPlan, onUpdateProgress, getStatusColor, getProficiencyColor }) {
   const { setNodeRef, isOver } = useDroppable({
     id: bucket.id,
   })
 
   const filteredPlans = studyPlans.filter(plan => plan.learning_status === bucket.status)
 
+  // Get status-based class for glass effect
+  const getStatusClass = (status) => {
+    switch(status) {
+      case 'Done': return 'bucket-done';
+      case 'In Progress': return 'bucket-in-progress';
+      case 'To Do': return 'bucket-todo';
+      default: return '';
+    }
+  }
+
   return (
     <div
       ref={setNodeRef}
-      className={`bucket bg-gray-50 rounded-lg p-4 min-h-[500px] flex flex-col ${isOver ? 'ring-2 ring-blue-500 bg-blue-50' : ''}`}
+      className={`bucket bg-gray-50 rounded-lg p-4 min-h-[500px] flex flex-col ${isOver ? 'ring-2 ring-blue-500 bg-blue-50' : ''} ${getStatusClass(bucket.status)}`}
     >
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900">{bucket.name}</h3>
@@ -488,8 +492,11 @@ function Bucket({ bucket, studyPlans, onEditStudyPlan, onUpdateProgress }) {
             <StudyPlanCard
               key={studyPlan.unique_id}
               studyPlan={studyPlan}
+              bucketColor={getStatusColor(bucket.status)}
               onEdit={onEditStudyPlan}
               onUpdateProgress={onUpdateProgress}
+              getStatusColor={getStatusColor}
+              getProficiencyColor={getProficiencyColor}
             />
           ))}
           {filteredPlans.length === 0 && (
@@ -503,13 +510,14 @@ function Bucket({ bucket, studyPlans, onEditStudyPlan, onUpdateProgress }) {
   )
 }
 
-function StudyPlanGrid({ subject, onUpdate }) {
+function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor }) {
   const [studyPlans, setStudyPlans] = useState([])
   const [editingCell, setEditingCell] = useState(null)
   const [editValue, setEditValue] = useState('')
   const [loading, setLoading] = useState(true)
 
   const columns = [
+    { key: 'actions', label: 'Actions', width: '120px', type: 'actions', readonly: true },
     { key: 'unique_id', label: 'Unique ID', width: '140px', type: 'text', readonly: true },
     { key: 'curriculum', label: 'Curriculum', width: '100px', type: 'text' },
     { key: 'grade', label: 'Grade', width: '70px', type: 'number' },
@@ -529,18 +537,6 @@ function StudyPlanGrid({ subject, onUpdate }) {
   useEffect(() => {
     fetchStudyPlans()
   }, [subject])
-
-  // Utility functions
-  const getStatusColor = (status) => {
-    const colors = {
-      'In Queue': '#6b7280',
-      'To Do': '#3b82f6',
-      'In Progress': '#f59e0b',
-      'Done': '#10b981',
-      'Closed': '#8b5cf6'
-    }
-    return colors[status] || '#6b7280'
-  }
 
   const fetchStudyPlans = async () => {
     try {
@@ -611,41 +607,104 @@ function StudyPlanGrid({ subject, onUpdate }) {
     }
   }
 
+  const handleAddRow = async () => {
+    try {
+      const newRow = {
+        curriculum: subject?.name || 'JEE',
+        grade: 11,
+        subject: subject?.name || 'Mathematics',
+        chapter_name: 'New Chapter',
+        topic: 'New Topic',
+        target_date: null,
+        learning_status: 'In Queue',
+        learning_stage: 'Initiated',
+        learning_proficiency: 'Novice',
+        progress_percentage: 0,
+        notes: ''
+      }
+
+      const response = await fetch('/api/study-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newRow)
+      })
+
+      if (response.ok) {
+        const addedRow = await response.json()
+        setStudyPlans(prev => [...prev, addedRow])
+        if (onUpdate) onUpdate()
+      }
+    } catch (error) {
+      console.error('Failed to add row:', error)
+    }
+  }
+
+  const handleDeleteRow = async (uniqueId) => {
+    if (!confirm('Are you sure you want to delete this row?')) return
+
+    try {
+      await fetch(`/api/study-plan/${uniqueId}`, {
+        method: 'DELETE'
+      })
+
+      setStudyPlans(prev => prev.filter(plan => plan.unique_id !== uniqueId))
+      if (onUpdate) onUpdate()
+    } catch (error) {
+      console.error('Failed to delete row:', error)
+    }
+  }
+
+  const handleInsertRow = async (index) => {
+    try {
+      const newRow = {
+        curriculum: subject?.name || 'JEE',
+        grade: 11,
+        subject: subject?.name || 'Mathematics',
+        chapter_name: 'New Chapter',
+        topic: 'New Topic',
+        target_date: null,
+        learning_status: 'In Queue',
+        learning_stage: 'Initiated',
+        learning_proficiency: 'Novice',
+        progress_percentage: 0,
+        notes: ''
+      }
+
+      const response = await fetch('/api/study-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newRow)
+      })
+
+      if (response.ok) {
+        const addedRow = await response.json()
+        setStudyPlans(prev => {
+          const newPlans = [...prev]
+          newPlans.splice(index, 0, addedRow)
+          return newPlans
+        })
+        if (onUpdate) onUpdate()
+      }
+    } catch (error) {
+      console.error('Failed to insert row:', error)
+    }
+  }
+
   if (loading) {
     return (
       <div className="study-plan-container">
-        <div className="loading">Loading study plan data...</div>
+        <div className="study-plan-header">
+          <div className="header-info">
+            <h1>{subject ? `${subject.name} Study Plan` : 'Complete Study Plan'}</h1>
+            <p>Master curriculum management with comprehensive tracking</p>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
     <div className="study-plan-container">
-      <div className="study-plan-header">
-        <div className="header-info">
-          <h1>{subject ? `${subject.name} Study Plan` : 'Complete Study Plan'}</h1>
-          <p>Master curriculum management with comprehensive tracking</p>
-        </div>
-        <div className="header-stats">
-          <div className="stat-item">
-            <span className="stat-label">Total Topics:</span>
-            <span className="stat-value">{studyPlans.length}</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-label">Completed:</span>
-            <span className="stat-value">
-              {studyPlans.filter(p => p.learning_status === 'Done').length}
-            </span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-label">In Progress:</span>
-            <span className="stat-value">
-              {studyPlans.filter(p => p.learning_status === 'In Progress').length}
-            </span>
-          </div>
-        </div>
-      </div>
-
       <div className="excel-grid-container">
         <div className="excel-grid">
           {/* Header Row */}
@@ -670,6 +729,24 @@ function StudyPlanGrid({ subject, onUpdate }) {
                   className="grid-cell"
                   style={{ width: column.width, minWidth: column.width }}
                 >
+                  {column.key === 'actions' && (
+                    <div className="action-buttons">
+                      <button
+                        className="action-btn add-btn"
+                        onClick={() => handleInsertRow(studyPlans.indexOf(plan))}
+                        title="Insert row above"
+                      >
+                        +
+                      </button>
+                      <button
+                        className="action-btn delete-btn"
+                        onClick={() => handleDeleteRow(plan.unique_id)}
+                        title="Delete row"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
                   {column.key === 'unique_id' && (
                     <span className="readonly-cell">{plan.unique_id}</span>
                   )}
@@ -901,6 +978,30 @@ function StudyPlanGrid({ subject, onUpdate }) {
               ))}
             </div>
           ))}
+
+          {/* Add Row */}
+          <div className="grid-row add-row">
+            {columns.map(column => (
+              <div
+                key={`add-${column.key}`}
+                className="grid-cell"
+                style={{ width: column.width, minWidth: column.width }}
+              >
+                {column.key === 'actions' && (
+                  <button
+                    className="action-btn add-btn primary"
+                    onClick={handleAddRow}
+                    title="Add new row"
+                  >
+                    +
+                  </button>
+                )}
+                {column.key !== 'actions' && (
+                  <span className="add-placeholder">Click + to add</span>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -919,7 +1020,8 @@ function StudyPlanGrid({ subject, onUpdate }) {
   const [filterPriority, setFilterPriority] = useState('All')
   const [filterLabel, setFilterLabel] = useState('All')
   const [selectedDueDate, setSelectedDueDate] = useState(null)
-  const [backgroundTheme, setBackgroundTheme] = useState('forest-mountain')
+  const [backgroundTheme, setBackgroundTheme] = useState('ocean')
+  const [navbarBackground, setNavbarBackground] = useState('default')
   const [viewMode, setViewMode] = useState('kanban') // 'kanban' or 'study-plan'
   const [studyPlans, setStudyPlans] = useState([])
   const [weatherEffect, setWeatherEffect] = useState(false)
@@ -929,28 +1031,15 @@ function StudyPlanGrid({ subject, onUpdate }) {
   const [musicPlaying, setMusicPlaying] = useState(true) // Auto-play zen rhythms
   const [zenRhythmsEnabled, setZenRhythmsEnabled] = useState(true)
   const [editingStudyPlan, setEditingStudyPlan] = useState(null)
+  const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 })
   const [subTopics, setSubTopics] = useState([])
   const [newSubTopic, setNewSubTopic] = useState('')
   const [voiceRecordings, setVoiceRecordings] = useState([])
   const [isRecording, setIsRecording] = useState(false)
   const [mediaRecorder, setMediaRecorder] = useState(null)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true)
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  )
-
-  // Bucket configuration
-  const buckets = [
-    { id: 'backlog', name: 'Backlog', status: 'In Queue' },
-    { id: 'todo', name: 'To Do', status: 'To Do' },
-    { id: 'inprogress', name: 'In Progress', status: 'In Progress' },
-    { id: 'done', name: 'Done', status: 'Done' }
-  ]
-
-  // Utility functions
+  // Utility functions for colors
   const getStatusColor = (status) => {
     const colors = {
       'In Queue': '#6b7280',
@@ -971,6 +1060,21 @@ function StudyPlanGrid({ subject, onUpdate }) {
     }
     return colors[proficiency] || '#6b7280'
   }
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
+  // Bucket configuration
+  const buckets = [
+    { id: 'backlog', name: 'Backlog', status: 'In Queue' },
+    { id: 'todo', name: 'To Do', status: 'To Do' },
+    { id: 'inprogress', name: 'In Progress', status: 'In Progress' },
+    { id: 'done', name: 'Done', status: 'Done' }
+  ]
 
   useEffect(() => {
     fetchData()
@@ -1033,6 +1137,15 @@ function StudyPlanGrid({ subject, onUpdate }) {
       const targetBucket = buckets.find(b => b.id === overId)
 
       if (targetBucket) {
+        // Add dropping animation effect
+        const draggedElement = document.querySelector(`[data-id="${activeId}"]`)
+        if (draggedElement) {
+          draggedElement.classList.add('dropping')
+          setTimeout(() => {
+            draggedElement.classList.remove('dropping')
+          }, 600)
+        }
+
         try {
           await fetch(`/api/study-plan/${studyPlanId}`, {
             method: 'PUT',
@@ -1062,18 +1175,38 @@ function StudyPlanGrid({ subject, onUpdate }) {
     }
   }
 
-  const onEditStudyPlan = async (studyPlan) => {
+  const onEditStudyPlan = async (studyPlan, event) => {
+    // Calculate modal position based on clicked element
+    if (event) {
+      const rect = event.currentTarget.getBoundingClientRect()
+      const modalWidth = 900 // max-width of modal
+      const modalHeight = window.innerHeight * 0.6 // 60vh
+      
+      let top = rect.bottom + 10 // Position below the card
+      let left = rect.left
+      
+      // Adjust if modal would go off screen
+      if (left + modalWidth > window.innerWidth) {
+        left = window.innerWidth - modalWidth - 20
+      }
+      if (top + modalHeight > window.innerHeight) {
+        top = rect.top - modalHeight - 10 // Position above if below doesn't fit
+      }
+      
+      setModalPosition({ top, left })
+    }
+    
     setEditingStudyPlan(studyPlan)
     // Load subtopics for this chapter
     try {
       const response = await fetch(`/api/subtopics?chapter_id=${studyPlan.chapter_id}`)
       const chapterSubtopics = await response.json()
       // Convert database subtopics to the format expected by the modal
-      const formattedSubtopics = chapterSubtopics.map(subtopic => ({
+      const formattedSubtopics = Array.isArray(chapterSubtopics) ? chapterSubtopics.map(subtopic => ({
         id: subtopic.subtopic_id,
         text: subtopic.name,
         completed: subtopic.status === 'Completed'
-      }))
+      })) : []
       setSubTopics(formattedSubtopics)
     } catch (error) {
       console.error('Error fetching chapter subtopics:', error)
@@ -1153,8 +1286,8 @@ function StudyPlanGrid({ subject, onUpdate }) {
 
   return (
     <div className="planner">
-      {/* Professional Top Navigation Bar */}
-      <nav className="top-navbar">
+      {/* Professional Top Header */}
+      <nav className={`top-navbar navbar-${navbarBackground || 'default'}`}>
         <div className="navbar-brand">
           <div className="brand-logo">
             <span className="brand-main">Prody</span>
@@ -1163,37 +1296,34 @@ function StudyPlanGrid({ subject, onUpdate }) {
           </div>
           <div className="brand-subtitle">
             <span>Peepal Prodigy School</span>
-            <span className="version-tag">v1.0.1-alpha</span>
+            <span className="version-tag">v{packageJson.version}</span>
           </div>
         </div>
-        
+      </nav>
+
+      {/* Breadcrumb Navigation Bar */}
+      <div className="breadcrumb-navbar">
         <div className="navbar-controls">
-          {/* Subjects Selector */}
+          {/* Subjects Tabs */}
           <div className="nav-group">
-            <div className="subjects-selector">
-              <BookOpenIcon />
-              <select 
-                value={selectedSubject?.subject_id || ''} 
-                onChange={(e) => {
-                  const subjectId = parseInt(e.target.value)
-                  const subject = subjects.find(s => s.subject_id === subjectId)
-                  setSelectedSubject(subject)
-                }}
-              >
-                <option value="">Select Subject</option>
-                {subjects.map(subject => (
-                  <option key={subject.subject_id} value={subject.subject_id}>
-                    {subject.name}
-                  </option>
-                ))}
-              </select>
+            <div className="subjects-tabs">
+              {subjects.slice(0, 3).map(subject => (
+                <button
+                  key={subject.subject_id}
+                  className={`subject-tab ${selectedSubject?.subject_id === subject.subject_id ? 'active' : ''}`}
+                  onClick={() => setSelectedSubject(subject)}
+                >
+                  <BookOpenIcon />
+                  <span>{subject.name}</span>
+                </button>
+              ))}
             </div>
           </div>
 
           {/* View Toggle */}
           <div className="nav-group">
             <div className="view-toggle">
-              <button 
+              <button
                 className={`nav-btn ${viewMode === 'kanban' ? 'active' : ''}`}
                 onClick={() => setViewMode('kanban')}
                 title="Kanban View"
@@ -1201,7 +1331,7 @@ function StudyPlanGrid({ subject, onUpdate }) {
                 <BookOpenIcon />
                 <span>Kanban</span>
               </button>
-              <button 
+              <button
                 className={`nav-btn ${viewMode === 'study-plan' ? 'active' : ''}`}
                 onClick={() => setViewMode('study-plan')}
                 title="Study Plan View"
@@ -1236,7 +1366,42 @@ function StudyPlanGrid({ subject, onUpdate }) {
             </a>
           </div>
         </div>
-      </nav>
+      </div>
+
+      {/* Collapsible Sidebar */}
+      <div className={`sidebar ${sidebarCollapsed ? 'collapsed' : 'expanded'}`}>
+        <div className="sidebar-header">
+          <button 
+            className="sidebar-toggle"
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+          >
+            {sidebarCollapsed ? '→' : '←'}
+          </button>
+        </div>
+        <div className="sidebar-content">
+          <div className="sidebar-item" title="Dashboard">
+            <div className="sidebar-icon">📊</div>
+            {!sidebarCollapsed && <span>Dashboard</span>}
+          </div>
+          <div className="sidebar-item" title="Charts">
+            <div className="sidebar-icon">📈</div>
+            {!sidebarCollapsed && <span>Charts</span>}
+          </div>
+          <div className="sidebar-item" title="Schedule">
+            <div className="sidebar-icon">📅</div>
+            {!sidebarCollapsed && <span>Schedule</span>}
+          </div>
+          <div className="sidebar-item" title="Timer">
+            <div className="sidebar-icon">⏱️</div>
+            {!sidebarCollapsed && <span>Timer</span>}
+          </div>
+          <div className="sidebar-item" title="Relax">
+            <div className="sidebar-icon">🧘</div>
+            {!sidebarCollapsed && <span>Relax</span>}
+          </div>
+        </div>
+      </div>
 
       <main className="board">
         {selectedSubject && viewMode === 'kanban' && (
@@ -1257,6 +1422,8 @@ function StudyPlanGrid({ subject, onUpdate }) {
                     studyPlans={studyPlans.filter(plan => plan.subject === selectedSubject.name)}
                     onEditStudyPlan={onEditStudyPlan}
                     onUpdateProgress={fetchData}
+                    getStatusColor={getStatusColor}
+                    getProficiencyColor={getProficiencyColor}
                   />
                 ))}
               </div>
@@ -1268,6 +1435,8 @@ function StudyPlanGrid({ subject, onUpdate }) {
           <StudyPlanGrid 
             subject={selectedSubject} 
             onUpdate={fetchData}
+            getStatusColor={getStatusColor}
+            getProficiencyColor={getProficiencyColor}
           />
         )}
       </main>
@@ -1654,10 +1823,35 @@ function StudyPlanGrid({ subject, onUpdate }) {
       {/* Study Plan Edit Modal */}
       {editingStudyPlan && (
         <div className="modal-overlay">
-          <div className="study-plan-modal glass-card">
+          <div 
+            className="study-plan-modal glass-card"
+            style={{
+              top: `${modalPosition.top}px`,
+              left: `${modalPosition.left}px`,
+              position: 'fixed'
+            }}
+          >
             <div className="modal-header">
               <div className="modal-title-section">
                 <h2>{editingStudyPlan.topic}</h2>
+                <div className="study-plan-details-popup">
+                  <div className="detail-item">
+                    <span className="detail-label">Chapter:</span>
+                    <span className="detail-value">{editingStudyPlan.chapter_name}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="detail-label">Subject:</span>
+                    <span className="detail-value">{editingStudyPlan.subject}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="detail-label">Grade:</span>
+                    <span className="detail-value">{editingStudyPlan.grade}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="detail-label">Curriculum:</span>
+                    <span className="detail-value">{editingStudyPlan.curriculum}</span>
+                  </div>
+                </div>
                 <span
                   className="modal-status-badge"
                   style={{
@@ -1866,15 +2060,15 @@ function StudyPlanGrid({ subject, onUpdate }) {
                   </div>
                 </div>
 
-                <div className="form-actions">
-                  <button type="submit" className="save-btn">Save Progress</button>
-                  <button type="button" onClick={() => {
-                    setEditingStudyPlan(null)
-                    setSubTopics([])
-                    setNewSubTopic('')
-                    setVoiceRecordings([])
-                  }} className="cancel-btn">Close</button>
-                </div>
+                  <div className="form-actions">
+                    <button type="submit" className="save-btn">💾 Save Progress</button>
+                    <button type="button" onClick={() => {
+                      setEditingStudyPlan(null)
+                      setSubTopics([])
+                      setNewSubTopic('')
+                      setVoiceRecordings([])
+                    }} className="cancel-btn">❌ Close</button>
+                  </div>
               </form>
             </div>
           </div>
@@ -1919,6 +2113,21 @@ function StudyPlanGrid({ subject, onUpdate }) {
                     <option value="ice">Arctic Ice</option>
                     <option value="cosmic">Cosmic Nebula</option>
                     <option value="ethereal">Ethereal Mist</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="settings-section">
+                <h3>Navigation Bar Background</h3>
+                <div className="setting-item">
+                  <PaletteIcon />
+                  <select value={navbarBackground || 'default'} onChange={(e) => setNavbarBackground(e.target.value)}>
+                    <option value="default">Default (Semi-transparent)</option>
+                    <option value="glass">Glass Effect</option>
+                    <option value="solid">Solid White</option>
+                    <option value="gradient">Gradient</option>
+                    <option value="blur">Heavy Blur</option>
+                    <option value="minimal">Minimal</option>
                   </select>
                 </div>
               </div>
