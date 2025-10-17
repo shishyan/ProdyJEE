@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Subjects {
+  subject_id Int     @id @default(autoincrement())
+  name       String
+  Chapters   Chapters[]
+  TestTracker TestTracker[]
+}
+
+model Chapters {
+  chapter_id   Int       @id @default(autoincrement())
+  subject_id   Int
+  name         String
+  unit         String?
+  cbse_weightage Int     @default(5)
+  jee_weightage  Int     @default(5)
+  Subjects     Subjects  @relation(fields: [subject_id], references: [subject_id])
+  SubTopics    SubTopics[]
+}
+
+model SubTopics {
+  subtopic_id       Int      @id @default(autoincrement())
+  chapter_id        Int
+  name              String
+  status            String   @default("Not Started")
+  time_spent_minutes Int     @default(0)
+  mastery_level     Int      @default(0)
+  is_high_priority  Boolean  @default(false)
+  due_date          DateTime?
+  Chapters          Chapters @relation(fields: [chapter_id], references: [chapter_id])
+  StudyLogs         StudyLogs[]
+}
+
+model StudyLogs {
+  log_id         Int      @id @default(autoincrement())
+  subtopic_id    Int
+  date           DateTime
+  duration_minutes Int
+  mode           String
+  notes          String?
+  SubTopics      SubTopics @relation(fields: [subtopic_id], references: [subtopic_id])
+}
+
+model TestTracker {
+  test_id        Int      @id @default(autoincrement())
+  subject_id     Int
+  date           DateTime
+  test_type      String
+  score          Int?
+  max_score      Int?
+  chapters_covered String?
+  Subjects       Subjects @relation(fields: [subject_id], references: [subject_id])
+}
+
+// New models for MS Planner-like features
+model Plans {
+  plan_id       Int      @id @default(autoincrement())
+  name          String
+  description   String?
+  created_at    DateTime @default(now())
+  Buckets       Buckets[]
+}
+
+model Buckets {
+  bucket_id     Int      @id @default(autoincrement())
+  plan_id       Int
+  name          String
+  order         Int      @default(0)
+  Plans         Plans    @relation(fields: [plan_id], references: [plan_id])
+  Tasks         Tasks[]
+}
+
+model Tasks {
+  task_id       Int      @id @default(autoincrement())
+  bucket_id     Int
+  title         String
+  description   String?
+  due_date      DateTime?
+  priority      String   @default("Medium") // Low, Medium, High, Important
+  progress      Int      @default(0) // 0-100
+  order         Int      @default(0)
+  assigned_to   String?  // For now, simple string; could be user ID later
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  Buckets       Buckets  @relation(fields: [bucket_id], references: [bucket_id])
+  Comments      Comments[]
+  TaskLabels    TaskLabels[]
+  SubTasks      SubTasks[]
+}
+
+model Labels {
+  label_id      Int      @id @default(autoincrement())
+  name          String
+  color         String   @default("#0078d4")
+  TaskLabels    TaskLabels[]
+}
+
+model TaskLabels {
+  task_id       Int
+  label_id      Int
+  Tasks         Tasks    @relation(fields: [task_id], references: [task_id])
+  Labels        Labels   @relation(fields: [label_id], references: [label_id])
+  @@id([task_id, label_id])
+}
+
+model Comments {
+  comment_id    Int      @id @default(autoincrement())
+  task_id       Int
+  content       String
+  created_at    DateTime @default(now())
+  Tasks         Tasks    @relation(fields: [task_id], references: [task_id])
+}
+
+// New model for subtasks/checklists
+model SubTasks {
+  subtask_id    Int      @id @default(autoincrement())
+  task_id       Int
+  title         String
+  completed     Boolean  @default(false)
+  created_at    DateTime @default(now())
+  Tasks         Tasks    @relation(fields: [task_id], references: [task_id])
+}
+
+// Master Study Plan table - serves as the source of truth for curriculum
+model StudyPlan {
+  unique_id             String   @id
+  curriculum            String   // CBSE, ICSE, etc.
+  grade                 Int      // 11, 12, etc.
+  subject               String   // Physics, Chemistry, Mathematics
+  chapter_id            String   // PHY-1, CHM-1, MTH-1
+  chapter_name          String   // Physical World, Sets, etc.
+  topic_id              String   // PHY-1.1, CHM-1.1, MTH-1.1
+  topic                 String   // Scope and excitement of physics, etc.
+  target_date           DateTime
+  learning_status       String   @default("In Queue") // In Queue, To Do, In Progress, Done, Closed
+  learning_stage        String   @default("Initiated") // Initiated, Skimmed, Grasped, Practiced, Revised
+  learning_proficiency  String   @default("Novice") // Novice, Competent, Expert, Master
+  progress_percentage   Int      @default(0) // 0-100
+  notes                 String?
+  sub_topics            String?  // JSON string of sub-topic checklist items
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+}
