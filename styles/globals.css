@@ -33,6 +33,13 @@ body {
   color: #1a1a1a;
 }
 
+/* Bucket drop zone hover effect */
+.bucket-drop-zone--over {
+  background: rgba(79, 172, 254, 0.1);
+  border: 2px dashed rgba(79, 172, 254, 0.5);
+  transform: scale(1.02);
+}
+
 /* Top Navigation Bar */
 .top-navbar {
   position: fixed;
@@ -2119,6 +2126,107 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
   background: #6b7280;
 }
 
+/* Unified Kanban Board Styles */
+.unified-kanban-board {
+  width: 100%;
+  height: calc(100vh - 140px);
+  display: flex;
+  flex-direction: column;
+}
+
+.board-header {
+  margin-bottom: 20px;
+  text-align: center;
+  position: relative;
+}
+
+.board-header h2 {
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 0;
+}
+
+.status-indicators {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 30px;
+  pointer-events: none;
+}
+
+.status-indicator {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.status-label {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 12px;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.unified-board-drop-zone {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.unified-board-drop-zone--over {
+  background: rgba(79, 172, 254, 0.1);
+  border: 2px dashed rgba(79, 172, 254, 0.5);
+  transform: scale(1.01);
+}
+
+.unified-board-canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+}
+
+.positioned-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
+}
+
+.positioned-card:hover {
+  z-index: 20;
+  transform: scale(1.05);
+}
+
+.study-plan-card.dragging {
+  opacity: 0.5;
+  transform: scale(1.02);
+  z-index: 1000;
+}
+
+/* Remove old status zone styles */
+.status-zone,
+.status-zone-header,
+.status-zone-title,
+.status-zone-count,
+.status-zone-content {
+  display: none !important;
+}
+
 /* Study Plan Card Styles */
 .study-plan-card {
   padding: 16px;
@@ -2254,6 +2362,155 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
   font-style: italic;
 }
 
+/* Study Plan Container Styles */
+.study-plan-container {
+  margin-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  padding-top: 12px;
+}
+
+.container-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.container-header:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.container-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.container-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.container-count {
+  font-size: 11px;
+  color: #666;
+  background: rgba(255, 255, 255, 0.3);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.expand-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.expand-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  color: #2d3748;
+}
+
+.container-content {
+  margin-top: 8px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.subtasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.subtask-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+}
+
+.subtask-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: #10b981;
+  cursor: pointer;
+}
+
+.subtask-text {
+  font-size: 13px;
+  color: #2d3748;
+  flex: 1;
+  transition: all 0.2s ease;
+}
+
+.subtask-text.completed {
+  text-decoration: line-through;
+  color: #10b981;
+  opacity: 0.7;
+}
+
+/* Kanban Board Styles */
+.kanban-board {
+  padding: 20px;
+}
+
+.board-header {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.board-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.buckets-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 0 20px;
+}
+
+.bucket {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.bucket:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.bucket h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .study-plan-container {
@@ -2277,6 +2534,15 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 
   .grid-cell.header-cell {
     padding: 12px 8px;
+  }
+
+  .buckets-container {
+    grid-template-columns: 1fr;
+    padding: 0 10px;
+  }
+
+  .bucket {
+    min-height: 400px;
   }
 }
 
@@ -2635,4 +2901,11 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 
 .recording-controls button:hover {
   background: rgba(255, 255, 255, 0.3);
+}
+
+/* Bucket drop zone hover effect */
+.bucket-drop-zone--over {
+  background: rgba(79, 172, 254, 0.1);
+  border: 2px dashed rgba(79, 172, 254, 0.5);
+  transform: scale(1.02);
 }

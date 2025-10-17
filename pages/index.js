@@ -9,6 +9,7 @@ import {
   closestCorners,
   rectIntersection,
   pointerWithin,
+  useDraggable,
 } from '@dnd-kit/core'
 import {
   sortableKeyboardCoordinates,
@@ -353,6 +354,7 @@ function StudyPlanCard({ studyPlan, onEdit, onUpdateProgress }) {
     setNodeRef,
     transform,
     transition,
+    isDragging,
   } = useSortable({ id: `studyplan-${studyPlan.unique_id}` })
 
   const style = {
@@ -385,21 +387,15 @@ function StudyPlanCard({ studyPlan, onEdit, onUpdateProgress }) {
     <div
       ref={setNodeRef}
       style={style}
-      className="study-plan-card glass-card"
-      onClick={(e) => {
-        // Only trigger edit if not dragging
-        if (!e.defaultPrevented) {
-          onEdit(studyPlan)
-        }
-      }}
+      className={`study-plan-card glass-card ${isDragging ? 'dragging' : ''}`}
     >
       <div className="study-plan-header">
         <div className="study-plan-info">
-          <h4 
-            className="study-plan-title" 
+          <h4
+            className="study-plan-title"
             {...attributes}
             {...listeners}
-            style={{ cursor: 'grab' }}
+            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
           >
             {studyPlan.topic}
           </h4>
@@ -460,33 +456,45 @@ function StudyPlanCard({ studyPlan, onEdit, onUpdateProgress }) {
   )
 }
 
-function Bucket({ bucket, studyPlans, onEditStudyPlan, onUpdateProgress, searchTerm, isBacklog }) {
-  const { setNodeRef } = useDroppable({ id: bucket.bucket_id })
+// Bucket Component
+function Bucket({ bucket, studyPlans, onEditStudyPlan, onUpdateProgress }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: bucket.id,
+  })
 
-  const filteredStudyPlans = studyPlans ? studyPlans.filter(plan => {
-    const matchesSearch = plan.topic.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          plan.chapter_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          plan.notes?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = !bucket.status || plan.learning_status === bucket.status
-    return matchesSearch && matchesStatus
-  }) : []
-
-  // Create items array for SortableContext
-  const items = filteredStudyPlans.map(plan => `studyplan-${plan.unique_id}`)
+  const filteredPlans = studyPlans.filter(plan => plan.learning_status === bucket.status)
 
   return (
-    <div ref={setNodeRef} className={`bucket ${isBacklog ? 'backlog-bucket' : ''}`}>
-      <h3>{bucket.name} ({filteredStudyPlans.length})</h3>
-      <SortableContext items={items} strategy={verticalListSortingStrategy}>
-        {filteredStudyPlans.map(studyPlan => (
-          <StudyPlanCard
-            key={studyPlan.unique_id}
-            studyPlan={studyPlan}
-            onEdit={onEditStudyPlan}
-            onUpdateProgress={onUpdateProgress}
-          />
-        ))}
-      </SortableContext>
+    <div
+      ref={setNodeRef}
+      className={`bucket bg-gray-50 rounded-lg p-4 min-h-[500px] flex flex-col ${isOver ? 'ring-2 ring-blue-500 bg-blue-50' : ''}`}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-gray-900">{bucket.name}</h3>
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+          {filteredPlans.length}
+        </span>
+      </div>
+
+      <div className="flex-1 overflow-y-auto">
+        <SortableContext items={filteredPlans.map(sp => `studyplan-${sp.unique_id}`)} strategy={verticalListSortingStrategy}>
+          <div className="space-y-3">
+            {filteredPlans.map(studyPlan => (
+              <StudyPlanCard
+                key={studyPlan.unique_id}
+                studyPlan={studyPlan}
+                onEdit={onEditStudyPlan}
+                onUpdateProgress={onUpdateProgress}
+              />
+            ))}
+            {filteredPlans.length === 0 && (
+              <div className="flex items-center justify-center h-32 text-gray-500 text-sm border-2 border-dashed border-gray-300 rounded-lg">
+                No items in {bucket.name.toLowerCase()}
+              </div>
+            )}
+          </div>
+        </SortableContext>
+      </div>
     </div>
   )
 }
@@ -585,27 +593,6 @@ function StudyPlanGrid({ subject, onUpdate }) {
       setEditingCell(null)
       setEditValue('')
     }
-  }
-
-  const getStatusColor = (status) => {
-    const colors = {
-      'In Queue': '#6b7280',
-      'To Do': '#3b82f6',
-      'In Progress': '#f59e0b',
-      'Done': '#10b981',
-      'Closed': '#8b5cf6'
-    }
-    return colors[status] || '#6b7280'
-  }
-
-  const getProficiencyColor = (proficiency) => {
-    const colors = {
-      'Novice': '#ef4444',
-      'Competent': '#f59e0b',
-      'Expert': '#3b82f6',
-      'Master': '#10b981'
-    }
-    return colors[proficiency] || '#6b7280'
   }
 
   if (loading) {
@@ -939,6 +926,36 @@ function StudyPlanGrid({ subject, onUpdate }) {
     })
   )
 
+  // Bucket configuration
+  const buckets = [
+    { id: 'backlog', name: 'Backlog', status: 'In Queue' },
+    { id: 'todo', name: 'To Do', status: 'To Do' },
+    { id: 'inprogress', name: 'In Progress', status: 'In Progress' },
+    { id: 'done', name: 'Done', status: 'Done' }
+  ]
+
+  // Utility functions
+  const getStatusColor = (status) => {
+    const colors = {
+      'In Queue': '#6b7280',
+      'To Do': '#3b82f6',
+      'In Progress': '#f59e0b',
+      'Done': '#10b981',
+      'Closed': '#8b5cf6'
+    }
+    return colors[status] || '#6b7280'
+  }
+
+  const getProficiencyColor = (proficiency) => {
+    const colors = {
+      'Novice': '#ef4444',
+      'Competent': '#f59e0b',
+      'Expert': '#3b82f6',
+      'Master': '#10b981'
+    }
+    return colors[proficiency] || '#6b7280'
+  }
+
   useEffect(() => {
     fetchData()
   }, [])
@@ -995,47 +1012,23 @@ function StudyPlanGrid({ subject, onUpdate }) {
     const activeId = active.id
     const overId = over.id
 
-    // Check if dragging a study plan
     if (activeId.startsWith('studyplan-')) {
       const studyPlanId = activeId.replace('studyplan-', '')
-
-      // Only allow drops directly on bucket areas, not on other cards
-      const targetBucket = [
-        { bucket_id: 'backlog', name: 'Backlog', status: 'In Queue' },
-        { bucket_id: 'todo', name: 'To Do', status: 'To Do' },
-        { bucket_id: 'inprogress', name: 'In Progress', status: 'In Progress' },
-        { bucket_id: 'done', name: 'Done', status: 'Done' }
-      ].find(b => b.bucket_id === overId)
+      const targetBucket = buckets.find(b => b.id === overId)
 
       if (targetBucket) {
-        // Find current bucket of the active item
-        const currentBucket = [
-          { bucket_id: 'backlog', name: 'Backlog', status: 'In Queue' },
-          { bucket_id: 'todo', name: 'To Do', status: 'To Do' },
-          { bucket_id: 'inprogress', name: 'In Progress', status: 'In Progress' },
-          { bucket_id: 'done', name: 'Done', status: 'Done' }
-        ].find(bucket => {
-          const bucketPlans = studyPlans.filter(plan =>
-            plan.subject === selectedSubject?.name &&
-            (!bucket.status || plan.learning_status === bucket.status)
-          )
-          return bucketPlans.some(plan => plan.unique_id === studyPlanId)
-        })
-
-        // Only update if moving to a different bucket
-        if (currentBucket && currentBucket.bucket_id !== targetBucket.bucket_id) {
+        try {
           await fetch(`/api/study-plan/${studyPlanId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ learning_status: targetBucket.status })
           })
-          fetchData()
+          fetchData() // Refresh data
+        } catch (error) {
+          console.error('Failed to update study plan:', error)
         }
       }
-      // Ignore drops on other cards - no reordering within buckets for now
     }
-
-    // All other drag operations are disabled since we only use StudyPlan data now
   }
 
   const onEditChapter = async (chapter) => {
@@ -1055,23 +1048,20 @@ function StudyPlanGrid({ subject, onUpdate }) {
 
   const onEditStudyPlan = async (studyPlan) => {
     setEditingStudyPlan(studyPlan)
-    // Load existing sub-topics or create default ones
-    if (studyPlan.sub_topics) {
-      try {
-        const parsedSubTopics = JSON.parse(studyPlan.sub_topics)
-        setSubTopics(parsedSubTopics)
-      } catch (error) {
-        console.error('Error parsing sub_topics:', error)
-        setSubTopics([])
-      }
-    } else {
-      const defaultSubTopics = [
-        { id: 1, text: 'Read theory and concepts', completed: false },
-        { id: 2, text: 'Solve basic problems', completed: false },
-        { id: 3, text: 'Practice advanced problems', completed: false },
-        { id: 4, text: 'Review and revise', completed: false }
-      ]
-      setSubTopics(defaultSubTopics)
+    // Load subtopics for this chapter
+    try {
+      const response = await fetch(`/api/subtopics?chapter_id=${studyPlan.chapter_id}`)
+      const chapterSubtopics = await response.json()
+      // Convert database subtopics to the format expected by the modal
+      const formattedSubtopics = chapterSubtopics.map(subtopic => ({
+        id: subtopic.subtopic_id,
+        text: subtopic.name,
+        completed: subtopic.status === 'Completed'
+      }))
+      setSubTopics(formattedSubtopics)
+    } catch (error) {
+      console.error('Error fetching chapter subtopics:', error)
+      setSubTopics([])
     }
   }
 
@@ -1222,41 +1212,28 @@ function StudyPlanGrid({ subject, onUpdate }) {
 
       <main className="board">
         {selectedSubject && viewMode === 'kanban' && (
-          <>
-            <DndContext
-              sensors={sensors}
-              collisionDetection={pointerWithin}
-              onDragEnd={handleDragEnd}
-            >
-              <div className="buckets">
-                {/* Backlog bucket with study plan topics */}
-                <Bucket
-                  bucket={{ bucket_id: 'backlog', name: 'Backlog' }}
-                  studyPlans={studyPlans.filter(plan => plan.subject === selectedSubject.name && plan.learning_status === 'In Queue')}
-                  searchTerm={searchTerm}
-                  isBacklog={true}
-                  onEditStudyPlan={onEditStudyPlan}
-                  onUpdateProgress={fetchData}
-                />
-                {/* Regular task buckets mapped from study plan statuses */}
-                {[
-                  { bucket_id: 'todo', name: 'To Do', status: 'To Do' },
-                  { bucket_id: 'inprogress', name: 'In Progress', status: 'In Progress' },
-                  { bucket_id: 'done', name: 'Done', status: 'Done' }
-                ].map(bucket => (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragEnd={handleDragEnd}
+          >
+            <div className="kanban-board">
+              <div className="board-header">
+                <h2>Kanban Board - {selectedSubject.name} ({studyPlans.filter(plan => plan.subject === selectedSubject.name).length} items)</h2>
+              </div>
+              <div className="buckets-container">
+                {buckets.map(bucket => (
                   <Bucket
-                    key={bucket.bucket_id}
+                    key={bucket.id}
                     bucket={bucket}
-                    studyPlans={studyPlans.filter(plan => plan.subject === selectedSubject.name && plan.learning_status === bucket.status)}
+                    studyPlans={studyPlans.filter(plan => plan.subject === selectedSubject.name)}
                     onEditStudyPlan={onEditStudyPlan}
-                    searchTerm={searchTerm}
                     onUpdateProgress={fetchData}
-                    isBacklog={false}
                   />
                 ))}
               </div>
-            </DndContext>
-          </>
+            </div>
+          </DndContext>
         )}
 
         {selectedSubject && viewMode === 'study-plan' && (
@@ -1671,6 +1648,17 @@ function StudyPlanGrid({ subject, onUpdate }) {
                 e.preventDefault()
                 const formData = new FormData(e.target)
 
+                // Update subtopic statuses in database
+                for (const subTopic of subTopics) {
+                  await fetch(`/api/subtopics/${subTopic.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      status: subTopic.completed ? 'Completed' : 'Not Started'
+                    })
+                  })
+                }
+
                 // Calculate progress based on completed sub-topics
                 const completedCount = subTopics.filter(st => st.completed).length
                 const totalCount = subTopics.length
@@ -1681,8 +1669,7 @@ function StudyPlanGrid({ subject, onUpdate }) {
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
                     progress_percentage: calculatedProgress,
-                    notes: formData.get('notes'),
-                    sub_topics: JSON.stringify(subTopics) // Store sub-topics as JSON
+                    notes: formData.get('notes')
                   })
                 })
                 setEditingStudyPlan(null)
