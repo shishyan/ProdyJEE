@@ -1268,82 +1268,104 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
     <div className="planner">
       {/* Professional Top Header */}
       <nav className={`top-navbar navbar-${navbarBackground || 'default'}`}>
-        <div className="navbar-brand">
-          <div className="brand-logo">
-            <span className="brand-main">Prody</span>
-            <span className="brand-jee">JEE</span>
-            <span className="brand-accent">™</span>
-          </div>
-          <div className="brand-subtitle">
-            <span>Peepal Prodigy School</span>
-            <span className="version-tag">v{packageJson.version}</span>
-          </div>
-        </div>
-      </nav>
-
-      {/* Breadcrumb Navigation Bar */}
-      <div className="breadcrumb-navbar">
-        <div className="navbar-controls">
-          {/* Subjects Tabs */}
-          <div className="nav-group">
-            <div className="subjects-tabs">
-              {subjects.slice(0, 3).map(subject => (
-                <button
-                  key={subject.subject_id}
-                  className={`subject-tab ${selectedSubject?.subject_id === subject.subject_id ? 'active' : ''}`}
-                  onClick={() => setSelectedSubject(subject)}
-                >
-                  <BookOpenIcon />
-                  <span>{subject.name}</span>
-                </button>
-              ))}
+        <div className="navbar-content">
+          {/* Left Side - App Logo, Title, Subtitle */}
+          <div className="navbar-brand">
+            <div className="brand-logo">
+              <span className="brand-main">Prody</span>
+              <span className="brand-jee">JEE</span>
+              <span className="brand-accent">™</span>
+            </div>
+            <div className="brand-subtitle">
+              <span>Peepal Prodigy School</span>
+              <span className="version-tag">v{packageJson.version}</span>
             </div>
           </div>
 
-          {/* View Toggle */}
-          <div className="nav-group">
-            <div className="view-toggle">
-              <button
-                className={`nav-btn ${viewMode === 'kanban' ? 'active' : ''}`}
-                onClick={() => setViewMode('kanban')}
-                title="Kanban View"
-              >
-                <BookOpenIcon />
-                <span>Kanban</span>
-              </button>
-              <button
-                className={`nav-btn ${viewMode === 'study-plan' ? 'active' : ''}`}
-                onClick={() => setViewMode('study-plan')}
-                title="Study Plan View"
-              >
-                <GridIcon />
-                <span>Study Plan</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Settings Button */}
-          <div className="nav-group">
+          {/* Right Side - User Profile, Settings, Themes */}
+          <div className="navbar-actions">
             <button
-              className="nav-btn"
+              className="nav-action-btn"
               onClick={() => setShowSettings(true)}
               title="Settings"
             >
               <CogIcon />
-              <span>Settings</span>
             </button>
-          </div>
-
-          {/* Login Button */}
-          <div className="nav-group">
+            <button
+              className="nav-action-btn"
+              onClick={() => {/* Theme toggle logic */}}
+              title="Themes"
+            >
+              <PaletteIcon />
+            </button>
             <a
               href="/login"
-              className="nav-btn login-btn"
-              title="Login"
+              className="nav-action-btn user-profile"
+              title="User Profile"
             >
               <UserIcon />
-              <span>Login</span>
             </a>
+          </div>
+        </div>
+      </nav>
+
+      {/* Horizontal Navigation Bar - Breadcrumb + Filters */}
+      <div className="horizontal-navbar">
+        <div className="nav-content">
+          {/* Breadcrumb Section */}
+          <div className="breadcrumb-section">
+            <div className="breadcrumb-path">
+              <span className="breadcrumb-item">Home</span>
+              <span className="breadcrumb-separator">/</span>
+              <span className="breadcrumb-item active">Study Plans</span>
+              {selectedSubject && (
+                <>
+                  <span className="breadcrumb-separator">/</span>
+                  <span className="breadcrumb-item active">{selectedSubject.name}</span>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Filter Tabs Section */}
+          <div className="filter-tabs-section">
+            {/* Subjects Filter Tabs */}
+            <div className="filter-group">
+              <div className="filter-tabs">
+                {subjects.slice(0, 4).map(subject => (
+                  <button
+                    key={subject.subject_id}
+                    className={`filter-tab ${selectedSubject?.subject_id === subject.subject_id ? 'active' : ''}`}
+                    onClick={() => setSelectedSubject(subject)}
+                  >
+                    <BookOpenIcon />
+                    <span>{subject.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* View Toggle */}
+            <div className="filter-group">
+              <div className="view-toggle-tabs">
+                <button
+                  className={`view-tab ${viewMode === 'kanban' ? 'active' : ''}`}
+                  onClick={() => setViewMode('kanban')}
+                  title="Kanban View"
+                >
+                  <BookOpenIcon />
+                  <span>Kanban</span>
+                </button>
+                <button
+                  className={`view-tab ${viewMode === 'study-plan' ? 'active' : ''}`}
+                  onClick={() => setViewMode('study-plan')}
+                  title="Study Plan View"
+                >
+                  <GridIcon />
+                  <span>Study Plan</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1356,16 +1378,16 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
           >
-            {sidebarCollapsed ? '→' : '←'}
+            {sidebarCollapsed ? '☰' : '✕'}
           </button>
         </div>
         <div className="sidebar-content">
           <div className="sidebar-item" title="Dashboard">
-            <div className="sidebar-icon">📊</div>
+            <div className="sidebar-icon">🏠</div>
             {!sidebarCollapsed && <span>Dashboard</span>}
           </div>
           <div className="sidebar-item" title="Charts">
-            <div className="sidebar-icon">📈</div>
+            <div className="sidebar-icon">�</div>
             {!sidebarCollapsed && <span>Charts</span>}
           </div>
           <div className="sidebar-item" title="Schedule">
@@ -2196,6 +2218,18 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
           </div>
         </div>
       )}
+
+      {/* Voice Assistant - Bottom Right Corner */}
+      <div className="voice-assistant-container">
+        <button
+          className="voice-assistant-btn"
+          onClick={() => {/* Voice assistant logic */}}
+          title="Voice Assistant"
+        >
+          <div className="voice-assistant-icon">🎙️</div>
+          <div className="voice-assistant-pulse"></div>
+        </button>
+      </div>
     </div>
   )
 }

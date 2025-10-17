@@ -46,17 +46,56 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  height: 150px; /* Reduced by 25% from 200px */
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.45) 50%, rgba(255, 255, 255, 0.5) 100%); /* 50% transparent */
+  height: 80px; /* Reduced height for more compact design */
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.45) 50%, rgba(255, 255, 255, 0.5) 100%);
   -webkit-backdrop-filter: blur(30px);
   backdrop-filter: blur(30px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 20px 32px;
   transition: all 0.3s ease;
+}
+
+.navbar-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 24px;
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #1a1a1a;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 18px;
+}
+
+.nav-action-btn:hover {
+  background: rgba(255, 255, 255, 0.4);
+  transform: scale(1.05);
+}
+
+.nav-action-btn.user-profile {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.nav-action-btn.user-profile:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
 }
 
 /* Navbar Background Variants */
@@ -201,18 +240,110 @@ body {
 }
 
 /* Breadcrumb Navigation Bar */
-.breadcrumb-navbar {
+/* Horizontal Navigation Bar */
+.horizontal-navbar {
   position: fixed;
-  top: 150px; /* Below the top navbar */
+  top: 80px; /* Below the top navbar */
   left: 0;
   right: 0;
-  height: 50px;
-  background: rgba(255, 255, 255, 0.1);
+  height: 60px;
+  background: rgba(255, 255, 255, 0.15);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   z-index: 999;
+}
+
+.nav-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 24px;
+}
+
+.breadcrumb-section {
+  flex: 1;
+}
+
+.breadcrumb-path {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #4a5568;
+}
+
+.breadcrumb-item {
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #4a5568;
+  transition: all 0.2s ease;
+}
+
+.breadcrumb-item.active {
+  background: rgba(59, 130, 246, 0.2);
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.breadcrumb-separator {
+  color: #9ca3af;
+  font-weight: bold;
+}
+
+.filter-tabs-section {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-tabs, .view-toggle-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.filter-tab, .view-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: #4a5568;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.filter-tab:hover, .view-tab:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #1a1a1a;
+}
+
+.filter-tab.active, .view-tab.active {
+  background: rgba(59, 130, 246, 0.2);
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.filter-tab svg, .view-tab svg {
+  width: 16px;
+  height: 16px;
 }
 
 .nav-group {
@@ -3394,16 +3525,16 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 /* Collapsible Sidebar */
 .sidebar {
   position: fixed;
-  top: 150px; /* Below the top navbar */
+  top: 140px; /* Below both navbars: 80px + 60px */
   left: 0;
-  height: calc(100vh - 150px);
+  height: calc(100vh - 140px);
   background: rgba(255, 255, 255, 0.25);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-right: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   transition: width 0.3s ease;
-  z-index: 1000;
+  z-index: 998;
   overflow: hidden;
 }
 
@@ -3461,9 +3592,9 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 }
 
 .sidebar-icon {
-  font-size: 18px;
+  font-size: 20px;
   margin-right: 12px;
-  min-width: 18px;
+  min-width: 20px;
   text-align: center;
 }
 
@@ -3479,11 +3610,69 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 /* Adjust main content when sidebar is present */
 .board {
   margin-left: 200px; /* Match expanded sidebar width */
-  margin-top: 150px; /* Below navbar */
+  margin-top: 140px; /* Below both navbars: 80px + 60px */
   padding: 20px;
   transition: margin-left 0.3s ease;
 }
 
 .sidebar.collapsed ~ .board {
   margin-left: 60px; /* Match collapsed sidebar width */
+}
+
+/* Voice Assistant */
+.voice-assistant-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1001;
+}
+
+.voice-assistant-btn {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.voice-assistant-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.voice-assistant-icon {
+  font-size: 24px;
+  z-index: 2;
+  position: relative;
+}
+
+.voice-assistant-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(102, 126, 234, 0.3);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
 }
