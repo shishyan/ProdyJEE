@@ -995,14 +995,6 @@ function StudyPlanGrid({ subject, onUpdate }) {
     const activeId = active.id
     const overId = over.id
 
-  const handleDragEnd = async (event) => {
-    const { active, over } = event
-
-    if (!over) return
-
-    const activeId = active.id
-    const overId = over.id
-
     // Check if dragging a study plan
     if (activeId.startsWith('studyplan-')) {
       const studyPlanId = activeId.replace('studyplan-', '')
@@ -1042,9 +1034,6 @@ function StudyPlanGrid({ subject, onUpdate }) {
       }
       // Ignore drops on other cards - no reordering within buckets for now
     }
-
-    // All other drag operations are disabled since we only use StudyPlan data now
-  }
 
     // All other drag operations are disabled since we only use StudyPlan data now
   }
@@ -1236,7 +1225,7 @@ function StudyPlanGrid({ subject, onUpdate }) {
           <>
             <DndContext
               sensors={sensors}
-              collisionDetection={closestCorners}
+              collisionDetection={pointerWithin}
               onDragEnd={handleDragEnd}
             >
               <div className="buckets">
