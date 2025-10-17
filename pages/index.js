@@ -1,24 +1,22 @@
 import { useState, useEffect } from 'react'
 import {
   DndContext,
-  closestCenter,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
   useDroppable,
   closestCorners,
-  pointerWithin,
   rectIntersection,
+  pointerWithin,
 } from '@dnd-kit/core'
 import {
-  arrayMove,
-  SortableContext,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import {
   useSortable,
+  SortableContext,
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import DatePicker from 'react-datepicker'
@@ -79,9 +77,10 @@ const CloudIcon = () => (
   </svg>
 )
 
-const MusicIcon = () => (
+const CogIcon = () => (
   <svg className="nav-icon w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
   </svg>
 )
 
@@ -386,8 +385,6 @@ function StudyPlanCard({ studyPlan, onEdit, onUpdateProgress }) {
     <div
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
       className="study-plan-card glass-card"
       onClick={(e) => {
         // Only trigger edit if not dragging
@@ -398,30 +395,24 @@ function StudyPlanCard({ studyPlan, onEdit, onUpdateProgress }) {
     >
       <div className="study-plan-header">
         <div className="study-plan-info">
-          <h4 className="study-plan-title">{studyPlan.topic}</h4>
+          <h4 
+            className="study-plan-title" 
+            {...attributes}
+            {...listeners}
+            style={{ cursor: 'grab' }}
+          >
+            {studyPlan.topic}
+          </h4>
           <div className="study-plan-meta">
             <span className="chapter-name">{studyPlan.chapter_name}</span>
-            <span className="subject-name">{studyPlan.subject}</span>
           </div>
-        </div>
-        <div className="study-plan-status">
-          <span
-            className="status-badge"
-            style={{
-              backgroundColor: `${getStatusColor(studyPlan.learning_status)}20`,
-              color: getStatusColor(studyPlan.learning_status),
-              borderColor: getStatusColor(studyPlan.learning_status)
-            }}
-          >
-            {studyPlan.learning_status}
-          </span>
         </div>
       </div>
 
       <div className="study-plan-details">
-        <div className="detail-row">
-          <span className="detail-label">Stage:</span>
-          <span className="detail-value">{studyPlan.learning_stage}</span>
+        <div className="detail-row highlight-row">
+          <span className="detail-label highlight-label">Stage:</span>
+          <span className="detail-value highlight-value stage-value">{studyPlan.learning_stage}</span>
         </div>
         <div className="detail-row">
           <span className="detail-label">Proficiency:</span>
@@ -435,9 +426,9 @@ function StudyPlanCard({ studyPlan, onEdit, onUpdateProgress }) {
             {studyPlan.learning_proficiency}
           </span>
         </div>
-        <div className="detail-row">
-          <span className="detail-label">Progress:</span>
-          <span className="detail-value">{studyPlan.progress_percentage}%</span>
+        <div className="detail-row highlight-row">
+          <span className="detail-label highlight-label">Progress:</span>
+          <span className="detail-value highlight-value progress-value">{studyPlan.progress_percentage}%</span>
         </div>
       </div>
 
@@ -468,10 +459,13 @@ function Bucket({ bucket, studyPlans, onEditStudyPlan, onUpdateProgress, searchT
     return matchesSearch && matchesStatus
   }) : []
 
+  // Create items array for SortableContext
+  const items = filteredStudyPlans.map(plan => `studyplan-${plan.unique_id}`)
+
   return (
     <div ref={setNodeRef} className={`bucket ${isBacklog ? 'backlog-bucket' : ''}`}>
       <h3>{bucket.name} ({filteredStudyPlans.length})</h3>
-      <SortableContext items={filteredStudyPlans.map(sp => `studyplan-${sp.unique_id}`)} strategy={verticalListSortingStrategy}>
+      <SortableContext items={items} strategy={verticalListSortingStrategy}>
         {filteredStudyPlans.map(studyPlan => (
           <StudyPlanCard
             key={studyPlan.unique_id}
@@ -914,13 +908,17 @@ function StudyPlanGrid({ subject, onUpdate }) {
   const [viewMode, setViewMode] = useState('kanban') // 'kanban' or 'study-plan'
   const [studyPlans, setStudyPlans] = useState([])
   const [weatherEffect, setWeatherEffect] = useState(false)
-  const [backgroundMusic, setBackgroundMusic] = useState('zen-forest')
+  const [showSettings, setShowSettings] = useState(false)
+  const [backgroundMusic, setBackgroundMusic] = useState('zen-mixed')
   const [musicVolume, setMusicVolume] = useState(0.2)
   const [musicPlaying, setMusicPlaying] = useState(true) // Auto-play zen rhythms
   const [zenRhythmsEnabled, setZenRhythmsEnabled] = useState(true)
   const [editingStudyPlan, setEditingStudyPlan] = useState(null)
   const [subTopics, setSubTopics] = useState([])
   const [newSubTopic, setNewSubTopic] = useState('')
+  const [voiceRecordings, setVoiceRecordings] = useState([])
+  const [isRecording, setIsRecording] = useState(false)
+  const [mediaRecorder, setMediaRecorder] = useState(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -943,7 +941,7 @@ function StudyPlanGrid({ subject, onUpdate }) {
     if (zenRhythmsEnabled && musicPlaying) {
       // Auto-cycle through zen rhythms every 30 minutes for variety
       const rhythmInterval = setInterval(() => {
-        const zenTracks = ['zen-forest', 'zen-rain', 'zen-wind', 'zen-birds', 'zen-water']
+        const zenTracks = ['zen-mixed', 'zen-forest', 'zen-rain', 'zen-wind', 'zen-birds', 'zen-water']
         const currentIndex = zenTracks.indexOf(backgroundMusic)
         const nextIndex = (currentIndex + 1) % zenTracks.length
         setBackgroundMusic(zenTracks[nextIndex])
@@ -988,6 +986,53 @@ function StudyPlanGrid({ subject, onUpdate }) {
     // Check if dragging a study plan
     if (activeId.startsWith('studyplan-')) {
       const studyPlanId = activeId.replace('studyplan-', '')
+
+      // If dropping on another study plan (could be same bucket or different bucket)
+      if (overId.startsWith('studyplan-')) {
+        const overStudyPlanId = overId.replace('studyplan-', '')
+
+        // Find which bucket the active item belongs to
+        const activeBucket = [
+          { bucket_id: 'backlog', name: 'Backlog', status: 'In Queue' },
+          { bucket_id: 'todo', name: 'To Do', status: 'To Do' },
+          { bucket_id: 'inprogress', name: 'In Progress', status: 'In Progress' },
+          { bucket_id: 'done', name: 'Done', status: 'Done' }
+        ].find(bucket => {
+          const bucketPlans = studyPlans.filter(plan =>
+            plan.subject === selectedSubject?.name &&
+            (!bucket.status || plan.learning_status === bucket.status)
+          )
+          return bucketPlans.some(plan => plan.unique_id === studyPlanId)
+        })
+
+        // Find which bucket the over item belongs to
+        const overBucket = [
+          { bucket_id: 'backlog', name: 'Backlog', status: 'In Queue' },
+          { bucket_id: 'todo', name: 'To Do', status: 'To Do' },
+          { bucket_id: 'inprogress', name: 'In Progress', status: 'In Progress' },
+          { bucket_id: 'done', name: 'Done', status: 'Done' }
+        ].find(bucket => {
+          const bucketPlans = studyPlans.filter(plan =>
+            plan.subject === selectedSubject?.name &&
+            (!bucket.status || plan.learning_status === bucket.status)
+          )
+          return bucketPlans.some(plan => plan.unique_id === overStudyPlanId)
+        })
+
+        if (activeBucket && overBucket && activeBucket.bucket_id !== overBucket.bucket_id) {
+          // Moving to a different bucket
+          await fetch(`/api/study-plan/${studyPlanId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ learning_status: overBucket.status })
+          })
+          fetchData()
+        }
+        // If same bucket, we could implement reordering here, but for now just return
+        return
+      }
+
+      // If dropping directly on a bucket
       const targetBucket = [
         { bucket_id: 'backlog', name: 'Backlog', status: 'In Queue' },
         { bucket_id: 'todo', name: 'To Do', status: 'To Do' },
@@ -1047,6 +1092,57 @@ function StudyPlanGrid({ subject, onUpdate }) {
     }
   }
 
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const recorder = new MediaRecorder(stream)
+      const chunks = []
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunks.push(e.data)
+        }
+      }
+
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/wav' })
+        const url = URL.createObjectURL(blob)
+        const newRecording = {
+          id: Date.now(),
+          url: url,
+          blob: blob,
+          timestamp: new Date().toLocaleString()
+        }
+        setVoiceRecordings([...voiceRecordings, newRecording])
+        stream.getTracks().forEach(track => track.stop())
+      }
+
+      setMediaRecorder(recorder)
+      recorder.start()
+      setIsRecording(true)
+    } catch (error) {
+      console.error('Error starting recording:', error)
+      alert('Could not access microphone. Please check permissions.')
+    }
+  }
+
+  const stopRecording = () => {
+    if (mediaRecorder && isRecording) {
+      mediaRecorder.stop()
+      setIsRecording(false)
+      setMediaRecorder(null)
+    }
+  }
+
+  const playRecording = (url) => {
+    const audio = new Audio(url)
+    audio.play()
+  }
+
+  const deleteRecording = (id) => {
+    setVoiceRecordings(voiceRecordings.filter(recording => recording.id !== id))
+  }
+
   const onEditTask = async (task) => {
     setEditingTask(task)
     setSelectedDueDate(task.due_date ? new Date(task.due_date) : null)
@@ -1071,8 +1167,15 @@ function StudyPlanGrid({ subject, onUpdate }) {
       {/* Professional Top Navigation Bar */}
       <nav className="top-navbar">
         <div className="navbar-brand">
-          <h1>ProdyJEE</h1>
-          <span className="brand-subtitle">JEE Preparation Tracker</span>
+          <div className="brand-logo">
+            <span className="brand-main">Prody</span>
+            <span className="brand-jee">JEE</span>
+            <span className="brand-accent">™</span>
+          </div>
+          <div className="brand-subtitle">
+            <span>Peepal Prodigy School</span>
+            <span className="version-tag">v1.0.1-alpha</span>
+          </div>
         </div>
         
         <div className="navbar-controls">
@@ -1120,65 +1223,16 @@ function StudyPlanGrid({ subject, onUpdate }) {
             </div>
           </div>
 
-          {/* Background Selector */}
+          {/* Settings Button */}
           <div className="nav-group">
-            <div className="background-selector">
-              <PaletteIcon />
-              <select value={backgroundTheme} onChange={(e) => setBackgroundTheme(e.target.value)}>
-                <option value="forest-mountain">Forest Mountain</option>
-                <option value="green-forest">Green Forest</option>
-                <option value="bamboo">Bamboo</option>
-                <option value="jungle">Jungle</option>
-                <option value="meadow">Meadow</option>
-                <option value="gradient">Gradient</option>
-                <option value="nature">Nature</option>
-                <option value="flowers">Flowers</option>
-                <option value="animals">Animals</option>
-                <option value="mountains">Mountains</option>
-                <option value="ocean">Ocean</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Weather Control */}
-          <div className="nav-group">
-            <div className="weather-control">
-              <CloudIcon />
-              <button
-                className={`nav-btn ${weatherEffect ? 'active' : ''}`}
-                onClick={() => setWeatherEffect(!weatherEffect)}
-                title="Toggle Weather Effect"
-              >
-                🌧️
-              </button>
-            </div>
-          </div>
-
-          {/* Filters */}
-          <div className="nav-group">
-            <div className="filters">
-              <input
-                type="text"
-                placeholder="Search tasks..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-              <select value={filterPriority} onChange={(e) => setFilterPriority(e.target.value)}>
-                <option value="All">All Priorities</option>
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-                <option value="Important">Important</option>
-              </select>
-              <select value={filterLabel} onChange={(e) => setFilterLabel(e.target.value)}>
-                <option value="All">All Labels</option>
-                <option value="Math">Math</option>
-                <option value="Physics">Physics</option>
-                <option value="Chemistry">Chemistry</option>
-                <option value="High Priority">High Priority</option>
-              </select>
-            </div>
+            <button 
+              className="nav-btn"
+              onClick={() => setShowSettings(true)}
+              title="Settings"
+            >
+              <CogIcon />
+              <span>Settings</span>
+            </button>
           </div>
         </div>
       </nav>
@@ -1564,7 +1618,9 @@ function StudyPlanGrid({ subject, onUpdate }) {
         >
           <source
             src={
-              backgroundMusic === 'zen-forest'
+              backgroundMusic === 'zen-mixed'
+                ? 'https://www.soundjay.com/misc/sounds/ambient-nature.wav'
+                : backgroundMusic === 'zen-forest'
                 ? 'https://www.soundjay.com/misc/sounds/forest-sounds.wav'
                 : backgroundMusic === 'zen-rain'
                 ? 'https://www.soundjay.com/misc/sounds/rain-03.wav'
@@ -1586,7 +1642,9 @@ function StudyPlanGrid({ subject, onUpdate }) {
           />
           <source
             src={
-              backgroundMusic === 'zen-forest'
+              backgroundMusic === 'zen-mixed'
+                ? 'https://www.soundjay.com/misc/sounds/ambient-nature.mp3'
+                : backgroundMusic === 'zen-forest'
                 ? 'https://www.soundjay.com/misc/sounds/forest-sounds.mp3'
                 : backgroundMusic === 'zen-rain'
                 ? 'https://www.soundjay.com/misc/sounds/rain-03.mp3'
@@ -1614,28 +1672,24 @@ function StudyPlanGrid({ subject, onUpdate }) {
         <div className="modal-overlay">
           <div className="study-plan-modal glass-card">
             <div className="modal-header">
-              <h2>Edit Study Plan</h2>
+              <h2>{editingStudyPlan.topic}</h2>
               <button className="close-btn" onClick={() => setEditingStudyPlan(null)}>×</button>
             </div>
             <div className="modal-body">
               <form onSubmit={async (e) => {
                 e.preventDefault()
                 const formData = new FormData(e.target)
-                
+
                 // Calculate progress based on completed sub-topics
                 const completedCount = subTopics.filter(st => st.completed).length
                 const totalCount = subTopics.length
                 const calculatedProgress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0
-                
+
                 await fetch(`/api/study-plan/${editingStudyPlan.unique_id}`, {
                   method: 'PUT',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
-                    learning_status: formData.get('learning_status'),
-                    learning_stage: formData.get('learning_stage'),
-                    learning_proficiency: formData.get('learning_proficiency'),
                     progress_percentage: calculatedProgress,
-                    target_date: formData.get('target_date'),
                     notes: formData.get('notes'),
                     sub_topics: JSON.stringify(subTopics) // Store sub-topics as JSON
                   })
@@ -1643,109 +1697,73 @@ function StudyPlanGrid({ subject, onUpdate }) {
                 setEditingStudyPlan(null)
                 setSubTopics([])
                 setNewSubTopic('')
+                setVoiceRecordings([])
                 fetchStudyPlans()
               }}>
+                
+                {/* Modern Sub-Topics Progress Tracking */}
                 <div className="form-group">
-                  <label>Topic</label>
-                  <div className="read-only-field">{editingStudyPlan.topic}</div>
-                </div>
-                <div className="form-group">
-                  <label>Chapter</label>
-                  <div className="read-only-field">{editingStudyPlan.chapter_name}</div>
-                </div>
-                <div className="form-group">
-                  <label>Subject</label>
-                  <div className="read-only-field">{editingStudyPlan.subject}</div>
-                </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Learning Status</label>
-                    <select name="learning_status" defaultValue={editingStudyPlan.learning_status}>
-                      <option>In Queue</option>
-                      <option>To Do</option>
-                      <option>In Progress</option>
-                      <option>Done</option>
-                      <option>Closed</option>
-                    </select>
+                  <label>🎯 Learning Progress</label>
+                  <div className="progress-tracker">
+                    <div className="progress-header">
+                      <span className="progress-title">Overall Progress</span>
+                      <span className="progress-percentage">
+                        {subTopics.length > 0 ? Math.round((subTopics.filter(st => st.completed).length / subTopics.length) * 100) : 0}%
+                      </span>
+                    </div>
+                    <div className="progress-bar-container">
+                      <div 
+                        className="progress-bar-fill"
+                        style={{
+                          width: `${subTopics.length > 0 ? Math.round((subTopics.filter(st => st.completed).length / subTopics.length) * 100) : 0}%`
+                        }}
+                      ></div>
+                    </div>
+                    <div className="progress-stats">
+                      {subTopics.filter(st => st.completed).length} of {subTopics.length} topics completed
+                    </div>
                   </div>
-                  <div className="form-group">
-                    <label>Learning Stage</label>
-                    <select name="learning_stage" defaultValue={editingStudyPlan.learning_stage}>
-                      <option>Initiated</option>
-                      <option>Skimmed</option>
-                      <option>Grasped</option>
-                      <option>Practiced</option>
-                      <option>Revised</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Proficiency</label>
-                    <select name="learning_proficiency" defaultValue={editingStudyPlan.learning_proficiency}>
-                      <option>Novice</option>
-                      <option>Competent</option>
-                      <option>Expert</option>
-                      <option>Master</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label>Progress (%)</label>
-                    <input 
-                      name="progress_percentage" 
-                      type="number" 
-                      min="0" 
-                      max="100" 
-                      value={subTopics.length > 0 ? Math.round((subTopics.filter(st => st.completed).length / subTopics.length) * 100) : 0}
-                      readOnly 
-                    />
-                    <small>Calculated from completed sub-topics</small>
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label>Target Date</label>
-                  <input name="target_date" type="date" defaultValue={editingStudyPlan.target_date ? new Date(editingStudyPlan.target_date).toISOString().split('T')[0] : ''} />
-                </div>
-                <div className="form-group">
-                  <label>Notes</label>
-                  <textarea name="notes" defaultValue={editingStudyPlan.notes} rows="3" placeholder="Add notes about this topic..." />
-                </div>
 
-                {/* Sub-Topics Checklist */}
-                <div className="form-group">
-                  <label>Sub-Topics Checklist</label>
-                  <div className="subtopics-checklist">
+                  <div className="subtopics-modern">
                     {subTopics.map((subTopic, index) => (
-                      <div key={subTopic.id} className="checklist-item">
-                        <input
-                          type="checkbox"
-                          checked={subTopic.completed}
-                          onChange={(e) => {
-                            const updatedSubTopics = [...subTopics]
-                            updatedSubTopics[index].completed = e.target.checked
-                            setSubTopics(updatedSubTopics)
-                          }}
-                        />
-                        <span className={subTopic.completed ? 'completed' : ''}>
-                          {subTopic.text}
-                        </span>
-                        <button
-                          type="button"
-                          className="remove-subtopic-btn"
-                          onClick={() => {
-                            setSubTopics(subTopics.filter((_, i) => i !== index))
-                          }}
-                        >
-                          ×
-                        </button>
+                      <div key={subTopic.id} className={`subtopic-item ${subTopic.completed ? 'completed' : 'pending'}`}>
+                        <div className="subtopic-content">
+                          <div className="subtopic-icon">
+                            {subTopic.completed ? '✅' : '⏳'}
+                          </div>
+                          <span className="subtopic-text">{subTopic.text}</span>
+                        </div>
+                        <div className="subtopic-actions">
+                          <button
+                            type="button"
+                            className={`status-btn ${subTopic.completed ? 'completed' : 'pending'}`}
+                            onClick={() => {
+                              const updatedSubTopics = [...subTopics]
+                              updatedSubTopics[index].completed = !updatedSubTopics[index].completed
+                              setSubTopics(updatedSubTopics)
+                            }}
+                          >
+                            {subTopic.completed ? 'Mark Incomplete' : 'Mark Complete'}
+                          </button>
+                          <button
+                            type="button"
+                            className="remove-subtopic-btn"
+                            onClick={() => {
+                              setSubTopics(subTopics.filter((_, i) => i !== index))
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
                       </div>
                     ))}
-                    <div className="add-subtopic">
+                    
+                    <div className="add-subtopic-modern">
                       <input
                         type="text"
                         value={newSubTopic}
                         onChange={(e) => setNewSubTopic(e.target.value)}
-                        placeholder="Add new sub-topic..."
+                        placeholder="Add new learning topic..."
                         onKeyPress={(e) => {
                           if (e.key === 'Enter') {
                             e.preventDefault()
@@ -1762,7 +1780,7 @@ function StudyPlanGrid({ subject, onUpdate }) {
                       />
                       <button
                         type="button"
-                        className="add-subtopic-btn"
+                        className="add-subtopic-btn-modern"
                         onClick={() => {
                           if (newSubTopic.trim()) {
                             setSubTopics([...subTopics, {
@@ -1774,20 +1792,187 @@ function StudyPlanGrid({ subject, onUpdate }) {
                           }
                         }}
                       >
-                        +
+                        ➕ Add Topic
                       </button>
                     </div>
                   </div>
-                  <div className="checklist-progress">
-                    Progress: {subTopics.filter(st => st.completed).length}/{subTopics.length} completed
-                    ({subTopics.length > 0 ? Math.round((subTopics.filter(st => st.completed).length / subTopics.length) * 100) : 0}%)
+                </div>
+
+                {/* Notes Section */}
+                <div className="form-group">
+                  <label>📝 Notes</label>
+                  <textarea 
+                    name="notes" 
+                    defaultValue={editingStudyPlan.notes} 
+                    rows="4" 
+                    placeholder="Add your study notes, insights, or reminders here..." 
+                  />
+                </div>
+
+                {/* Voice Logging Section */}
+                <div className="form-group">
+                  <label>🎤 Voice Notes</label>
+                  <div className="voice-logging">
+                    <div className="voice-controls">
+                      {!isRecording ? (
+                        <button
+                          type="button"
+                          className="record-btn recording"
+                          onClick={startRecording}
+                        >
+                          🎤 Start Recording
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="record-btn stop"
+                          onClick={stopRecording}
+                        >
+                          ⏹️ Stop Recording
+                        </button>
+                      )}
+                    </div>
+                    <div className="voice-recordings">
+                      {voiceRecordings.length === 0 ? (
+                        <p>No voice recordings yet</p>
+                      ) : (
+                        voiceRecordings.map(recording => (
+                          <div key={recording.id} className="voice-recording-item">
+                            <span>Recording {new Date(recording.timestamp).toLocaleTimeString()}</span>
+                            <div className="recording-controls">
+                              <button
+                                type="button"
+                                onClick={() => playRecording(recording.url)}
+                              >
+                                ▶️
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => deleteRecording(recording.id)}
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </div>
                 </div>
+
                 <div className="form-actions">
-                  <button type="submit" className="save-btn">Save Changes</button>
-                  <button type="button" onClick={() => setEditingStudyPlan(null)} className="cancel-btn">Cancel</button>
+                  <button type="submit" className="save-btn">Save Progress</button>
+                  <button type="button" onClick={() => {
+                    setEditingStudyPlan(null)
+                    setSubTopics([])
+                    setNewSubTopic('')
+                    setVoiceRecordings([])
+                  }} className="cancel-btn">Close</button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSettings && (
+        <div className="modal-overlay">
+          <div className="settings-modal glass-card">
+            <div className="modal-header">
+              <h2>Settings</h2>
+              <button className="close-btn" onClick={() => setShowSettings(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              <div className="settings-section">
+                <h3>Background Theme</h3>
+                <div className="setting-item">
+                  <PaletteIcon />
+                  <select value={backgroundTheme} onChange={(e) => setBackgroundTheme(e.target.value)}>
+                    <option value="forest-mountain">Forest Mountain</option>
+                    <option value="green-forest">Green Forest</option>
+                    <option value="bamboo">Bamboo</option>
+                    <option value="jungle">Jungle</option>
+                    <option value="meadow">Meadow</option>
+                    <option value="gradient">Gradient</option>
+                    <option value="nature">Nature</option>
+                    <option value="flowers">Flowers</option>
+                    <option value="animals">Animals</option>
+                    <option value="mountains">Mountains</option>
+                    <option value="ocean">Ocean</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="settings-section">
+                <h3>Weather Effects</h3>
+                <div className="setting-item">
+                  <CloudIcon />
+                  <button
+                    className={`nav-btn ${weatherEffect ? 'active' : ''}`}
+                    onClick={() => setWeatherEffect(!weatherEffect)}
+                  >
+                    {weatherEffect ? 'Disable' : 'Enable'} Weather Effects
+                  </button>
+                </div>
+              </div>
+
+              <div className="settings-section">
+                <h3>Background Music</h3>
+                <div className="setting-item">
+                  <MusicIcon />
+                  <select value={backgroundMusic} onChange={(e) => setBackgroundMusic(e.target.value)}>
+                    <option value="zen-mixed">Zen Mixed (Waves + Campfire + Rain + Crickets)</option>
+                    <option value="zen-forest">Zen Forest</option>
+                    <option value="zen-rain">Zen Rain</option>
+                    <option value="zen-wind">Zen Wind</option>
+                    <option value="zen-birds">Zen Birds</option>
+                    <option value="zen-water">Zen Water</option>
+                    <option value="meditation">Meditation</option>
+                    <option value="flute">Flute</option>
+                    <option value="nature">Nature</option>
+                    <option value="none">None</option>
+                  </select>
+                </div>
+                <div className="setting-item">
+                  <button
+                    className={`nav-btn ${musicPlaying ? 'active' : ''}`}
+                    onClick={() => setMusicPlaying(!musicPlaying)}
+                  >
+                    {musicPlaying ? 'Pause' : 'Play'} Music
+                  </button>
+                </div>
+              </div>
+
+              <div className="settings-section">
+                <h3>Filters</h3>
+                <div className="setting-item">
+                  <input
+                    type="text"
+                    placeholder="Search tasks..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="search-input"
+                  />
+                </div>
+                <div className="setting-item">
+                  <select value={filterPriority} onChange={(e) => setFilterPriority(e.target.value)}>
+                    <option value="All">All Priorities</option>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Important">Important</option>
+                  </select>
+                </div>
+                <div className="setting-item">
+                  <select value={filterLabel} onChange={(e) => setFilterLabel(e.target.value)}>
+                    <option value="All">All Labels</option>
+                    <option value="Math">Math</option>
+                    <option value="Physics">Physics</option>
+                    <option value="Chemistry">Chemistry</option>
+                    <option value="High Priority">High Priority</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
         </div>
