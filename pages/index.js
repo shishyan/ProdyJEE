@@ -1176,26 +1176,6 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
   }
 
   const onEditStudyPlan = async (studyPlan, event) => {
-    // Calculate modal position based on clicked element
-    if (event) {
-      const rect = event.currentTarget.getBoundingClientRect()
-      const modalWidth = 900 // max-width of modal
-      const modalHeight = window.innerHeight * 0.6 // 60vh
-      
-      let top = rect.bottom + 10 // Position below the card
-      let left = rect.left
-      
-      // Adjust if modal would go off screen
-      if (left + modalWidth > window.innerWidth) {
-        left = window.innerWidth - modalWidth - 20
-      }
-      if (top + modalHeight > window.innerHeight) {
-        top = rect.top - modalHeight - 10 // Position above if below doesn't fit
-      }
-      
-      setModalPosition({ top, left })
-    }
-    
     setEditingStudyPlan(studyPlan)
     // Load subtopics for this chapter
     try {
@@ -1823,14 +1803,7 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
       {/* Study Plan Edit Modal */}
       {editingStudyPlan && (
         <div className="modal-overlay">
-          <div 
-            className="study-plan-modal glass-card"
-            style={{
-              top: `${modalPosition.top}px`,
-              left: `${modalPosition.left}px`,
-              position: 'fixed'
-            }}
-          >
+          <div className="study-plan-modal glass-card">
             <div className="modal-header">
               <div className="modal-title-section">
                 <h2>{editingStudyPlan.topic}</h2>
@@ -1901,9 +1874,9 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
                 fetchStudyPlans()
               }}>
                 
-                {/* Modern Sub-Topics Progress Tracking */}
-                <div className="form-group">
-                  <label className="form-label-icon">📊 Learning Progress</label>
+                {/* Chapter Sub-Topics Tracking - Main Purpose */}
+                <div className="form-group primary-section">
+                  <label className="form-label-icon">� Chapter Sub-Topics</label>
                   <div className="progress-tracker">
                     <div className="progress-header">
                       <span className="progress-title">Overall Progress</span>
@@ -1994,6 +1967,23 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
                       >
                         + Add Topic
                       </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Overall Status and Date Tracking */}
+                <div className="form-group">
+                  <label className="form-label-icon">📊 Overall Status & Date</label>
+                  <div className="status-date-section">
+                    <div className="status-info">
+                      <span className="status-label">Current Status:</span>
+                      <span className="status-value">{editingStudyPlan.learning_status}</span>
+                    </div>
+                    <div className="date-info">
+                      <span className="date-label">Target Date:</span>
+                      <span className="date-value">
+                        {editingStudyPlan.target_date ? new Date(editingStudyPlan.target_date).toLocaleDateString() : 'Not set'}
+                      </span>
                     </div>
                   </div>
                 </div>
