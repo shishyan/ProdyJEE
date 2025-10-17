@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import React from 'react'
+import type { ReactNode } from 'react'
 
 export const metadata: Metadata = {
   title: 'Dashboard - ProdyJEE',
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: ReactNode
 }) {
   return (
     <div className="dashboard-layout">

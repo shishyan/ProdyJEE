@@ -16,8 +16,6 @@ import {
 } from '@dnd-kit/sortable'
 import {
   useSortable,
-  SortableContext,
-  verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import DatePicker from 'react-datepicker'
@@ -82,6 +80,18 @@ const CogIcon = () => (
   <svg className="nav-icon w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+  </svg>
+)
+
+const MusicIcon = () => (
+  <svg className="nav-icon w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+  </svg>
+)
+
+const UserIcon = () => (
+  <svg className="nav-icon w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
   </svg>
 )
 
@@ -352,15 +362,11 @@ function StudyPlanCard({ studyPlan, onEdit, onUpdateProgress }) {
     attributes,
     listeners,
     setNodeRef,
-    transform,
-    transition,
     isDragging,
-  } = useSortable({ id: `studyplan-${studyPlan.unique_id}` })
+  } = useDraggable({ id: `studyplan-${studyPlan.unique_id}` })
 
-  const style = {
-    transform: CSS.Translate.toString(transform),
-    transition,
-  }
+  // Remove all transform and transition to prevent any animation issues
+  const style = {}
 
   const getStatusColor = (status) => {
     const colors = {
@@ -477,23 +483,21 @@ function Bucket({ bucket, studyPlans, onEditStudyPlan, onUpdateProgress }) {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <SortableContext items={filteredPlans.map(sp => `studyplan-${sp.unique_id}`)} strategy={verticalListSortingStrategy}>
-          <div className="space-y-3">
-            {filteredPlans.map(studyPlan => (
-              <StudyPlanCard
-                key={studyPlan.unique_id}
-                studyPlan={studyPlan}
-                onEdit={onEditStudyPlan}
-                onUpdateProgress={onUpdateProgress}
-              />
-            ))}
-            {filteredPlans.length === 0 && (
-              <div className="flex items-center justify-center h-32 text-gray-500 text-sm border-2 border-dashed border-gray-300 rounded-lg">
-                No items in {bucket.name.toLowerCase()}
-              </div>
-            )}
-          </div>
-        </SortableContext>
+        <div className="space-y-3">
+          {filteredPlans.map(studyPlan => (
+            <StudyPlanCard
+              key={studyPlan.unique_id}
+              studyPlan={studyPlan}
+              onEdit={onEditStudyPlan}
+              onUpdateProgress={onUpdateProgress}
+            />
+          ))}
+          {filteredPlans.length === 0 && (
+            <div className="flex items-center justify-center h-32 text-gray-500 text-sm border-2 border-dashed border-gray-300 rounded-lg">
+              No items in {bucket.name.toLowerCase()}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -525,6 +529,18 @@ function StudyPlanGrid({ subject, onUpdate }) {
   useEffect(() => {
     fetchStudyPlans()
   }, [subject])
+
+  // Utility functions
+  const getStatusColor = (status) => {
+    const colors = {
+      'In Queue': '#6b7280',
+      'To Do': '#3b82f6',
+      'In Progress': '#f59e0b',
+      'Done': '#10b981',
+      'Closed': '#8b5cf6'
+    }
+    return colors[status] || '#6b7280'
+  }
 
   const fetchStudyPlans = async () => {
     try {
@@ -1198,7 +1214,7 @@ function StudyPlanGrid({ subject, onUpdate }) {
 
           {/* Settings Button */}
           <div className="nav-group">
-            <button 
+            <button
               className="nav-btn"
               onClick={() => setShowSettings(true)}
               title="Settings"
@@ -1206,6 +1222,18 @@ function StudyPlanGrid({ subject, onUpdate }) {
               <CogIcon />
               <span>Settings</span>
             </button>
+          </div>
+
+          {/* Login Button */}
+          <div className="nav-group">
+            <a
+              href="/login"
+              className="nav-btn login-btn"
+              title="Login"
+            >
+              <UserIcon />
+              <span>Login</span>
+            </a>
           </div>
         </div>
       </nav>
@@ -1868,15 +1896,29 @@ function StudyPlanGrid({ subject, onUpdate }) {
                   <select value={backgroundTheme} onChange={(e) => setBackgroundTheme(e.target.value)}>
                     <option value="forest-mountain">Forest Mountain</option>
                     <option value="green-forest">Green Forest</option>
-                    <option value="bamboo">Bamboo</option>
-                    <option value="jungle">Jungle</option>
-                    <option value="meadow">Meadow</option>
-                    <option value="gradient">Gradient</option>
-                    <option value="nature">Nature</option>
-                    <option value="flowers">Flowers</option>
-                    <option value="animals">Animals</option>
-                    <option value="mountains">Mountains</option>
-                    <option value="ocean">Ocean</option>
+                    <option value="bamboo">Bamboo Grove</option>
+                    <option value="jungle">Tropical Jungle</option>
+                    <option value="meadow">Spring Meadow</option>
+                    <option value="gradient">Ocean Gradient</option>
+                    <option value="nature">Wild Nature</option>
+                    <option value="flowers">Flower Garden</option>
+                    <option value="animals">Safari Animals</option>
+                    <option value="mountains">Snow Mountains</option>
+                    <option value="ocean">Deep Ocean</option>
+                    <option value="desert">Golden Desert</option>
+                    <option value="sunset">Tropical Sunset</option>
+                    <option value="aurora">Northern Aurora</option>
+                    <option value="galaxy">Starry Galaxy</option>
+                    <option value="sakura">Cherry Blossom</option>
+                    <option value="autumn">Autumn Leaves</option>
+                    <option value="winter">Winter Wonderland</option>
+                    <option value="rainbow">Rainbow Sky</option>
+                    <option value="zen-garden">Zen Garden</option>
+                    <option value="crystal">Crystal Cave</option>
+                    <option value="lava">Volcanic Lava</option>
+                    <option value="ice">Arctic Ice</option>
+                    <option value="cosmic">Cosmic Nebula</option>
+                    <option value="ethereal">Ethereal Mist</option>
                   </select>
                 </div>
               </div>
