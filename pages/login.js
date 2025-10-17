@@ -534,8 +534,10 @@ export default function Login() {
 
         @media (max-width: 640px) {
           .login-card {
-            padding: 2rem;
+            padding: 2rem 1.5rem;
             margin: 1rem;
+            max-width: none;
+            width: calc(100% - 2rem);
           }
 
           .login-title {
@@ -544,6 +546,71 @@ export default function Login() {
 
           .brand-main, .brand-jee {
             font-size: 28px;
+          }
+
+          .login-content {
+            padding: 1rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .login-card {
+            padding: 1.5rem 1rem;
+            margin: 0.5rem;
+            width: calc(100% - 1rem);
+          }
+
+          .login-title {
+            font-size: 1.5rem;
+          }
+
+          .brand-main, .brand-jee {
+            font-size: 24px;
+          }
+
+          .brand-accent {
+            font-size: 16px;
+          }
+
+          .login-subtitle {
+            font-size: 0.9rem;
+          }
+
+          .form-input {
+            padding: 0.75rem 0.875rem 0.75rem 2.75rem;
+            font-size: 16px; /* Prevents zoom on iOS */
+          }
+
+          .login-btn {
+            padding: 0.875rem;
+            font-size: 0.95rem;
+          }
+
+          .social-btn {
+            padding: 0.75rem;
+            font-size: 0.9rem;
+          }
+        }
+
+        @media (max-width: 360px) {
+          .login-card {
+            padding: 1rem 0.75rem;
+            margin: 0.25rem;
+            width: calc(100% - 0.5rem);
+          }
+
+          .login-header {
+            margin-bottom: 2rem;
+          }
+
+          .form-group {
+            margin-bottom: 1.25rem;
+          }
+
+          .form-options {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
           }
         }
       `}</style>

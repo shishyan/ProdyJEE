@@ -387,7 +387,7 @@ function StudyPlanCard({ studyPlan, bucketColor, onEdit, onUpdateProgress, getSt
       className={`study-plan-card ${isDragging ? 'dragging' : ''}`}
       onClick={(e) => onEdit(studyPlan, e)}
     >
-      <div className="study-plan-header">
+      <div className="study-plan-header" style={{ backgroundColor: `${bucketColor}20` }}>
         <div className="study-plan-info">
           <h4
             className="study-plan-title"
