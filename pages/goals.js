@@ -6,6 +6,8 @@ export default function GoalsPage() {
   const [selectedSubject, setSelectedSubject] = useState('Chemistry')
   const [showAddGoal, setShowAddGoal] = useState(false)
   const [showTemplates, setShowTemplates] = useState(false)
+  const [starPoints, setStarPoints] = useState(0) // [STAR] Points from stars (10 per star)
+  const [badgePoints, setBadgePoints] = useState(0) // [STAR] Points from badges (100 per badge)
   const [formData, setFormData] = useState({
     chapterName: '',
     targetProficiency: 'Competent',
@@ -18,30 +20,49 @@ export default function GoalsPage() {
   const proficiencyLevels = ['Novice', 'Competent', 'Expert', 'Master']
   const priorities = ['Low', 'Medium', 'High', 'Critical']
 
-  // ⭐ Star-Based Goal Templates
+  // [STAR] Star-Based Goal Templates
   const goalTemplates = {
     academic: [
       { phrase: 'Achieve mastery across all subjects in mock tests.', metric: 'Average score across PCM', stars: [{ range: '50–59%', count: 1 }, { range: '60–74%', count: 2 }, { range: '75–84%', count: 3 }, { range: '85–89%', count: 4 }, { range: '≥90%', count: 5 }] },
       { phrase: 'Excel in Mathematics with precision.', metric: 'Best Math score in any test', stars: [{ range: '60–69%', count: 1 }, { range: '70–79%', count: 2 }, { range: '80–89%', count: 3 }, { range: '90–94%', count: 4 }, { range: '≥95%', count: 5 }] },
       { phrase: 'Complete the entire syllabus before January.', metric: '% topics marked Grasped or higher', stars: [{ range: '≥50%', count: 1 }, { range: '≥60%', count: 2 }, { range: '≥75%', count: 3 }, { range: '≥90%', count: 4 }, { range: '100%', count: 5 }] },
       { phrase: 'Solve past year questions to understand exam rhythm.', metric: 'Years of PYQs completed', stars: [{ range: '3 years', count: 1 }, { range: '5 years', count: 2 }, { range: '7 years', count: 3 }, { range: '8–9 years', count: 4 }, { range: 'All 10 years', count: 5 }] },
-      { phrase: 'Refine memory through full syllabus revisions.', metric: 'Number of full revisions', stars: [{ range: '1×', count: 1 }, { range: '2×', count: 2 }, { range: '3×', count: 5 }] }
+      { phrase: 'Refine memory through full syllabus revisions.', metric: 'Number of full revisions', stars: [{ range: '1×', count: 1 }, { range: '2×', count: 2 }, { range: '3×', count: 5 }] },
+      // NEW: 6 simpler daily/weekly academic goals
+      { phrase: 'Finish Physics topic today.', metric: 'Topics completed this week', stars: [{ range: '1 topic', count: 1 }, { range: '3 topics', count: 2 }, { range: '5 topics', count: 3 }] },
+      { phrase: 'Solve 10 Math problems daily.', metric: 'Problems solved per week', stars: [{ range: '50 problems', count: 1 }, { range: '100 problems', count: 2 }, { range: '150+ problems', count: 3 }] },
+      { phrase: 'Revise Chemistry notes weekly.', metric: 'Revision sessions per month', stars: [{ range: '2 sessions', count: 1 }, { range: '4 sessions', count: 2 }, { range: '8+ sessions', count: 3 }] },
+      { phrase: 'Score 75% in mock tests.', metric: 'Tests ≥75% this month', stars: [{ range: '1 test', count: 1 }, { range: '2 tests', count: 2 }, { range: '4+ tests', count: 3 }] },
+      { phrase: 'Understand one tough concept daily.', metric: 'Concepts mastered per week', stars: [{ range: '3 concepts', count: 1 }, { range: '5 concepts', count: 2 }, { range: '7+ concepts', count: 3 }] },
+      { phrase: 'Complete NCERT exercises on time.', metric: 'Exercises done per week', stars: [{ range: '3 exercises', count: 1 }, { range: '6 exercises', count: 2 }, { range: '10+ exercises', count: 3 }] }
     ],
     behavioral: [
       { phrase: 'Show up for every test without fail.', metric: 'Missed tests count', stars: [{ range: 'Missed 2', count: 1 }, { range: 'Missed 1', count: 2 }, { range: '100% attendance', count: 5 }] },
       { phrase: 'Build a streak of homework discipline.', metric: 'Days since last missed submission', stars: [{ range: '≥15 days', count: 1 }, { range: '≥30 days', count: 2 }, { range: '≥50 days', count: 5 }] },
       { phrase: 'Maintain a leave-free study streak.', metric: 'Days without skipping study', stars: [{ range: '≥15 days', count: 1 }, { range: '≥30 days', count: 2 }, { range: '≥50 days', count: 5 }] },
       { phrase: 'Resolve doubts consistently each week.', metric: 'Doubts asked per week', stars: [{ range: '1/week', count: 1 }, { range: '3/week', count: 2 }, { range: '5+/week', count: 5 }] },
-      { phrase: 'Log your study hours with commitment.', metric: 'Avg daily study time', stars: [{ range: '≥4 hrs', count: 1 }, { range: '≥5 hrs', count: 2 }, { range: '≥6 hrs', count: 5 }] }
+      { phrase: 'Log your study hours with commitment.', metric: 'Avg daily study time', stars: [{ range: '≥4 hrs', count: 1 }, { range: '≥5 hrs', count: 2 }, { range: '≥6 hrs', count: 5 }] },
+      // NEW: 6 simpler daily/weekly behavioral goals
+      { phrase: 'Maintain full test attendance this week.', metric: 'Weeks with 100% attendance', stars: [{ range: '1 week', count: 1 }, { range: '2 weeks', count: 2 }, { range: '4+ weeks', count: 3 }] },
+      { phrase: 'Build a 7-day study streak.', metric: 'Days studied consecutively', stars: [{ range: '7 days', count: 1 }, { range: '14 days', count: 2 }, { range: '21+ days', count: 3 }] },
+      { phrase: 'Submit all homework on time.', metric: 'On-time submissions per week', stars: [{ range: '3 submissions', count: 1 }, { range: '5 submissions', count: 2 }, { range: '7+ submissions', count: 3 }] },
+      { phrase: 'Ask doubts without hesitation.', metric: 'Doubts asked per session', stars: [{ range: '1 doubt', count: 1 }, { range: '3 doubts', count: 2 }, { range: '5+ doubts', count: 3 }] },
+      { phrase: 'Take guilt-free study breaks.', metric: 'Proper breaks per day', stars: [{ range: '2 breaks', count: 1 }, { range: '4 breaks', count: 2 }, { range: '6+ breaks', count: 3 }] },
+      { phrase: 'Avoid phone distractions during study.', metric: 'Distraction-free hours per week', stars: [{ range: '5 hours', count: 1 }, { range: '10 hours', count: 2 }, { range: '20+ hours', count: 3 }] }
     ],
     emotional: [
       { phrase: 'Reflect weekly to stay emotionally aligned.', metric: 'Journal entries per month', stars: [{ range: '3 entries', count: 1 }, { range: '6 entries', count: 2 }, { range: '10+ entries', count: 5 }] },
       { phrase: 'Celebrate your small wins with pride.', metric: 'Wins logged per month', stars: [{ range: '3 wins', count: 1 }, { range: '6 wins', count: 2 }, { range: '10+ wins', count: 5 }] },
-      { phrase: 'Rate your confidence and grow it weekly.', metric: 'Weekly self-rating', stars: [{ range: '≥6/10', count: 1 }, { range: '≥7/10', count: 2 }, { range: '≥8/10', count: 5 }] }
+      { phrase: 'Rate your confidence and grow it weekly.', metric: 'Weekly self-rating', stars: [{ range: '≥6/10', count: 1 }, { range: '≥7/10', count: 2 }, { range: '≥8/10', count: 5 }] },
+      // NEW: 4 simpler daily/weekly emotional goals
+      { phrase: 'Write daily reflection for 5 minutes.', metric: 'Reflections written per week', stars: [{ range: '3 reflections', count: 1 }, { range: '5 reflections', count: 2 }, { range: '7+ reflections', count: 3 }] },
+      { phrase: 'Celebrate small wins every day.', metric: 'Wins celebrated per week', stars: [{ range: '3 wins', count: 1 }, { range: '5 wins', count: 2 }, { range: '7+ wins', count: 3 }] },
+      { phrase: 'Rate your confidence 7 or higher.', metric: 'Days with confidence ≥7', stars: [{ range: '3 days', count: 1 }, { range: '5 days', count: 2 }, { range: '7+ days', count: 3 }] },
+      { phrase: 'Encourage a friend with kind words.', metric: 'Encouragements given per week', stars: [{ range: '2 encouragements', count: 1 }, { range: '4 encouragements', count: 2 }, { range: '7+ encouragements', count: 3 }] }
     ]
   }
 
-  const renderStars = (count) => '⭐'.repeat(count)
+  const renderStars = (count) => '[' + 'STAR'.repeat(count) + ']'
 
   const addTemplateGoal = (template) => {
     const goalKey = `template-${Date.now()}`
@@ -77,14 +98,52 @@ export default function GoalsPage() {
 
   const loadGoals = () => {
     const saved = localStorage.getItem('goals')
+    const savedStarPoints = parseInt(localStorage.getItem('starPoints') || '0', 10)
+    const savedBadgePoints = parseInt(localStorage.getItem('badgePoints') || '0', 10)
     if (saved) {
       setGoals(JSON.parse(saved))
     }
+    setStarPoints(savedStarPoints)
+    setBadgePoints(savedBadgePoints)
   }
 
   const saveGoals = (updatedGoals) => {
     localStorage.setItem('goals', JSON.stringify(updatedGoals))
+    localStorage.setItem('starPoints', starPoints.toString())
+    localStorage.setItem('badgePoints', badgePoints.toString())
     setGoals(updatedGoals)
+  }
+
+  // [STAR] Calculate points: Each star = 10 points, Each badge (5 stars) = 100 points
+  const calculatePointsForGoal = (currentStars) => {
+    const starPts = currentStars * 10 // 10 points per star
+    const badgePts = Math.floor(currentStars / 5) * 100 // 100 points per full badge (5 stars)
+    return { starPts, badgePts }
+  }
+
+  const updateGoalStars = (goalKey, newStars) => {
+    const goal = goals[goalKey]
+    const oldStars = goal.currentStars || 0
+    
+    if (newStars > oldStars) {
+      // Award points for new stars
+      const { starPts, badgePts } = calculatePointsForGoal(newStars - oldStars)
+      setStarPoints(prev => prev + starPts)
+      
+      // Check if crossing badge boundary
+      const oldBadges = Math.floor(oldStars / 5)
+      const newBadges = Math.floor(newStars / 5)
+      if (newBadges > oldBadges) {
+        const newBadgePts = (newBadges - oldBadges) * 100
+        setBadgePoints(prev => prev + newBadgePts)
+      }
+    }
+    
+    const updatedGoals = {
+      ...goals,
+      [goalKey]: { ...goal, currentStars: newStars }
+    }
+    saveGoals(updatedGoals)
   }
 
   const addGoal = () => {
@@ -169,8 +228,24 @@ export default function GoalsPage() {
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           {/* Header */}
           <div style={{ marginBottom: '30px' }}>
-            <h1 style={{ color: 'white', fontSize: '32px', fontWeight: '700', margin: '0 0 10px 0' }}>🎯 Goals & Targets</h1>
+            <h1 style={{ color: 'white', fontSize: '32px', fontWeight: '700', margin: '0 0 10px 0' }}>[GOAL] Goals & Targets</h1>
             <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '14px', margin: '0' }}>Set learning proficiency targets for each chapter</p>
+            
+            {/* [STAR] Points Tracker */}
+            <div style={{ display: 'flex', gap: '20px', marginTop: '15px', flexWrap: 'wrap' }}>
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.15)', padding: '12px 20px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
+                <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px', margin: '0 0 4px 0' }}>[STAR] Star Points</p>
+                <p style={{ color: 'white', fontSize: '20px', fontWeight: '700', margin: '0' }}>{starPoints}</p>
+              </div>
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.15)', padding: '12px 20px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
+                <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px', margin: '0 0 4px 0' }}>[BADGE] Badge Points</p>
+                <p style={{ color: 'white', fontSize: '20px', fontWeight: '700', margin: '0' }}>{badgePoints}</p>
+              </div>
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.15)', padding: '12px 20px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
+                <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px', margin: '0 0 4px 0' }}>[TOTAL] Total Points</p>
+                <p style={{ color: 'white', fontSize: '20px', fontWeight: '700', margin: '0' }}>{starPoints + badgePoints}</p>
+              </div>
+            </div>
           </div>
 
           {/* Subject Tabs */}
@@ -309,11 +384,43 @@ export default function GoalsPage() {
                         <div style={{ marginTop: '12px', padding: '12px', backgroundColor: isOverdue ? '#fee2e2' : isUrgent ? '#fef3c7' : '#ecfdf5', borderRadius: '6px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ fontSize: '12px', fontWeight: '500', color: isOverdue ? '#dc2626' : isUrgent ? '#d97706' : '#059669' }}>
-                              📅 {new Date(goal.targetDate).toLocaleDateString()}
+                              [CAL] {new Date(goal.targetDate).toLocaleDateString()}
                             </span>
                             <span style={{ fontSize: '12px', fontWeight: '600', color: isOverdue ? '#dc2626' : isUrgent ? '#d97706' : '#059669' }}>
-                              {isOverdue ? `⏰ ${Math.abs(daysLeft)} days overdue` : `📌 ${daysLeft} days left`}
+                              {isOverdue ? `[CLOCK] ${Math.abs(daysLeft)} days overdue` : `[PIN] ${daysLeft} days left`}
                             </span>
+                          </div>
+                        </div>
+
+                        {/* [STAR] Star Progress Tracker */}
+                        <div style={{ marginTop: '12px', padding: '12px', backgroundColor: '#fffbeb', borderRadius: '6px', border: '1px solid #fcd34d' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <span style={{ fontSize: '12px', fontWeight: '600', color: '#92400e' }}>[STAR] Progress Stars</span>
+                            <span style={{ fontSize: '12px', fontWeight: '600', color: '#f59e0b' }}>{goal.currentStars || 0} / {goal.stars ? Math.max(...goal.stars.map(s => s.count)) : 5}</span>
+                          </div>
+                          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                            {[1, 2, 3, 4, 5].map(star => (
+                              <button
+                                key={star}
+                                onClick={() => updateGoalStars(goalKey, star)}
+                                style={{
+                                  padding: '6px 10px',
+                                  borderRadius: '4px',
+                                  border: '1px solid #fcd34d',
+                                  backgroundColor: (goal.currentStars || 0) >= star ? '#fbbf24' : '#fef3c7',
+                                  color: '#92400e',
+                                  cursor: 'pointer',
+                                  fontWeight: '600',
+                                  fontSize: '12px',
+                                  transition: 'all 0.2s ease'
+                                }}
+                              >
+                                {star}
+                              </button>
+                            ))}
+                          </div>
+                          <div style={{ marginTop: '8px', fontSize: '11px', color: '#92400e' }}>
+                            [STAR] {(goal.currentStars || 0) * 10} star points + {Math.floor((goal.currentStars || 0) / 5) * 100} badge points
                           </div>
                         </div>
                       </div>
@@ -523,13 +630,13 @@ export default function GoalsPage() {
                     marginBottom: '10px'
                   }}
                 >
-                  {showTemplates ? '−' : '+'} ⭐ Goal Templates
+                  {showTemplates ? '−' : '+'} [STAR] Goal Templates
                 </button>
 
                 {showTemplates && (
                   <div style={{ display: 'grid', gap: '10px' }}>
                     <div>
-                      <p style={{ margin: '0 0 8px 0', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>📘 Academic</p>
+                      <p style={{ margin: '0 0 8px 0', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>[BOOK] Academic</p>
                       <div style={{ display: 'grid', gap: '6px' }}>
                         {goalTemplates.academic.map((t, i) => (
                           <button
@@ -555,7 +662,7 @@ export default function GoalsPage() {
                       </div>
                     </div>
                     <div>
-                      <p style={{ margin: '8px 0 8px 0', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>🧠 Behavioral</p>
+                      <p style={{ margin: '8px 0 8px 0', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>[BRAIN] Behavioral</p>
                       <div style={{ display: 'grid', gap: '6px' }}>
                         {goalTemplates.behavioral.map((t, i) => (
                           <button
@@ -581,7 +688,7 @@ export default function GoalsPage() {
                       </div>
                     </div>
                     <div>
-                      <p style={{ margin: '8px 0 8px 0', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>💬 Emotional</p>
+                      <p style={{ margin: '8px 0 8px 0', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>[COMMENT] Emotional</p>
                       <div style={{ display: 'grid', gap: '6px' }}>
                         {goalTemplates.emotional.map((t, i) => (
                           <button

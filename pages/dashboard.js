@@ -132,9 +132,17 @@ export default function Dashboard() {
   const [studyData, setStudyData] = useState(null)
   const [timerData, setTimerData] = useState(null)
   const [scheduleData, setScheduleData] = useState(null)
+  const [starPoints, setStarPoints] = useState(0) // [STAR] Star Points from goals
+  const [badgePoints, setBadgePoints] = useState(0) // [STAR] Badge Points from goals
 
   // Load data from localStorage and simulate API data
   useEffect(() => {
+    // Load star points from localStorage
+    const savedStarPoints = parseInt(localStorage.getItem('starPoints') || '0', 10)
+    const savedBadgePoints = parseInt(localStorage.getItem('badgePoints') || '0', 10)
+    setStarPoints(savedStarPoints)
+    setBadgePoints(savedBadgePoints)
+    
     // Simulate study plan data
     const studyPlans = JSON.parse(localStorage.getItem('study-plans-data') || '[]')
 
@@ -263,6 +271,34 @@ export default function Dashboard() {
             color="purple"
             trend="Keep it up!"
           />
+        </div>
+
+        {/* [STAR] Star Points Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 p-6 rounded-xl shadow-md text-white">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold">[STAR] Star Points</h3>
+              <span className="text-3xl">⭐</span>
+            </div>
+            <p className="text-4xl font-bold">{starPoints}</p>
+            <p className="text-sm text-yellow-100 mt-2">10 points per completed goal star</p>
+          </div>
+          <div className="bg-gradient-to-br from-indigo-400 to-indigo-600 p-6 rounded-xl shadow-md text-white">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold">[BADGE] Badge Points</h3>
+              <span className="text-3xl">🏆</span>
+            </div>
+            <p className="text-4xl font-bold">{badgePoints}</p>
+            <p className="text-sm text-indigo-100 mt-2">100 points per badge (5 stars = 1 badge)</p>
+          </div>
+          <div className="bg-gradient-to-br from-purple-400 to-purple-600 p-6 rounded-xl shadow-md text-white">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold">[TOTAL] Total Points</h3>
+              <span className="text-3xl">✨</span>
+            </div>
+            <p className="text-4xl font-bold">{starPoints + badgePoints}</p>
+            <p className="text-sm text-purple-100 mt-2">Combined achievement score</p>
+          </div>
         </div>
 
         {/* Charts Section */}

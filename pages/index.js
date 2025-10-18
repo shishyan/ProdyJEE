@@ -2344,7 +2344,7 @@ export default function Home() {
         const status = chapter.aggregatedStatus || 'Unknown'
         statusDistribution[status] = (statusDistribution[status] || 0) + 1
       })
-      console.log(`📊 Chapters for ${selectedSubject.name}:`, {
+      console.log(`[CHART] Chapters for ${selectedSubject.name}:`, {
         totalChapters: chapters.length,
         totalTopics: filteredPlans.length,
         statusDistribution,
@@ -3056,9 +3056,9 @@ export default function Home() {
                       }}
                     >
                       <option value="default">↕️ Sort By</option>
-                      <option value="progress">📊 Progress</option>
+                      <option value="progress">[CHART] Progress</option>
                       <option value="duedate">📅 Due Date</option>
-                      <option value="proficiency">⭐ Proficiency</option>
+                      <option value="proficiency">[STAR] Proficiency</option>
                     </select>
 
                     {/* Select/Deselect All Buttons */}
@@ -3109,7 +3109,7 @@ export default function Home() {
                           fontSize: '14px'
                         }}
                       >
-                        🎯 {selectedChapters.size} selected
+                        [GOAL] {selectedChapters.size} selected
                       </button>
                     )}
                   </div>
@@ -3966,7 +3966,7 @@ export default function Home() {
 
                 {/* Overall Status and Date Tracking */}
                 <div className="form-group">
-                  <label className="form-label-icon">📊 Overall Status & Date</label>
+                  <label className="form-label-icon">[CHART] Overall Status & Date</label>
                   <div className="status-date-section">
                     <div className="status-info">
                       <span className="status-label">Current Status:</span>

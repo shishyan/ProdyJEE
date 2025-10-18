@@ -216,7 +216,7 @@ const TimerCard = ({ timer, onStart, onPause, onStop, onReset, onUpdateDuration 
       {/* Status Messages */}
       {timer.timeLeft === 0 && !timer.isRunning && (
         <div className="mt-4 p-3 bg-red-100 text-red-800 rounded-lg text-center font-medium">
-          ⏰ Time's up! {timer.name} completed.
+          [CLOCK] Time's up! {timer.name} completed.
         </div>
       )}
 

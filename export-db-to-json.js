@@ -5,11 +5,26 @@
  * which will be used in static builds
  */
 
-const { PrismaClient } = require('@prisma/client')
 const fs = require('fs')
 const path = require('path')
 
-const prisma = new PrismaClient()
+// Check if database exists or if we should skip (for CI/static builds)
+const dbPath = process.env.DATABASE_URL || '.prisma/dev.db'
+const databaseFileExists = fs.existsSync(dbPath)
+
+if (!databaseFileExists && process.env.CI) {
+  console.log('SKIP: Running in CI environment without local database. Using cached data.')
+  process.exit(0)
+}
+
+let prisma
+try {
+  const { PrismaClient } = require('@prisma/client')
+  prisma = new PrismaClient()
+} catch (error) {
+  console.log('WARNING: Prisma client not available. Using existing database export if available.')
+  process.exit(0)
+}
 
 async function exportDatabase() {
   try {
