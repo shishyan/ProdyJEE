@@ -184,35 +184,81 @@ export default function Schedule() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <CalendarIcon />
-                Schedule Tracker
-              </h1>
-              <p className="text-gray-600 mt-1">Track important dates, periods, and events</p>
-            </div>
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-            >
-              <PlusIcon />
-              Add Event
-            </button>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f3f2f1' }}>
+      {/* MS Planner Navbar */}
+      <div style={{ 
+        backgroundColor: '#5558AF', 
+        color: 'white',
+        padding: '12px 24px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button 
+            onClick={() => window.history.back()}
+            style={{ 
+              background: 'transparent', 
+              border: 'none', 
+              color: 'white', 
+              fontSize: '20px', 
+              cursor: 'pointer',
+              padding: '4px 8px'
+            }}
+          >
+            ←
+          </button>
+          <span style={{ fontSize: '16px', fontWeight: '600' }}>Schedule Tracker</span>
+        </div>
+        <span style={{ fontSize: '12px', opacity: 0.9 }}>v{packageJson.version}</span>
+      </div>
+
+      {/* Breadcrumb and Header */}
+      <div style={{ backgroundColor: 'white', borderBottom: '1px solid #edebe9', padding: '16px 24px' }}>
+        <div style={{ fontSize: '12px', color: '#605e5c', marginBottom: '8px' }}>
+          <a href="/" style={{ color: '#0078d4', textDecoration: 'none' }}>Home</a>
+          <span style={{ margin: '0 4px' }}>/</span>
+          <span>Schedule</span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#323130', margin: 0 }}>📅 Schedule Tracker</h1>
+            <p style={{ fontSize: '13px', color: '#605e5c', marginTop: '4px' }}>Track important dates, periods, and events</p>
           </div>
+          <button
+            onClick={() => setShowAddForm(true)}
+            style={{
+              backgroundColor: '#0078d4',
+              color: 'white',
+              border: 'none',
+              padding: '8px 16px',
+              borderRadius: '2px',
+              fontSize: '13px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            <PlusIcon />
+            Add Event
+          </button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
           {/* Calendar Section */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h2 className="text-xl font-semibold mb-4">Calendar</h2>
+          <div style={{ gridColumn: 'span 2' }}>
+            <div style={{ 
+              backgroundColor: 'white', 
+              border: '1px solid #edebe9', 
+              borderRadius: '4px',
+              padding: '20px',
+              boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+            }}>
+              <h2 style={{ fontSize: '15px', fontWeight: '600', color: '#323130', marginBottom: '16px' }}>📅 Calendar</h2>
               <div className="calendar-container">
                 <DatePicker
                   selected={selectedDate}
@@ -223,25 +269,40 @@ export default function Schedule() {
               </div>
 
               {/* Events for selected date */}
-              <div className="mt-6">
-                <h3 className="text-lg font-medium mb-3">
+              <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #edebe9' }}>
+                <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#323130', marginBottom: '12px' }}>
                   Events on {formatDate(selectedDate)}
                 </h3>
-                <div className="space-y-3">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {getEventsForDate(selectedDate).length === 0 ? (
-                    <p className="text-gray-500 text-center py-4">No events scheduled</p>
+                    <p style={{ fontSize: '13px', color: '#605e5c', textAlign: 'center', padding: '16px' }}>No events scheduled</p>
                   ) : (
                     getEventsForDate(selectedDate).map(event => (
-                      <div key={event.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${getEventColor(event.type)}`}>
+                      <div key={event.id} style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between',
+                        padding: '12px', 
+                        backgroundColor: '#f3f2f1',
+                        borderRadius: '2px'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div className={`p-2 rounded-lg ${getEventColor(event.type)}`} style={{ padding: '8px', borderRadius: '2px' }}>
                             {getEventIcon(event.type)}
                           </div>
                           <div>
-                            <h4 className="font-medium">{event.title}</h4>
-                            <p className="text-sm text-gray-600">{event.description}</p>
+                            <h4 style={{ fontSize: '13px', fontWeight: '600', color: '#323130', margin: 0 }}>{event.title}</h4>
+                            <p style={{ fontSize: '12px', color: '#605e5c', margin: '2px 0' }}>{event.description}</p>
                             {event.recurring && (
-                              <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">
+                              <span style={{ 
+                                fontSize: '11px', 
+                                backgroundColor: '#edebe9', 
+                                color: '#323130',
+                                padding: '2px 8px',
+                                borderRadius: '2px',
+                                display: 'inline-block',
+                                marginTop: '4px'
+                              }}>
                                 Recurring {event.recurringType}
                               </span>
                             )}
@@ -249,7 +310,14 @@ export default function Schedule() {
                         </div>
                         <button
                           onClick={() => deleteEvent(event.id)}
-                          className="text-red-500 hover:text-red-700 p-1"
+                          style={{
+                            color: '#a4262c',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            fontSize: '20px',
+                            cursor: 'pointer',
+                            padding: '4px 8px'
+                          }}
                         >
                           ×
                         </button>
@@ -262,33 +330,52 @@ export default function Schedule() {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {/* Upcoming Events */}
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h3 className="text-lg font-semibold mb-4">Upcoming Events</h3>
-              <div className="space-y-3">
+            <div style={{ 
+              backgroundColor: 'white', 
+              border: '1px solid #edebe9', 
+              borderRadius: '4px',
+              padding: '20px',
+              boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+            }}>
+              <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#323130', marginBottom: '12px' }}>📌 Upcoming Events</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {getUpcomingEvents().map(event => (
-                  <div key={event.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                    <div className={`p-2 rounded-lg ${getEventColor(event.type)} flex-shrink-0`}>
+                  <div key={event.id} style={{ 
+                    display: 'flex', 
+                    alignItems: 'flex-start', 
+                    gap: '12px',
+                    padding: '12px',
+                    backgroundColor: '#f3f2f1',
+                    borderRadius: '2px'
+                  }}>
+                    <div className={`p-2 rounded-lg ${getEventColor(event.type)}`} style={{ padding: '8px', borderRadius: '2px', flexShrink: 0 }}>
                       {getEventIcon(event.type)}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-sm">{event.title}</h4>
-                      <p className="text-xs text-gray-600">{formatDate(event.date)}</p>
-                      <p className="text-xs text-gray-500 truncate">{event.description}</p>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <h4 style={{ fontSize: '13px', fontWeight: '600', color: '#323130', margin: 0 }}>{event.title}</h4>
+                      <p style={{ fontSize: '11px', color: '#605e5c', margin: '2px 0' }}>{formatDate(event.date)}</p>
+                      <p style={{ fontSize: '11px', color: '#8a8886', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{event.description}</p>
                     </div>
                   </div>
                 ))}
                 {getUpcomingEvents().length === 0 && (
-                  <p className="text-gray-500 text-center py-4">No upcoming events</p>
+                  <p style={{ fontSize: '13px', color: '#605e5c', textAlign: 'center', padding: '16px' }}>No upcoming events</p>
                 )}
               </div>
             </div>
 
             {/* Event Types */}
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h3 className="text-lg font-semibold mb-4">Event Types</h3>
-              <div className="space-y-2">
+            <div style={{ 
+              backgroundColor: 'white', 
+              border: '1px solid #edebe9', 
+              borderRadius: '4px',
+              padding: '20px',
+              boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+            }}>
+              <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#323130', marginBottom: '12px' }}>🏷️ Event Types</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {[
                   { type: 'school', label: 'School Period', icon: BookOpenIcon },
                   { type: 'menstrual', label: 'Menstrual Period', icon: HeartIcon },
@@ -296,11 +383,11 @@ export default function Schedule() {
                   { type: 'birthday', label: 'Birthday', icon: CakeIcon },
                   { type: 'holiday', label: 'Public Holiday', icon: CalendarIcon }
                 ].map(({ type, label, icon: Icon }) => (
-                  <div key={type} className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${getEventColor(type)}`}>
+                  <div key={type} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div className={`p-2 rounded-lg ${getEventColor(type)}`} style={{ padding: '8px', borderRadius: '2px' }}>
                       <Icon />
                     </div>
-                    <span className="text-sm">{label}</span>
+                    <span style={{ fontSize: '13px', color: '#323130' }}>{label}</span>
                   </div>
                 ))}
               </div>
@@ -309,29 +396,59 @@ export default function Schedule() {
         </div>
       </div>
 
-      {/* Add Event Modal */}
+      {/* Add Event Modal - MS Planner Style */}
       {showAddForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
-            <h2 className="text-xl font-semibold mb-4">Add New Event</h2>
-            <div className="space-y-4">
+        <div style={{ 
+          position: 'fixed', 
+          inset: 0, 
+          backgroundColor: 'rgba(0, 0, 0, 0.4)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 50 
+        }}>
+          <div style={{ 
+            backgroundColor: 'white', 
+            borderRadius: '4px',
+            padding: '24px',
+            width: '100%',
+            maxWidth: '480px',
+            margin: '0 16px',
+            boxShadow: '0 6.4px 14.4px 0 rgba(0,0,0,0.132), 0 1.2px 3.6px 0 rgba(0,0,0,0.108)'
+          }}>
+            <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#323130', marginBottom: '16px' }}>Add New Event</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label className="block text-sm font-medium mb-1">Title</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#323130', marginBottom: '4px' }}>Title</label>
                 <input
                   type="text"
                   value={newEvent.title}
                   onChange={(e) => setNewEvent(prev => ({ ...prev, title: e.target.value }))}
-                  className="w-full p-2 border rounded-lg"
+                  style={{
+                    width: '100%',
+                    padding: '8px',
+                    border: '1px solid #8a8886',
+                    borderRadius: '2px',
+                    fontSize: '13px',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  }}
                   placeholder="Event title"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Type</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#323130', marginBottom: '4px' }}>Type</label>
                 <select
                   value={newEvent.type}
                   onChange={(e) => setNewEvent(prev => ({ ...prev, type: e.target.value }))}
-                  className="w-full p-2 border rounded-lg"
+                  style={{
+                    width: '100%',
+                    padding: '8px',
+                    border: '1px solid #8a8886',
+                    borderRadius: '2px',
+                    fontSize: '13px',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                  }}
                 >
                   <option value="school">School Period</option>
                   <option value="menstrual">Menstrual Period</option>
@@ -342,42 +459,63 @@ export default function Schedule() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Date</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#323130', marginBottom: '4px' }}>Date</label>
                 <DatePicker
                   selected={newEvent.date}
                   onChange={(date) => setNewEvent(prev => ({ ...prev, date }))}
-                  className="w-full p-2 border rounded-lg"
+                  style={{
+                    width: '100%',
+                    padding: '8px',
+                    border: '1px solid #8a8886',
+                    borderRadius: '2px',
+                    fontSize: '13px'
+                  }}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#323130', marginBottom: '4px' }}>Description</label>
                 <textarea
                   value={newEvent.description}
                   onChange={(e) => setNewEvent(prev => ({ ...prev, description: e.target.value }))}
-                  className="w-full p-2 border rounded-lg"
+                  style={{
+                    width: '100%',
+                    padding: '8px',
+                    border: '1px solid #8a8886',
+                    borderRadius: '2px',
+                    fontSize: '13px',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                    resize: 'vertical'
+                  }}
                   rows={3}
                   placeholder="Optional description"
                 />
               </div>
 
-              <div className="flex items-center gap-2">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <input
                   type="checkbox"
                   id="recurring"
                   checked={newEvent.recurring}
                   onChange={(e) => setNewEvent(prev => ({ ...prev, recurring: e.target.checked }))}
                 />
-                <label htmlFor="recurring" className="text-sm">Recurring event</label>
+                <label htmlFor="recurring" style={{ fontSize: '13px', color: '#323130' }}>Recurring event</label>
               </div>
 
               {newEvent.recurring && (
                 <div>
-                  <label className="block text-sm font-medium mb-1">Recurring Type</label>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#323130', marginBottom: '4px' }}>Recurring Type</label>
                   <select
                     value={newEvent.recurringType}
                     onChange={(e) => setNewEvent(prev => ({ ...prev, recurringType: e.target.value }))}
-                    className="w-full p-2 border rounded-lg"
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid #8a8886',
+                      borderRadius: '2px',
+                      fontSize: '13px',
+                      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    }}
                   >
                     <option value="daily">Daily</option>
                     <option value="weekly">Weekly</option>
@@ -388,16 +526,36 @@ export default function Schedule() {
               )}
             </div>
 
-            <div className="flex gap-3 mt-6">
+            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
               <button
                 onClick={() => setShowAddForm(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                style={{
+                  flex: 1,
+                  padding: '8px 16px',
+                  border: '1px solid #8a8886',
+                  borderRadius: '2px',
+                  backgroundColor: 'white',
+                  color: '#323130',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
               >
                 Cancel
               </button>
               <button
                 onClick={addEvent}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                style={{
+                  flex: 1,
+                  padding: '8px 16px',
+                  border: 'none',
+                  borderRadius: '2px',
+                  backgroundColor: '#0078d4',
+                  color: 'white',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
               >
                 Add Event
               </button>
