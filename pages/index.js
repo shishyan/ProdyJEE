@@ -2274,6 +2274,7 @@ export default function Home() {
   const [backgroundTheme, setBackgroundTheme] = useState('ocean')
   const [navbarBackground, setNavbarBackground] = useState('default')
   const [viewMode, setViewMode] = useState('kanban') // Only Kanban view - simplified
+  const [groupBy, setGroupBy] = useState('status') // status, stage, proficiency
   const [studyPlans, setStudyPlans] = useState([])
   const [weatherEffect, setWeatherEffect] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
@@ -2328,13 +2329,34 @@ export default function Home() {
     })
   )
 
-  // Bucket configuration
-  const buckets = [
-    { id: 'backlog', name: 'Backlog', status: 'In Queue' },
-    { id: 'todo', name: 'To Do', status: 'To Do' },
-    { id: 'inprogress', name: 'In Progress', status: 'In Progress' },
-    { id: 'done', name: 'Done', status: 'Done' }
-  ]
+  // Dynamic Bucket configuration based on Group By
+  const getBuckets = () => {
+    if (groupBy === 'status') {
+      return [
+        { id: 'backlog', name: 'Backlog', status: 'In Queue', field: 'aggregatedStatus' },
+        { id: 'todo', name: 'To Do', status: 'To Do', field: 'aggregatedStatus' },
+        { id: 'inprogress', name: 'In Progress', status: 'In Progress', field: 'aggregatedStatus' },
+        { id: 'done', name: 'Done', status: 'Done', field: 'aggregatedStatus' }
+      ]
+    } else if (groupBy === 'stage') {
+      return [
+        { id: 'initiated', name: 'Initiated', status: 'Initiated', field: 'aggregatedStage' },
+        { id: 'skimmed', name: 'Skimmed', status: 'Skimmed', field: 'aggregatedStage' },
+        { id: 'grasped', name: 'Grasped', status: 'Grasped', field: 'aggregatedStage' },
+        { id: 'revised', name: 'Revised', status: 'Revised', field: 'aggregatedStage' },
+        { id: 'mastered', name: 'Mastered', status: 'Mastered', field: 'aggregatedStage' }
+      ]
+    } else if (groupBy === 'proficiency') {
+      return [
+        { id: 'novice', name: 'Novice', status: 'Novice', field: 'aggregatedProficiency' },
+        { id: 'competent', name: 'Competent', status: 'Competent', field: 'aggregatedProficiency' },
+        { id: 'expert', name: 'Expert', status: 'Expert', field: 'aggregatedProficiency' },
+        { id: 'master', name: 'Master', status: 'Master', field: 'aggregatedProficiency' }
+      ]
+    }
+  }
+  
+  const buckets = getBuckets()
 
   // Debug: Log chapter distribution
   useEffect(() => {
@@ -2825,12 +2847,30 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Center - Dynamic Title */}
+          {/* Center - Dynamic Title + Group By */}
           {selectedSubject && viewMode === 'kanban' && (
-            <div className="navbar-center">
+            <div className="navbar-center" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <h3 className="navbar-title">
                 Kanban Board - {selectedSubject.name} ({groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name)).length} chapters)
               </h3>
+              <select
+                value={groupBy}
+                onChange={(e) => setGroupBy(e.target.value)}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(0,0,0,0.1)',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  backgroundColor: 'rgba(255,255,255,0.95)',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                }}
+              >
+                <option value="status">📊 Group by Status</option>
+                <option value="stage">🎯 Group by Stage</option>
+                <option value="proficiency">⭐ Group by Proficiency</option>
+              </select>
             </div>
           )}
           {/* Right Side - Actions (Duplicates removed - use sidebar for navigation) */}
@@ -2941,197 +2981,101 @@ export default function Home() {
         </div>
       </div>
 
-      <main className="board">
+      <main className="board" style={{ paddingTop: 0 }}>
         {currentPage === 'kanban' && (
           <>
             {selectedSubject && viewMode === 'kanban' && (
               <>
-                {/* MS Planner Toolbar - Search, Filter, Sort, Bulk Actions */}
-                <div style={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  padding: '15px 20px',
-                  margin: '10px',
-                  borderRadius: '8px',
-                  color: 'white',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-                }}>
-                  <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'center' }}>
-                    {/* Search */}
-                    <div style={{ flex: 1, minWidth: '200px' }}>
-                      <input
-                        type="text"
-                        placeholder="🔍 Search chapters or topics..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '8px 12px',
-                          borderRadius: '6px',
-                          border: 'none',
-                          fontSize: '14px'
-                        }}
-                      />
+                {/* Horizontal Scrolling Backlog Section (Hero-style) */}
+                {groupBy === 'status' && (
+                  <div style={{
+                    background: 'rgba(255, 255, 255, 0.25)',
+                    backdropFilter: 'blur(20px)',
+                    WebkitBackdropFilter: 'blur(20px)',
+                    borderRadius: '16px',
+                    padding: '20px',
+                    margin: '0 16px 20px 16px',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#1a1a1a', margin: 0 }}>
+                        📌 Backlog
+                      </h2>
+                      <span style={{ fontSize: '14px', color: '#666', fontWeight: '600' }}>
+                        Drag cards to start working →
+                      </span>
                     </div>
-
-                    {/* Filter by Status */}
-                    <select
-                      value={filterStatus}
-                      onChange={(e) => setFilterStatus(e.target.value)}
-                      style={{
-                        padding: '8px 12px',
-                        borderRadius: '6px',
-                        border: 'none',
-                        fontSize: '14px',
-                        backgroundColor: 'rgba(255,255,255,0.9)',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <option value="all">📋 All Status</option>
-                      <option value="Done">✅ Done</option>
-                      <option value="In Progress">⚙️ In Progress</option>
-                      <option value="To Do">📝 To Do</option>
-                      <option value="In Queue">📌 Backlog</option>
-                    </select>
-
-                    {/* Sort */}
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                      style={{
-                        padding: '8px 12px',
-                        borderRadius: '6px',
-                        border: 'none',
-                        fontSize: '14px',
-                        backgroundColor: 'rgba(255,255,255,0.9)',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <option value="default">↕️ Sort By</option>
-                      <option value="progress">[CHART] Progress</option>
-                      <option value="duedate">📅 Due Date</option>
-                      <option value="proficiency">[STAR] Proficiency</option>
-                    </select>
-
-                    {/* Select/Deselect All Buttons */}
-                    <button
-                      onClick={selectAllChapters}
-                      style={{
-                        padding: '8px 12px',
-                        borderRadius: '6px',
-                        border: 'none',
-                        fontSize: '14px',
-                        backgroundColor: '#8b5cf6',
-                        color: 'white',
-                        cursor: 'pointer',
-                        fontWeight: '500'
-                      }}
-                    >
-                      ✓ Select All
-                    </button>
-
-                    <button
-                      onClick={deselectAllChapters}
-                      style={{
-                        padding: '8px 12px',
-                        borderRadius: '6px',
-                        border: 'none',
-                        fontSize: '14px',
-                        backgroundColor: '#9ca3af',
-                        color: 'white',
-                        cursor: 'pointer',
-                        fontWeight: '500'
-                      }}
-                    >
-                      ✕ Deselect All
-                    </button>
-
-                    {/* Bulk Actions */}
-                    {selectedChapters.size > 0 && (
-                      <button
-                        onClick={() => setShowBulkActions(!showBulkActions)}
-                        style={{
-                          padding: '8px 16px',
-                          borderRadius: '6px',
-                          border: 'none',
-                          backgroundColor: '#ff6b6b',
-                          color: 'white',
-                          cursor: 'pointer',
-                          fontWeight: 'bold',
-                          fontSize: '14px'
-                        }}
-                      >
-                        [GOAL] {selectedChapters.size} selected
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Bulk Actions Menu */}
-                  {showBulkActions && (
                     <div style={{
-                      marginTop: '10px',
                       display: 'flex',
-                      gap: '10px',
-                      flexWrap: 'wrap'
+                      gap: '16px',
+                      overflowX: 'auto',
+                      paddingBottom: '8px',
+                      scrollbarWidth: 'thin',
+                      scrollbarColor: 'rgba(0,0,0,0.3) transparent'
                     }}>
-                      <button
-                        onClick={() => handleBulkStatusChange('Done')}
-                        style={{
-                          padding: '6px 12px',
-                          borderRadius: '4px',
-                          border: 'none',
-                          backgroundColor: '#10b981',
-                          color: 'white',
-                          cursor: 'pointer',
-                          fontSize: '12px'
-                        }}
-                      >
-                        ✅ Mark Done
-                      </button>
-                      <button
-                        onClick={() => handleBulkStatusChange('In Progress')}
-                        style={{
-                          padding: '6px 12px',
-                          borderRadius: '4px',
-                          border: 'none',
-                          backgroundColor: '#f59e0b',
-                          color: 'white',
-                          cursor: 'pointer',
-                          fontSize: '12px'
-                        }}
-                      >
-                        ⚙️ In Progress
-                      </button>
-                      <button
-                        onClick={() => handleBulkStatusChange('To Do')}
-                        style={{
-                          padding: '6px 12px',
-                          borderRadius: '4px',
-                          border: 'none',
-                          backgroundColor: '#3b82f6',
-                          color: 'white',
-                          cursor: 'pointer',
-                          fontSize: '12px'
-                        }}
-                      >
-                        📝 To Do
-                      </button>
-                      <button
-                        onClick={() => { setSelectedChapters(new Set()); setShowBulkActions(false); }}
-                        style={{
-                          padding: '6px 12px',
-                          borderRadius: '4px',
-                          border: '1px solid white',
-                          backgroundColor: 'transparent',
-                          color: 'white',
-                          cursor: 'pointer',
-                          fontSize: '12px'
-                        }}
-                      >
-                        ✕ Cancel
-                      </button>
+                      {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+                        .filter(chapter => chapter.aggregatedStatus === 'In Queue')
+                        .map((chapter) => (
+                          <div
+                            key={chapter.chapter_id}
+                            draggable
+                            style={{
+                              minWidth: '280px',
+                              maxWidth: '280px',
+                              background: 'rgba(255, 255, 255, 0.4)',
+                              backdropFilter: 'blur(10px)',
+                              borderRadius: '12px',
+                              padding: '16px',
+                              cursor: 'grab',
+                              transition: 'all 0.3s ease',
+                              border: '1px solid rgba(255, 255, 255, 0.5)',
+                              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)'
+                            }}
+                            onMouseOver={(e) => {
+                              e.currentTarget.style.transform = 'translateY(-4px)'
+                              e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.15)'
+                            }}
+                            onMouseOut={(e) => {
+                              e.currentTarget.style.transform = 'translateY(0)'
+                              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.1)'
+                            }}
+                          >
+                            <div style={{ fontWeight: '700', fontSize: '16px', color: '#1a1a1a', marginBottom: '8px' }}>
+                              {chapter.chapter_name}
+                            </div>
+                            <div style={{ fontSize: '14px', color: '#666', marginBottom: '12px' }}>
+                              {chapter.topics?.length || 0} topics
+                            </div>
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                              <span style={{
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                fontSize: '12px',
+                                fontWeight: '600',
+                                background: getStatusColor(chapter.aggregatedStatus) + '20',
+                                color: getStatusColor(chapter.aggregatedStatus),
+                                border: `1px solid ${getStatusColor(chapter.aggregatedStatus)}40`
+                              }}>
+                                {chapter.aggregatedStatus}
+                              </span>
+                              <span style={{
+                                padding: '4px 8px',
+                                borderRadius: '6px',
+                                fontSize: '12px',
+                                fontWeight: '600',
+                                background: getProficiencyColor(chapter.aggregatedProficiency) + '20',
+                                color: getProficiencyColor(chapter.aggregatedProficiency),
+                                border: `1px solid ${getProficiencyColor(chapter.aggregatedProficiency)}40`
+                              }}>
+                                ⭐ {chapter.aggregatedProficiency}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
 
                 <DndContext
                   sensors={sensors}
@@ -3140,11 +3084,11 @@ export default function Home() {
                 >
                   <div className="kanban-board">
                     <div className="buckets-container">
-                      {buckets.map(bucket => {
+                      {buckets.filter(bucket => groupBy !== 'status' || bucket.id !== 'backlog').map(bucket => {
                         const allChapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
                         const filtered = filterChapters(allChapters)
                         const sorted = sortChapters(filtered)
-                        const bucketChapters = sorted.filter(chapter => chapter.aggregatedStatus === bucket.status)
+                        const bucketChapters = sorted.filter(chapter => chapter[bucket.field] === bucket.status)
                         
                         return (
                           <Bucket
