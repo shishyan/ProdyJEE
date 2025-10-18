@@ -730,23 +730,19 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
   const [editingCell, setEditingCell] = useState(null)
   const [editValue, setEditValue] = useState('')
   const [loading, setLoading] = useState(true)
+  const [filterStatus, setFilterStatus] = useState('all')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedRows, setSelectedRows] = useState(new Set())
 
   const columns = [
     { key: 'actions', label: 'Actions', width: '120px', type: 'actions', readonly: true },
-    { key: 'unique_id', label: 'Unique ID', width: '140px', type: 'text', readonly: true },
-    { key: 'curriculum', label: 'Curriculum', width: '100px', type: 'text' },
-    { key: 'grade', label: 'Grade', width: '70px', type: 'number' },
-    { key: 'subject', label: 'Subject', width: '100px', type: 'text' },
-    { key: 'chapter_id', label: 'Chapter ID', width: '100px', type: 'text' },
-    { key: 'chapter_name', label: 'Chapter Name', width: '180px', type: 'text' },
-    { key: 'topic_id', label: 'Topic ID', width: '100px', type: 'text' },
+    { key: 'chapter_name', label: 'Chapter', width: '180px', type: 'text' },
     { key: 'topic', label: 'Topic', width: '250px', type: 'text' },
     { key: 'target_date', label: 'Target Date', width: '120px', type: 'date' },
-    { key: 'learning_status', label: 'Learning Status', width: '130px', type: 'select', options: ['In Queue', 'To Do', 'In Progress', 'Done', 'Closed'] },
-    { key: 'learning_stage', label: 'Learning Stage', width: '130px', type: 'select', options: ['Initiated', 'Skimmed', 'Grasped', 'Practiced', 'Revised'] },
+    { key: 'learning_status', label: 'Status', width: '130px', type: 'select', options: ['In Queue', 'To Do', 'In Progress', 'Done', 'Closed'] },
+    { key: 'learning_stage', label: 'Stage', width: '130px', type: 'select', options: ['Initiated', 'Skimmed', 'Grasped', 'Practiced', 'Revised'] },
     { key: 'learning_proficiency', label: 'Proficiency', width: '110px', type: 'select', options: ['Novice', 'Competent', 'Expert', 'Master'] },
-    { key: 'progress_percentage', label: 'Progress %', width: '100px', type: 'number', min: 0, max: 100 },
-    { key: 'notes', label: 'Notes', width: '200px', type: 'text' }
+    { key: 'progress_percentage', label: 'Progress', width: '100px', type: 'number', min: 0, max: 100 },
   ]
 
   useEffect(() => {
@@ -767,6 +763,20 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
       setLoading(false)
     }
   }
+
+  const filteredAndSearchedPlans = studyPlans.filter(plan => {
+    // Filter by status
+    if (filterStatus !== 'all' && plan.learning_status !== filterStatus) {
+      return false
+    }
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      return plan.topic.toLowerCase().includes(query) ||
+             plan.chapter_name.toLowerCase().includes(query)
+    }
+    return true
+  })
 
   const handleCellEdit = (uniqueId, columnKey, value) => {
     setEditingCell({ uniqueId, columnKey })
@@ -896,6 +906,66 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
 
   return (
     <div className="study-plan-container">
+      {/* Filter Toolbar - MS Planner Style */}
+      <div style={{
+        display: 'flex',
+        gap: '12px',
+        padding: '16px',
+        backgroundColor: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(168, 85, 247, 0.1))',
+        borderRadius: '8px',
+        marginBottom: '16px',
+        flexWrap: 'wrap',
+        alignItems: 'center'
+      }}>
+        {/* Search */}
+        <input
+          type="text"
+          placeholder="🔍 Search topics or chapters..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{
+            flex: 1,
+            minWidth: '200px',
+            padding: '8px 12px',
+            borderRadius: '6px',
+            border: 'none',
+            fontSize: '14px'
+          }}
+        />
+
+        {/* Status Filter */}
+        <select
+          value={filterStatus}
+          onChange={(e) => setFilterStatus(e.target.value)}
+          style={{
+            padding: '8px 12px',
+            borderRadius: '6px',
+            border: 'none',
+            fontSize: '14px',
+            backgroundColor: 'rgba(255,255,255,0.9)',
+            cursor: 'pointer'
+          }}
+        >
+          <option value="all">📋 All Status</option>
+          <option value="Done">✅ Done</option>
+          <option value="In Progress">⚙️ In Progress</option>
+          <option value="To Do">📝 To Do</option>
+          <option value="In Queue">📌 Backlog</option>
+        </select>
+
+        {/* Result count */}
+        <span style={{
+          padding: '8px 12px',
+          backgroundColor: 'rgba(255,255,255,0.8)',
+          borderRadius: '6px',
+          fontSize: '13px',
+          fontWeight: '500',
+          color: '#6b7280'
+        }}>
+          📊 {filteredAndSearchedPlans.length} records
+        </span>
+      </div>
+
       <div className="excel-grid-container">
         <div className="excel-grid">
           {/* Header Row */}
@@ -904,16 +974,24 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
               <div
                 key={column.key}
                 className="grid-cell header-cell"
-                style={{ width: column.width, minWidth: column.width }}
+                style={{ 
+                  width: column.width, 
+                  minWidth: column.width,
+                  fontWeight: '600',
+                  backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                  borderBottom: '2px solid rgba(139, 92, 246, 0.3)'
+                }}
               >
                 {column.label}
               </div>
             ))}
           </div>
 
-          {/* Data Rows */}
-          {studyPlans.map(plan => (
-            <div key={plan.unique_id} className="grid-row data-row">
+          {/* Data Rows - Use filtered data */}
+          {filteredAndSearchedPlans.map(plan => (
+            <div key={plan.unique_id} className="grid-row data-row" style={{
+              backgroundColor: plan.learning_status === 'Done' ? 'rgba(16, 185, 129, 0.05)' : 'transparent'
+            }}>
               {columns.map(column => (
                 <div
                   key={`${plan.unique_id}-${column.key}`}
@@ -2565,33 +2643,29 @@ export default function Home() {
     const activeId = active.id
     const overId = over.id
 
+    // Check if same bucket - no change needed
+    if (activeId === overId) return
+
     if (activeId.startsWith('chapter-')) {
       const chapterId = activeId.replace('chapter-', '')
       const targetBucket = buckets.find(b => b.id === overId)
 
       if (targetBucket) {
-        // Add dropping animation effect
-        const draggedElement = document.querySelector(`[data-id="${activeId}"]`)
-        if (draggedElement) {
-          draggedElement.classList.add('dropping')
-          setTimeout(() => {
-            draggedElement.classList.remove('dropping')
-          }, 600)
-        }
-
         try {
-          // Update all study plans in this chapter to the new status (local state for static deployment)
-          const chapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
-          const draggedChapter = chapters.find(ch => ch.chapter_id === chapterId)
+          // Update all study plans in this chapter to the new status
+          const updatedPlans = studyPlans.map(plan =>
+            plan.chapter_id === chapterId
+              ? { ...plan, learning_status: targetBucket.status }
+              : plan
+          )
 
-          if (draggedChapter) {
-            // Update local state directly
-            setStudyPlans(prev => prev.map(plan =>
-              draggedChapter.studyPlans.some(chapterPlan => chapterPlan.unique_id === plan.unique_id)
-                ? { ...plan, learning_status: targetBucket.status }
-                : plan
-            ))
-          }
+          setStudyPlans(updatedPlans)
+          
+          // Persist to localStorage immediately
+          localStorage.setItem('study-plans-data', JSON.stringify(updatedPlans))
+          
+          // Show success feedback
+          console.log(`✅ Chapter ${chapterId} moved to ${targetBucket.status}`)
         } catch (error) {
           console.error('Failed to update chapter:', error)
         }
@@ -3387,135 +3461,187 @@ export default function Home() {
                   <h3>Topics in this Chapter</h3>
                   <div className="topics-list">
                   {editingChapter.studyPlans.map(studyPlan => (
-                    <div key={studyPlan.unique_id} className="topic-item-detailed">
-                      <div className="topic-header">
-                        <div className="topic-info">
-                          <div className="topic-completion">
-                            <div className="progress-stages">
-                              <label className="stage-option">
-                                <input
-                                  type="radio"
-                                  name={`progress-${studyPlan.unique_id}`}
-                                  value="Started"
-                                  checked={studyPlan.learning_status === 'Started' || studyPlan.learning_status === 'Studied' || studyPlan.learning_status === 'Done'}
-                                  onChange={async (e) => {
-                                    const newStatus = 'Started'
-                                    const newProgress = 33
+                    <div key={studyPlan.unique_id} className="topic-item-detailed" style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr auto',
+                      gap: '12px',
+                      padding: '12px',
+                      borderRadius: '8px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                      border: '1px solid rgba(0, 0, 0, 0.05)',
+                      marginBottom: '8px',
+                      alignItems: 'start'
+                    }}>
+                      {/* Left side - Topic details */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {/* Topic Title */}
+                        <h4 style={{
+                          margin: '0 0 4px 0',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#1f2937',
+                          textDecoration: studyPlan.learning_status === 'Done' ? 'line-through' : 'none',
+                          opacity: studyPlan.learning_status === 'Done' ? 0.6 : 1
+                        }}>
+                          {studyPlan.topic}
+                        </h4>
 
-                                    try {
-                                      // For static deployment, update local state directly
-                                      setStudyPlans(prev => prev.map(plan =>
-                                        plan.unique_id === studyPlan.unique_id
-                                          ? { ...plan, learning_status: newStatus, progress_percentage: newProgress }
-                                          : plan
-                                      ))
-
-                                      // Update editingChapter with refreshed data
-                                      const updatedChapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject?.name))
-                                      const updatedChapter = updatedChapters.find(ch => ch.chapter_id === editingChapter.chapter_id)
-                                      if (updatedChapter) {
-                                        setEditingChapter(updatedChapter)
-                                      }
-                                    } catch (error) {
-                                      console.error('Failed to update topic status:', error)
-                                    }
-                                  }}
-                                />
-                                <span className="stage-label">Started</span>
-                              </label>
-                              <label className="stage-option">
-                                <input
-                                  type="radio"
-                                  name={`progress-${studyPlan.unique_id}`}
-                                  value="Studied"
-                                  checked={studyPlan.learning_status === 'Studied' || studyPlan.learning_status === 'Done'}
-                                  onChange={async (e) => {
-                                    const newStatus = 'Studied'
-                                    const newProgress = 66
-
-                                    try {
-                                      // For static deployment, update local state directly
-                                      setStudyPlans(prev => prev.map(plan =>
-                                        plan.unique_id === studyPlan.unique_id
-                                          ? { ...plan, learning_status: newStatus, progress_percentage: newProgress }
-                                          : plan
-                                      ))
-
-                                      // Update editingChapter with refreshed data
-                                      const updatedChapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject?.name))
-                                      const updatedChapter = updatedChapters.find(ch => ch.chapter_id === editingChapter.chapter_id)
-                                      if (updatedChapter) {
-                                        setEditingChapter(updatedChapter)
-                                      }
-                                    } catch (error) {
-                                      console.error('Failed to update topic status:', error)
-                                    }
-                                  }}
-                                />
-                                <span className="stage-label">Studied</span>
-                              </label>
-                              <label className="stage-option">
-                                <input
-                                  type="radio"
-                                  name={`progress-${studyPlan.unique_id}`}
-                                  value="Practiced"
-                                  checked={studyPlan.learning_status === 'Done'}
-                                  onChange={async (e) => {
-                                    const newStatus = 'Done'
-                                    const newProgress = 100
-
-                                    try {
-                                      // For static deployment, update local state directly
-                                      setStudyPlans(prev => prev.map(plan =>
-                                        plan.unique_id === studyPlan.unique_id
-                                          ? { ...plan, learning_status: newStatus, progress_percentage: newProgress }
-                                          : plan
-                                      ))
-
-                                      // Update editingChapter with refreshed data
-                                      const updatedChapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject?.name))
-                                      const updatedChapter = updatedChapters.find(ch => ch.chapter_id === editingChapter.chapter_id)
-                                      if (updatedChapter) {
-                                        setEditingChapter(updatedChapter)
-                                      }
-                                    } catch (error) {
-                                      console.error('Failed to update topic status:', error)
-                                    }
-                                  }}
-                                />
-                                <span className="stage-label">Practiced</span>
-                              </label>
-                            </div>
-                            <h4 className={`topic-title ${studyPlan.learning_status === 'Done' ? 'completed' : ''}`}>
-                              {studyPlan.topic}
-                            </h4>
-                          </div>
-                          <div className="topic-meta">
-                            <span className="topic-id">ID: {studyPlan.topic_id}</span>
-                            <span
-                              className="status-badge"
-                              style={{
-                                backgroundColor: `${getStatusColor(studyPlan.learning_status)}30`,
-                                color: getStatusColor(studyPlan.learning_status),
-                                border: `1px solid ${getStatusColor(studyPlan.learning_status)}`
-                              }}
-                            >
-                              {studyPlan.learning_status}
-                            </span>
-                          </div>
+                        {/* Topic Meta */}
+                        <div style={{ display: 'flex', gap: '12px', fontSize: '12px', color: '#6b7280' }}>
+                          <span>ID: {studyPlan.topic_id}</span>
+                          <span
+                            style={{
+                              backgroundColor: `${getStatusColor(studyPlan.learning_status)}20`,
+                              color: getStatusColor(studyPlan.learning_status),
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              fontWeight: '500'
+                            }}
+                          >
+                            {studyPlan.learning_status}
+                          </span>
                         </div>
-                        <div className="topic-progress">
-                          <span className="progress-value">{studyPlan.progress_percentage}%</span>
-                          <div className="mini-progress-bar">
+
+                        {/* Progress Bar */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
+                          <div style={{
+                            flex: 1,
+                            height: '6px',
+                            backgroundColor: '#e5e7eb',
+                            borderRadius: '3px',
+                            overflow: 'hidden'
+                          }}>
                             <div
-                              className="mini-progress-fill"
                               style={{
                                 width: `${studyPlan.progress_percentage}%`,
-                                backgroundColor: studyPlan.progress_percentage === 100 ? '#10b981' : studyPlan.progress_percentage > 0 ? '#f59e0b' : '#6b7280'
+                                height: '100%',
+                                backgroundColor: studyPlan.progress_percentage === 100 ? '#10b981' : studyPlan.progress_percentage > 0 ? '#f59e0b' : '#6b7280',
+                                transition: 'width 0.3s ease'
                               }}
-                            ></div>
+                            />
                           </div>
+                          <span style={{ fontWeight: '600', color: '#374151', minWidth: '30px' }}>
+                            {studyPlan.progress_percentage}%
+                          </span>
                         </div>
+
+                        {/* Learning Stage Selection */}
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                          {['Started', 'Studied', 'Practiced'].map(stage => (
+                            <label
+                              key={stage}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                padding: '4px 8px',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '12px',
+                                backgroundColor: studyPlan.learning_status === (stage === 'Practiced' ? 'Done' : stage === 'Started' ? 'Started' : 'Studied') 
+                                  ? 'rgba(139, 92, 246, 0.15)' 
+                                  : 'rgba(0, 0, 0, 0.03)',
+                                border: studyPlan.learning_status === (stage === 'Practiced' ? 'Done' : stage === 'Started' ? 'Started' : 'Studied') 
+                                  ? '1px solid rgba(139, 92, 246, 0.3)' 
+                                  : '1px solid rgba(0, 0, 0, 0.05)',
+                                transition: 'all 0.2s ease'
+                              }}
+                            >
+                              <input
+                                type="radio"
+                                name={`progress-${studyPlan.unique_id}`}
+                                value={stage}
+                                checked={studyPlan.learning_status === (stage === 'Practiced' ? 'Done' : stage)}
+                                onChange={async (e) => {
+                                  const newStatus = stage === 'Practiced' ? 'Done' : stage
+                                  const progressMap = { 'Started': 33, 'Studied': 66, 'Done': 100 }
+                                  const newProgress = progressMap[newStatus] || 0
+
+                                  try {
+                                    setStudyPlans(prev => {
+                                      const updated = prev.map(plan =>
+                                        plan.unique_id === studyPlan.unique_id
+                                          ? { ...plan, learning_status: newStatus, progress_percentage: newProgress }
+                                          : plan
+                                      )
+                                      localStorage.setItem('study-plans-data', JSON.stringify(updated))
+                                      return updated
+                                    })
+
+                                    // Update editingChapter with refreshed data
+                                    const updatedChapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject?.name))
+                                    const updatedChapter = updatedChapters.find(ch => ch.chapter_id === editingChapter.chapter_id)
+                                    if (updatedChapter) {
+                                      setEditingChapter(updatedChapter)
+                                    }
+                                  } catch (error) {
+                                    console.error('Failed to update topic status:', error)
+                                  }
+                                }}
+                                style={{ cursor: 'pointer' }}
+                              />
+                              <span>{stage}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Right side - Quick actions */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <button
+                          onClick={() => {
+                            const newProgress = studyPlan.progress_percentage + 10
+                            setStudyPlans(prev => {
+                              const updated = prev.map(plan =>
+                                plan.unique_id === studyPlan.unique_id
+                                  ? { ...plan, progress_percentage: Math.min(newProgress, 100) }
+                                  : plan
+                              )
+                              localStorage.setItem('study-plans-data', JSON.stringify(updated))
+                              return updated
+                            })
+                          }}
+                          style={{
+                            padding: '4px 8px',
+                            fontSize: '12px',
+                            borderRadius: '4px',
+                            border: 'none',
+                            backgroundColor: '#f3f4f6',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => e.target.style.backgroundColor = '#e5e7eb'}
+                          onMouseLeave={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+                        >
+                          +10%
+                        </button>
+                        <button
+                          onClick={() => {
+                            setStudyPlans(prev => {
+                              const updated = prev.map(plan =>
+                                plan.unique_id === studyPlan.unique_id
+                                  ? { ...plan, learning_status: 'Done', progress_percentage: 100 }
+                                  : plan
+                              )
+                              localStorage.setItem('study-plans-data', JSON.stringify(updated))
+                              return updated
+                            })
+                          }}
+                          style={{
+                            padding: '4px 8px',
+                            fontSize: '12px',
+                            borderRadius: '4px',
+                            border: 'none',
+                            backgroundColor: '#d1fae5',
+                            color: '#065f46',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => e.target.style.backgroundColor = '#a7f3d0'}
+                          onMouseLeave={(e) => e.target.style.backgroundColor = '#d1fae5'}
+                        >
+                          Done
+                        </button>
                       </div>
                     </div>
                   ))}
