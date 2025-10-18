@@ -41,8 +41,8 @@ export default function Login() {
     // Simulate login process
     setTimeout(() => {
       setIsLoading(false)
-      // For demo purposes, redirect to main app
-      router.push('/')
+      // For demo purposes, redirect to main app with base path
+      router.push('/ProdyJEE/')
     }, 1500)
   }
 
@@ -155,6 +155,10 @@ export default function Login() {
           display: flex;
           position: relative;
           overflow: hidden;
+          background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80');
+          background-size: cover;
+          background-position: center;
+          background-attachment: fixed;
         }
 
         .login-background {
@@ -163,7 +167,8 @@ export default function Login() {
           left: 0;
           right: 0;
           bottom: 0;
-          z-index: -1;
+          z-index: 1;
+          pointer-events: none;
         }
 
         .bg-overlay {
@@ -172,8 +177,9 @@ export default function Login() {
           left: 0;
           right: 0;
           bottom: 0;
-          background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
-          backdrop-filter: blur(20px);
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.7) 0%, rgba(118, 75, 162, 0.7) 100%);
+          -webkit-backdrop-filter: blur(12px);
+          backdrop-filter: blur(12px);
         }
 
         .floating-shapes {
@@ -226,18 +232,23 @@ export default function Login() {
           align-items: center;
           justify-content: center;
           padding: 2rem;
+          position: relative;
+          z-index: 2;
         }
 
         .login-card {
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(20px);
+          background: rgba(255, 255, 255, 0.35);
+          -webkit-backdrop-filter: blur(30px);
+          backdrop-filter: blur(30px);
           border-radius: 24px;
           padding: 3rem;
-          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          box-shadow: 0 24px 48px rgba(0, 0, 0, 0.15),
+                      0 8px 16px rgba(0, 0, 0, 0.1),
+                      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+          border: 1px solid rgba(255, 255, 255, 0.4);
           width: 100%;
-          max-width: 420px;
-          animation: slideUp 0.6s ease-out;
+          max-width: 480px;
+          animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         @keyframes slideUp {
@@ -329,17 +340,28 @@ export default function Login() {
         .form-input {
           width: 100%;
           padding: 0.875rem 1rem 0.875rem 3rem;
-          border: 2px solid #e2e8f0;
+          border: 1px solid rgba(255, 255, 255, 0.4);
           border-radius: 12px;
           font-size: 1rem;
-          transition: all 0.3s ease;
-          background: rgba(255, 255, 255, 0.9);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          background: rgba(255, 255, 255, 0.25);
+          -webkit-backdrop-filter: blur(10px);
+          backdrop-filter: blur(10px);
+          color: #1a1a1a;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-input::placeholder {
+          color: rgba(26, 26, 26, 0.5);
         }
 
         .form-input:focus {
           outline: none;
-          border-color: #667eea;
-          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+          border-color: rgba(102, 126, 234, 0.6);
+          background: rgba(255, 255, 255, 0.35);
+          box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1),
+                      inset 0 2px 4px rgba(0, 0, 0, 0.05);
+          transform: translateY(-1px);
         }
 
         .password-toggle {
