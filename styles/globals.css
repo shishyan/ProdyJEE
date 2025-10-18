@@ -1582,8 +1582,8 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 
 .topics-scrollable-container {
   flex: 1;
-  max-height: 60vh;
-  overflow-y: auto;
+  max-height: none;
+  overflow-y: visible;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
   padding: 16px;
@@ -1847,6 +1847,10 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
   pointer-events: auto;
   display: flex;
   flex-direction: column;
+  background: rgba(255, 255, 255, 0.95) !important;
+  -webkit-backdrop-filter: blur(15px) !important;
+  backdrop-filter: blur(15px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
 }
 
 @keyframes slideIn {
@@ -1864,15 +1868,15 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .modal-header h2 {
   margin: 0;
   color: #1a1a1a;
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .close-btn {
@@ -1898,7 +1902,7 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 }
 
 .modal-body {
-  padding: 24px;
+  padding: 12px 16px;
   flex: 1;
   overflow: hidden;
   display: flex;
@@ -3920,8 +3924,9 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 }
 
 .chapter-card.dragging {
-  opacity: 0.5;
-  transform: rotate(5deg);
+  opacity: 0.7;
+  transform: rotate(2deg) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
 .chapter-meta-top {
@@ -4168,9 +4173,9 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 }
 
 .topics-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 .topic-item {
@@ -4201,16 +4206,18 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 
 /* Enhanced Chapter Modal Styles */
 .chapter-modal {
-  background: rgba(135, 206, 235, 0.15);
+  background: rgba(255, 255, 255, 0.15);
   -webkit-backdrop-filter: blur(25px);
   backdrop-filter: blur(25px);
   border-radius: 20px;
   width: 90%;
-  max-width: 900px;
-  max-height: 90vh;
+  max-width: 1000px;
+  max-height: 85vh;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  flex-direction: column;
 }
 
 .chapter-meta-info {
@@ -4255,8 +4262,8 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 .topic-item-detailed {
   background: rgba(255, 255, 255, 0.6);
   border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 12px;
+  padding: 12px;
+  margin-bottom: 0;
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
