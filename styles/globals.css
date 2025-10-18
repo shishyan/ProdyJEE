@@ -3765,6 +3765,10 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
   cursor: pointer;
 }
 
+.backlog-card {
+  border: 1px dotted #9ca3af;
+}
+
 .chapter-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
@@ -3914,11 +3918,19 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
   margin-bottom: 16px;
 }
 
+.backlog-grid {
+  grid-template-columns: 1fr;
+}
+
 .detail-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 4px 0;
+}
+
+.backlog-detail-row {
+  justify-content: space-between;
 }
 
 .detail-label {

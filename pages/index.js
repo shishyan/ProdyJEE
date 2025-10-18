@@ -473,7 +473,7 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
         backgroundColor: 'rgba(255, 255, 255, 0.3)',
         boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1)'
       }}
-      className={`chapter-card ${isDragging ? 'dragging' : ''}`}
+      className={`chapter-card ${isDragging ? 'dragging' : ''} ${chapter.aggregatedStatus === 'In Queue' ? 'backlog-card' : ''}`}
       onClick={(e) => onEdit(chapter, e)}
     >
       {/* ID and Subject above header */}
@@ -482,7 +482,7 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
         <span className="meta-subject">{chapter.subject}</span>
       </div>
 
-      <div className="chapter-header" {...attributes} {...listeners} style={{ cursor: isDragging ? 'grabbing' : 'grab', background: `linear-gradient(135deg, ${getStatusColor(chapter.aggregatedStatus)}20, ${getStatusColor(chapter.aggregatedStatus)}60)` }}>
+      <div className="chapter-header" {...attributes} {...listeners} style={{ cursor: isDragging ? 'grabbing' : 'grab', background: chapter.aggregatedStatus === 'In Queue' ? '#f3f4f6' : `linear-gradient(135deg, ${getStatusColor(chapter.aggregatedStatus)}20, ${getStatusColor(chapter.aggregatedStatus)}60)` }}>
         <div className="chapter-info">
           <h4
             className="chapter-title"
@@ -496,18 +496,41 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
       </div>
 
       <div className="chapter-content">
-        <div className="chapter-details-grid">
-          <div className="detail-row">
-            <span className="detail-label">Status:</span>
-            <span
-              className="status-badge"
-              style={{
-                color: getStatusColor(chapter.aggregatedStatus)
-              }}
-            >
-              {chapter.aggregatedStatus}
-            </span>
-          </div>
+        <div className={`chapter-details-grid ${chapter.aggregatedStatus === 'In Queue' ? 'backlog-grid' : ''}`}>
+          {chapter.aggregatedStatus === 'In Queue' ? (
+            <div className="detail-row">
+              <span className="detail-label">Status:</span>
+              <span
+                className="status-badge"
+                style={{
+                  color: getStatusColor(chapter.aggregatedStatus)
+                }}
+              >
+                {chapter.aggregatedStatus}
+              </span>
+              {earliestTargetDate && (
+                <span className={`target-date-display ${daysLeft !== null && daysLeft < 0 ? 'overdue' : daysLeft !== null && daysLeft <= 7 ? 'urgent' : ''}`}>
+                  {daysLeft !== null ? (
+                    daysLeft < 0 ? `⏰ ${Math.abs(daysLeft)} days overdue` : `📅 ${daysLeft} days left`
+                  ) : (
+                    `📅 ${new Date(earliestTargetDate).toLocaleDateString()}`
+                  )}
+                </span>
+              )}
+            </div>
+          ) : (
+            <div className="detail-row">
+              <span className="detail-label">Status:</span>
+              <span
+                className="status-badge"
+                style={{
+                  color: getStatusColor(chapter.aggregatedStatus)
+                }}
+              >
+                {chapter.aggregatedStatus}
+              </span>
+            </div>
+          )}
         </div>
 
         {chapter.aggregatedStatus !== 'In Queue' && (
@@ -586,7 +609,7 @@ function Bucket({ bucket, chapters, onEditChapter, onUpdateProgress, getStatusCo
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="space-y-8">
+        <div className="space-y-16">
           {filteredChapters.map(chapter => (
             <ChapterCard
               key={chapter.chapter_id}
