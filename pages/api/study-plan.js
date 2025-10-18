@@ -63,8 +63,26 @@ export default async function handler(req, res) {
       console.error('Create study plan error:', error)
       res.status(500).json({ error: 'Failed to create study plan' })
     }
+  } else if (req.method === 'PUT') {
+    try {
+      const { unique_id, ...updateData } = req.body
+
+      if (!unique_id) {
+        return res.status(400).json({ error: 'unique_id is required for updates' })
+      }
+
+      const studyPlan = await prisma.studyPlan.update({
+        where: { unique_id },
+        data: updateData
+      })
+
+      res.status(200).json(studyPlan)
+    } catch (error) {
+      console.error('Update study plan error:', error)
+      res.status(500).json({ error: 'Failed to update study plan' })
+    }
   } else {
-    res.setHeader('Allow', ['GET', 'POST'])
+    res.setHeader('Allow', ['GET', 'POST', 'PUT'])
     res.status(405).end(`Method ${req.method} Not Allowed`)
   }
 }

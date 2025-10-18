@@ -127,119 +127,6 @@ const MeditationIcon = () => (
   </svg>
 )
 
-function ChapterCard({ chapter, onEdit, onUpdateProgress }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-  } = useSortable({ id: `chapter-${chapter.chapter_id}` })
-
-  const style = {
-    transform: CSS.Translate.toString(transform),
-    transition,
-  }
-
-  const completedSubtopics = chapter.SubTopics.filter(st => st.status === 'Completed').length
-  const totalSubtopics = chapter.SubTopics.length
-  const progressPercentage = totalSubtopics > 0 ? (completedSubtopics / totalSubtopics) * 100 : 0
-
-  const highPriorityCount = chapter.SubTopics.filter(st => st.is_high_priority).length
-  const inProgressCount = chapter.SubTopics.filter(st => st.status === 'In Progress').length
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className="chapter-card glass-card"
-      onClick={() => onEdit(chapter)}
-    >
-      <div className="chapter-header">
-        <div className="chapter-info">
-          <h4 className="chapter-title">{chapter.name}</h4>
-          <div className="chapter-meta">
-            <span className="subtopic-count">{totalSubtopics} topics</span>
-            {highPriorityCount > 0 && (
-              <span className="priority-count">
-                <StarIcon />
-                {highPriorityCount} priority
-              </span>
-            )}
-            {inProgressCount > 0 && (
-              <span className="inprogress-count">
-                <ClockIcon />
-                {inProgressCount} in progress
-              </span>
-            )}
-          </div>
-        </div>
-        <div className="chapter-progress">
-          <div className="progress-circle">
-            <svg width="40" height="40">
-              <circle
-                cx="20"
-                cy="20"
-                r="16"
-                stroke="rgba(255,255,255,0.2)"
-                strokeWidth="3"
-                fill="none"
-              />
-              <circle
-                cx="20"
-                cy="20"
-                r="16"
-                stroke="url(#progressGradient)"
-                strokeWidth="3"
-                fill="none"
-                strokeDasharray={`${2 * Math.PI * 16}`}
-                strokeDashoffset={`${2 * Math.PI * 16 * (1 - progressPercentage / 100)}`}
-                transform="rotate(-90 20 20)"
-              />
-            </svg>
-            <div className="progress-text">{Math.round(progressPercentage)}%</div>
-          </div>
-        </div>
-      </div>
-
-      <div className="chapter-checklist">
-        {chapter.SubTopics.slice(0, 3).map(subtopic => (
-          <div key={subtopic.subtopic_id} className="checklist-item">
-            <input
-              type="checkbox"
-              checked={subtopic.status === 'Completed'}
-              onChange={(e) => {
-                e.stopPropagation()
-                // Handle subtopic status update
-              }}
-              onClick={(e) => e.stopPropagation()}
-            />
-            <span className={subtopic.status === 'Completed' ? 'completed' : ''}>
-              {subtopic.name}
-            </span>
-            {subtopic.is_high_priority && <StarIcon />}
-          </div>
-        ))}
-        {chapter.SubTopics.length > 3 && (
-          <div className="more-items">
-            +{chapter.SubTopics.length - 3} more topics
-          </div>
-        )}
-      </div>
-
-      <svg width="0" height="0">
-        <defs>
-          <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#4facfe" />
-            <stop offset="100%" stopColor="#00f2fe" />
-          </linearGradient>
-        </defs>
-      </svg>
-    </div>
-  )
-}
 
 
 
@@ -487,13 +374,199 @@ function StudyPlanCard({ studyPlan, bucketColor, onEdit, onUpdateProgress, getSt
   )
 }
 
+// Function to group study plans by chapter
+const groupStudyPlansByChapter = (studyPlans) => {
+  const chapterGroups = {}
+
+  studyPlans.forEach(plan => {
+    const chapterKey = `${plan.chapter_id}-${plan.chapter_name}`
+    if (!chapterGroups[chapterKey]) {
+      chapterGroups[chapterKey] = {
+        chapter_id: plan.chapter_id,
+        chapter_name: plan.chapter_name,
+        subject: plan.subject,
+        curriculum: plan.curriculum,
+        grade: plan.grade,
+        studyPlans: [],
+        // Aggregate status based on all topics in the chapter
+        aggregatedStatus: 'In Queue',
+        totalTopics: 0,
+        completedTopics: 0,
+        inProgressTopics: 0,
+        averageProgress: 0
+      }
+    }
+
+    chapterGroups[chapterKey].studyPlans.push(plan)
+    chapterGroups[chapterKey].totalTopics++
+  })
+
+  // Calculate aggregated status and progress for each chapter
+  Object.values(chapterGroups).forEach(chapter => {
+    const plans = chapter.studyPlans
+    const statusCounts = {
+      'Done': plans.filter(p => p.learning_status === 'Done').length,
+      'In Progress': plans.filter(p => p.learning_status === 'In Progress').length,
+      'To Do': plans.filter(p => p.learning_status === 'To Do').length,
+      'In Queue': plans.filter(p => p.learning_status === 'In Queue').length
+    }
+
+    chapter.completedTopics = statusCounts['Done']
+    chapter.inProgressTopics = statusCounts['In Progress']
+
+    // Calculate average progress
+    const totalProgress = plans.reduce((sum, plan) => sum + (plan.progress_percentage || 0), 0)
+    chapter.averageProgress = Math.round(totalProgress / plans.length)
+
+    // Determine aggregated status based on priority
+    if (statusCounts['In Progress'] > 0) {
+      chapter.aggregatedStatus = 'In Progress'
+    } else if (statusCounts['To Do'] > 0) {
+      chapter.aggregatedStatus = 'To Do'
+    } else if (statusCounts['Done'] === chapter.totalTopics) {
+      chapter.aggregatedStatus = 'Done'
+    } else {
+      chapter.aggregatedStatus = 'In Queue'
+    }
+  })
+
+  return Object.values(chapterGroups)
+}
+
+// Chapter Card Component
+function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatusColor, getProficiencyColor }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useDraggable({ id: `chapter-${chapter.chapter_id}` })
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition: isDragging ? 'none' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    zIndex: isDragging ? 1000 : 'auto'
+  }
+
+  const progressPercentage = Math.round((chapter.completedTopics / chapter.totalTopics) * 100)
+
+  // Calculate earliest target date and days left
+  const targetDates = chapter.studyPlans
+    .map(plan => plan.target_date)
+    .filter(date => date)
+    .map(date => new Date(date))
+    .sort((a, b) => a - b)
+
+  const earliestTargetDate = targetDates.length > 0 ? targetDates[0] : null
+  const daysLeft = earliestTargetDate
+    ? Math.ceil((earliestTargetDate - new Date()) / (1000 * 60 * 60 * 24))
+    : null
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        ...style,
+        border: 'none',
+        backgroundColor: 'rgba(255, 255, 255, 0.3)',
+        boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1)'
+      }}
+      className={`chapter-card ${isDragging ? 'dragging' : ''}`}
+      onClick={(e) => onEdit(chapter, e)}
+    >
+      {/* ID and Subject above header */}
+      <div className="chapter-meta-top">
+        <span className="meta-id">{chapter.chapter_id}</span>
+        <span className="meta-subject">{chapter.subject}</span>
+      </div>
+
+      <div className="chapter-header" style={{ backgroundColor: `${bucketColor}40` }}>
+        <div className="chapter-info">
+          <h4
+            className="chapter-title"
+            {...attributes}
+            {...listeners}
+            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+            onClick={(e) => {
+              e.stopPropagation()
+            }}
+          >
+            {chapter.chapter_name}
+          </h4>
+        </div>
+      </div>
+
+      <div className="chapter-content">
+        <div className="chapter-details-grid">
+          <div className="detail-row">
+            <span className="detail-label">Status:</span>
+            <span
+              className="status-badge"
+              style={{
+                color: getStatusColor(chapter.aggregatedStatus)
+              }}
+            >
+              {chapter.aggregatedStatus}
+            </span>
+          </div>
+        </div>
+
+        <div className="chapter-stats-grid">
+          <div className="stat-item">
+            <span className="stat-label">Topics:</span>
+            <span className="stat-value">{chapter.totalTopics}</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-label">Completed:</span>
+            <span className="stat-value">{chapter.completedTopics}</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-label">In Progress:</span>
+            <span className="stat-value">{chapter.inProgressTopics}</span>
+          </div>
+        </div>
+
+        <div className="chapter-progress">
+          <div className="progress-bar">
+            <div
+              className="progress-fill"
+              style={{
+                width: `${progressPercentage}%`,
+                backgroundColor: progressPercentage === 100 ? '#10b981' : progressPercentage > 0 ? '#f59e0b' : '#6b7280'
+              }}
+            ></div>
+          </div>
+          <div className="progress-info">
+            <span className="progress-label">Progress</span>
+            <span className="progress-text">{progressPercentage}% Complete</span>
+          </div>
+        </div>
+
+        {earliestTargetDate && (
+          <div className="chapter-target-date">
+            <span className={`target-date-display ${daysLeft !== null && daysLeft < 0 ? 'overdue' : daysLeft !== null && daysLeft <= 7 ? 'urgent' : ''}`}>
+              {daysLeft !== null ? (
+                daysLeft < 0 ? `⏰ ${Math.abs(daysLeft)} days overdue` : `📅 ${daysLeft} days left`
+              ) : (
+                `📅 ${new Date(earliestTargetDate).toLocaleDateString()}`
+              )}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // Bucket Component
-function Bucket({ bucket, studyPlans, onEditStudyPlan, onUpdateProgress, getStatusColor, getProficiencyColor }) {
+function Bucket({ bucket, chapters, onEditChapter, onUpdateProgress, getStatusColor, getProficiencyColor }) {
   const { setNodeRef, isOver } = useDroppable({
     id: bucket.id,
   })
 
-  const filteredPlans = studyPlans.filter(plan => plan.learning_status === bucket.status)
+  const filteredChapters = chapters.filter(chapter => chapter.aggregatedStatus === bucket.status)
 
   // Get status-based class for glass effect
   const getStatusClass = (status) => {
@@ -511,28 +584,25 @@ function Bucket({ bucket, studyPlans, onEditStudyPlan, onUpdateProgress, getStat
       className={`bucket bg-gray-50 rounded-lg p-4 min-h-[500px] flex flex-col ${isOver ? 'ring-2 ring-blue-500 bg-blue-50' : ''} ${getStatusClass(bucket.status)}`}
     >
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">{bucket.name}</h3>
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-          {filteredPlans.length}
-        </span>
+        <h3 className="text-lg font-semibold text-gray-900">{bucket.name} ({filteredChapters.length})</h3>
       </div>
 
       <div className="flex-1 overflow-y-auto">
         <div className="space-y-3">
-          {filteredPlans.map(studyPlan => (
-            <StudyPlanCard
-              key={studyPlan.unique_id}
-              studyPlan={studyPlan}
+          {filteredChapters.map(chapter => (
+            <ChapterCard
+              key={chapter.chapter_id}
+              chapter={chapter}
               bucketColor={getStatusColor(bucket.status)}
-              onEdit={onEditStudyPlan}
+              onEdit={onEditChapter}
               onUpdateProgress={onUpdateProgress}
               getStatusColor={getStatusColor}
               getProficiencyColor={getProficiencyColor}
             />
           ))}
-          {filteredPlans.length === 0 && (
+          {filteredChapters.length === 0 && (
             <div className="flex items-center justify-center h-32 text-gray-500 text-sm border-2 border-dashed border-gray-300 rounded-lg">
-              No items in {bucket.name.toLowerCase()}
+              No chapters in {bucket.name.toLowerCase()}
             </div>
           )}
         </div>
@@ -691,6 +761,7 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
         curriculum: subject?.name || 'JEE',
         grade: 11,
         subject: subject?.name || 'Mathematics',
+        chapter_id: `CH-${Date.now()}`,
         chapter_name: 'New Chapter',
         topic: 'New Topic',
         target_date: null,
@@ -1155,6 +1226,34 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
     }
   }
 
+  const deleteAllCards = async () => {
+    if (!confirm('Are you sure you want to delete ALL study plan cards? This action cannot be undone.')) {
+      return
+    }
+
+    try {
+      // Get all study plans
+      const response = await fetch('/api/study-plan')
+      const allStudyPlans = await response.json()
+
+      // Delete each study plan
+      const deletePromises = allStudyPlans.map(plan =>
+        fetch(`/api/study-plan/${plan.unique_id}`, {
+          method: 'DELETE'
+        })
+      )
+
+      await Promise.all(deletePromises)
+
+      // Clear local state
+      setStudyPlans([])
+      alert('All study plan cards have been deleted successfully.')
+    } catch (error) {
+      console.error('Failed to delete all cards:', error)
+      alert('Failed to delete all cards. Please try again.')
+    }
+  }
+
   const handleDragEnd = async (event) => {
     const { active, over } = event
 
@@ -1191,7 +1290,53 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
     }
   }
 
-  const onEditChapter = async (chapter) => {
+  const handleChapterDragEnd = async (event) => {
+    const { active, over } = event
+
+    if (!over) return
+
+    const activeId = active.id
+    const overId = over.id
+
+    if (activeId.startsWith('chapter-')) {
+      const chapterId = activeId.replace('chapter-', '')
+      const targetBucket = buckets.find(b => b.id === overId)
+
+      if (targetBucket) {
+        // Add dropping animation effect
+        const draggedElement = document.querySelector(`[data-id="${activeId}"]`)
+        if (draggedElement) {
+          draggedElement.classList.add('dropping')
+          setTimeout(() => {
+            draggedElement.classList.remove('dropping')
+          }, 600)
+        }
+
+        try {
+          // Update all study plans in this chapter to the new status
+          const chapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+          const draggedChapter = chapters.find(ch => ch.chapter_id === chapterId)
+
+          if (draggedChapter) {
+            const updatePromises = draggedChapter.studyPlans.map(plan =>
+              fetch(`/api/study-plan/${plan.unique_id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ learning_status: targetBucket.status })
+              })
+            )
+
+            await Promise.all(updatePromises)
+            fetchData() // Refresh data
+          }
+        } catch (error) {
+          console.error('Failed to update chapter:', error)
+        }
+      }
+    }
+  }
+
+  const onEditChapter = async (chapter, event) => {
     setEditingChapter(chapter)
   }
 
@@ -1313,7 +1458,14 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
             </div>
           </div>
 
-          {/* Right Side - User Profile, Settings, Themes */}
+          {/* Center - Dynamic Title */}
+          {selectedSubject && viewMode === 'kanban' && (
+            <div className="navbar-center">
+              <h3 className="navbar-title">
+                Kanban Board - {selectedSubject.name} ({groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name)).length} chapters)
+              </h3>
+            </div>
+          )}
           <div className="navbar-actions">
             <button
               className="nav-action-btn"
@@ -1441,19 +1593,16 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
           <DndContext
             sensors={sensors}
             collisionDetection={closestCorners}
-            onDragEnd={handleDragEnd}
+            onDragEnd={handleChapterDragEnd}
           >
             <div className="kanban-board">
-              <div className="board-header">
-                <h2>Kanban Board - {selectedSubject.name} ({studyPlans.filter(plan => plan.subject === selectedSubject.name).length} items)</h2>
-              </div>
               <div className="buckets-container">
                 {buckets.map(bucket => (
                   <Bucket
                     key={bucket.id}
                     bucket={bucket}
-                    studyPlans={studyPlans.filter(plan => plan.subject === selectedSubject.name)}
-                    onEditStudyPlan={onEditStudyPlan}
+                    chapters={groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))}
+                    onEditChapter={onEditChapter}
                     onUpdateProgress={fetchData}
                     getStatusColor={getStatusColor}
                     getProficiencyColor={getProficiencyColor}
@@ -1630,90 +1779,172 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
         <div className="modal-overlay">
           <div className="chapter-modal glass-card">
             <div className="modal-header">
-              <h2>Edit Chapter: {editingChapter.name}</h2>
+              <h2>Chapter: {editingChapter.chapter_name}</h2>
               <button className="close-btn" onClick={() => setEditingChapter(null)}>×</button>
             </div>
             <div className="modal-body">
               <div className="chapter-details">
                 <div className="chapter-info-section">
-                  <h3>Chapter Information</h3>
-                  <div className="info-stats">
+                  <h3>Chapter Overview</h3>
+                  <div className="chapter-meta-info">
+                    <div className="meta-item">
+                      <span className="meta-label">Chapter ID:</span>
+                      <span className="meta-value">{editingChapter.chapter_id}</span>
+                    </div>
+                    <div className="meta-item">
+                      <span className="meta-label">Subject:</span>
+                      <span className="meta-value">{editingChapter.subject}</span>
+                    </div>
+                    <div className="meta-item">
+                      <span className="meta-label">Grade:</span>
+                      <span className="meta-value">{editingChapter.grade}</span>
+                    </div>
+                    <div className="meta-item">
+                      <span className="meta-label">Curriculum:</span>
+                      <span className="meta-value">{editingChapter.curriculum}</span>
+                    </div>
+                  </div>
+
+                  <div className="chapter-stats">
                     <div className="stat-item">
                       <span className="stat-label">Total Topics:</span>
-                      <span className="stat-value">{editingChapter.SubTopics.length}</span>
+                      <span className="stat-value">{editingChapter.totalTopics}</span>
                     </div>
                     <div className="stat-item">
                       <span className="stat-label">Completed:</span>
-                      <span className="stat-value">{editingChapter.SubTopics.filter(st => st.status === 'Completed').length}</span>
+                      <span className="stat-value">{editingChapter.completedTopics}</span>
                     </div>
                     <div className="stat-item">
-                      <span className="stat-label">Progress:</span>
-                      <span className="stat-value">
-                        {editingChapter.SubTopics.length > 0
-                          ? Math.round((editingChapter.SubTopics.filter(st => st.status === 'Completed').length / editingChapter.SubTopics.length) * 100)
-                          : 0}%
-                      </span>
+                      <span className="stat-label">In Progress:</span>
+                      <span className="stat-value">{editingChapter.inProgressTopics}</span>
                     </div>
+                    <div className="stat-item">
+                      <span className="stat-label">Average Progress:</span>
+                      <span className="stat-value">{editingChapter.averageProgress}%</span>
+                    </div>
+                  </div>
+
+                  <div className="chapter-progress-bar">
+                    <div className="progress-bar">
+                      <div
+                        className="progress-fill"
+                        style={{
+                          width: `${Math.round((editingChapter.completedTopics / editingChapter.totalTopics) * 100)}%`,
+                          backgroundColor: editingChapter.completedTopics === editingChapter.totalTopics ? '#10b981' : '#f59e0b'
+                        }}
+                      ></div>
+                    </div>
+                    <span className="progress-text">
+                      {Math.round((editingChapter.completedTopics / editingChapter.totalTopics) * 100)}% Complete
+                    </span>
                   </div>
                 </div>
 
-                <div className="subtopics-section">
-                  <h3>Subtopics & Due Dates</h3>
-                  <div className="subtopics-list">
-                    {editingChapter.SubTopics.map(subtopic => (
-                      <div key={subtopic.subtopic_id} className="subtopic-item">
-                        <div className="subtopic-header">
-                          <div className="subtopic-checkbox">
-                            <input
-                              type="checkbox"
-                              checked={subtopic.status === 'Completed'}
-                              onChange={async (e) => {
-                                const newStatus = e.target.checked ? 'Completed' : 'Not Started'
-                                await fetch(`/api/subtopics/${subtopic.subtopic_id}`, {
-                                  method: 'PUT',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ status: newStatus })
-                                })
-                                fetchData()
-                              }}
-                            />
-                            <span className={`subtopic-name ${subtopic.status === 'Completed' ? 'completed' : ''}`}>
-                              {subtopic.name}
-                            </span>
+                <div className="topics-section">
+                  <h3>Topics in this Chapter</h3>
+                  <div className="topics-list">
+                    {editingChapter.studyPlans.map(studyPlan => (
+                      <div key={studyPlan.unique_id} className="topic-item-detailed">
+                        <div className="topic-header">
+                          <div className="topic-info">
+                            <div className="topic-completion">
+                              <input
+                                type="checkbox"
+                                checked={studyPlan.learning_status === 'Done'}
+                                onChange={async (e) => {
+                                  const newStatus = e.target.checked ? 'Done' : 'In Queue'
+                                  const newProgress = e.target.checked ? 100 : 0
+
+                                  try {
+                                    await fetch('/api/study-plan', {
+                                      method: 'PUT',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({
+                                        unique_id: studyPlan.unique_id,
+                                        learning_status: newStatus,
+                                        progress_percentage: newProgress
+                                      })
+                                    })
+
+                                    // Refresh the data
+                                    const response = await fetch('/api/study-plan')
+                                    const updatedStudyPlans = await response.json()
+                                    setStudyPlans(updatedStudyPlans)
+                                    
+                                    // Update editingChapter with refreshed data
+                                    const updatedChapters = groupStudyPlansByChapter(updatedStudyPlans.filter(plan => plan.subject === selectedSubject?.name))
+                                    const updatedChapter = updatedChapters.find(ch => ch.chapter_id === editingChapter.chapter_id)
+                                    if (updatedChapter) {
+                                      setEditingChapter(updatedChapter)
+                                    }
+                                  } catch (error) {
+                                    console.error('Failed to update topic status:', error)
+                                  }
+                                }}
+                                className="completion-checkbox"
+                              />
+                              <h4 className={`topic-title ${studyPlan.learning_status === 'Done' ? 'completed' : ''}`}>
+                                {studyPlan.topic}
+                              </h4>
+                            </div>
+                            <div className="topic-meta">
+                              <span className="topic-id">ID: {studyPlan.topic_id}</span>
+                              <span
+                                className="status-badge"
+                                style={{
+                                  backgroundColor: `${getStatusColor(studyPlan.learning_status)}30`,
+                                  color: getStatusColor(studyPlan.learning_status),
+                                  border: `1px solid ${getStatusColor(studyPlan.learning_status)}`
+                                }}
+                              >
+                                {studyPlan.learning_status}
+                              </span>
+                            </div>
                           </div>
-                          <div className="subtopic-priority">
-                            <input
-                              type="checkbox"
-                              checked={subtopic.is_high_priority}
-                              onChange={async (e) => {
-                                await fetch(`/api/subtopics/${subtopic.subtopic_id}`, {
-                                  method: 'PUT',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ is_high_priority: e.target.checked })
-                                })
-                                fetchData()
-                              }}
-                              title="High Priority"
-                            />
-                            <StarIcon />
+                          <div className="topic-progress">
+                            <span className="progress-value">{studyPlan.progress_percentage}%</span>
+                            <div className="mini-progress-bar">
+                              <div
+                                className="mini-progress-fill"
+                                style={{
+                                  width: `${studyPlan.progress_percentage}%`,
+                                  backgroundColor: studyPlan.progress_percentage === 100 ? '#10b981' : studyPlan.progress_percentage > 0 ? '#f59e0b' : '#6b7280'
+                                }}
+                              ></div>
+                            </div>
                           </div>
                         </div>
-                        <div className="subtopic-due-date">
-                          <label>Due Date:</label>
-                          <DatePicker
-                            selected={subtopic.due_date ? new Date(subtopic.due_date) : null}
-                            onChange={async (date) => {
-                              await fetch(`/api/subtopics/${subtopic.subtopic_id}`, {
-                                method: 'PUT',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ due_date: date ? date.toISOString().split('T')[0] : null })
-                              })
-                              fetchData()
-                            }}
-                            dateFormat="yyyy-MM-dd"
-                            placeholderText="Set due date"
-                            isClearable
-                          />
+
+                        <div className="topic-details">
+                          <div className="detail-row">
+                            <span className="detail-label">Stage:</span>
+                            <span className="detail-value">{studyPlan.learning_stage}</span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="detail-label">Proficiency:</span>
+                            <span
+                              className="proficiency-badge"
+                              style={{
+                                backgroundColor: `${getProficiencyColor(studyPlan.learning_proficiency)}30`,
+                                color: getProficiencyColor(studyPlan.learning_proficiency),
+                                border: 'none'
+                              }}
+                            >
+                              {studyPlan.learning_proficiency}
+                            </span>
+                          </div>
+                          {studyPlan.target_date && (
+                            <div className="detail-row">
+                              <span className="detail-label">Target Date:</span>
+                              <span className="detail-value">{new Date(studyPlan.target_date).toLocaleDateString()}</span>
+                            </div>
+                          )}
+                          {studyPlan.notes && (
+                            <div className="detail-row notes-row">
+                              <span className="detail-label">Notes:</span>
+                              <span className="detail-value notes">{studyPlan.notes}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -2243,6 +2474,23 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
                     <option value="Chemistry">Chemistry</option>
                     <option value="High Priority">High Priority</option>
                   </select>
+                </div>
+              </div>
+
+              <div className="settings-section">
+                <h3>Data Management</h3>
+                <div className="setting-item">
+                  <button
+                    className="nav-btn delete-all-btn"
+                    onClick={deleteAllCards}
+                    style={{ backgroundColor: '#ef4444', color: 'white', border: 'none' }}
+                    title="Delete all study plan cards from the Kanban board"
+                  >
+                    🗑️ Delete All Cards
+                  </button>
+                  <span style={{ fontSize: '12px', color: '#666', marginLeft: '10px' }}>
+                    Permanently delete all study plan cards
+                  </span>
                 </div>
               </div>
             </div>

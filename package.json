@@ -3,7 +3,8 @@
   "version": "1.0.3",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3000",
+    "dev": "node dev.js",
+    "dev:original": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 8000",
     "prisma:generate": "prisma generate",
@@ -29,6 +30,7 @@
   },
   "devDependencies": {
     "@types/react": "19.2.2",
+    "find-free-port": "^2.0.0",
     "husky": "^9.1.7",
     "typescript": "5.9.3"
   }
