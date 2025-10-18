@@ -47,7 +47,7 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  height: 80px; /* Reduced height for more compact design */
+  height: 133px; /* Increased by 66% from 80px */
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.45) 50%, rgba(255, 255, 255, 0.5) 100%);
   -webkit-backdrop-filter: blur(30px);
   backdrop-filter: blur(30px);
@@ -258,7 +258,7 @@ body {
 /* Horizontal Navigation Bar */
 .horizontal-navbar {
   position: fixed;
-  top: 80px; /* Below the top navbar */
+  top: 133px; /* Below the top navbar (133px height) */
   left: 0;
   right: 0;
   height: 60px;
@@ -2860,6 +2860,73 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
   justify-content: center;
 }
 
+.notes-section, .voice-section {
+  margin-top: 24px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.notes-section h3, .voice-section h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.notes-textarea {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+  background: rgba(255, 255, 255, 0.8);
+  min-height: 120px;
+  transition: all 0.3s ease;
+}
+
+.notes-textarea:focus {
+  outline: none;
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.voice-controls {
+  display: flex;
+  gap: 12px;
+}
+
+.voice-btn {
+  width: 48px;
+  height: 48px;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.voice-btn:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.6);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.voice-btn:active {
+  transform: scale(0.95);
+}
+
 .study-plan-due-date, .study-plan-details-popup {
   display: flex;
   flex-wrap: wrap;
@@ -3206,7 +3273,7 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 /* Status and Date Section */
 .status-date-section {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 16px;
   padding: 16px;
   background: rgba(255, 255, 255, 0.1);
@@ -3608,9 +3675,9 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 /* Collapsible Sidebar */
 .sidebar {
   position: fixed;
-  top: 140px; /* Below both navbars: 80px + 60px */
+  top: 193px; /* Below both navbars: 133px + 60px */
   left: 0;
-  height: calc(100vh - 140px);
+  height: calc(100vh - 193px);
   background: rgba(255, 255, 255, 0.25);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
@@ -3626,7 +3693,7 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 }
 
 .sidebar.collapsed {
-  width: 50px;
+  width: 25px; /* Reduced by 50% from 50px */
 }
 
 .sidebar-header {
@@ -3682,10 +3749,10 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 }
 
 .sidebar-icon-svg {
-  width: 1.2em;
-  height: 1.2em;
+  width: 1.8em; /* Increased by 50% from 1.2em */
+  height: 1.8em; /* Increased by 50% from 1.2em */
   margin-right: 12px;
-  min-width: 1.2em;
+  min-width: 1.8em; /* Increased by 50% from 1.2em */
   text-align: center;
   color: #1a1a1a;
   flex-shrink: 0;
@@ -3694,7 +3761,9 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 
 .sidebar.collapsed .sidebar-item {
   justify-content: center;
+  align-items: center;
   padding: 12px;
+  display: flex;
 }
 
 .sidebar.collapsed .sidebar-icon {
@@ -3708,13 +3777,13 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 /* Adjust main content when sidebar is present */
 .board {
   margin-left: 200px; /* Match expanded sidebar width */
-  margin-top: 140px; /* Below both navbars: 80px + 60px */
+  margin-top: 193px; /* Below both navbars: 133px + 60px */
   padding: 20px;
   transition: margin-left 0.3s ease;
 }
 
 .sidebar.collapsed ~ .board {
-  margin-left: 50px; /* Match collapsed sidebar width */
+  margin-left: 25px; /* Match collapsed sidebar width */
 }
 
 /* Voice Assistant */
@@ -3787,7 +3856,7 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 }
 
 .backlog-card {
-  border: 1px dotted #9ca3af;
+  border: 2px dashed #9ca3af;
 }
 
 .chapter-card:hover {
@@ -4077,7 +4146,7 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 
 /* Enhanced Chapter Modal Styles */
 .chapter-modal {
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(135, 206, 235, 0.15);
   -webkit-backdrop-filter: blur(25px);
   backdrop-filter: blur(25px);
   border-radius: 20px;
@@ -4152,6 +4221,29 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
   align-items: center;
   gap: 12px;
   margin-bottom: 6px;
+}
+
+.progress-stages {
+  display: flex;
+  gap: 8px;
+}
+
+.stage-option {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.stage-option input[type="radio"] {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+.stage-label {
+  color: #6b7280;
 }
 
 .completion-checkbox {

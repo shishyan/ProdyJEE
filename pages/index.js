@@ -627,7 +627,7 @@ function Bucket({ bucket, chapters, onEditChapter, onUpdateProgress, getStatusCo
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="space-y-16">
+        <div className="space-y-3">
           {filteredChapters.map(chapter => (
             <ChapterCard
               key={chapter.chapter_id}
@@ -1829,41 +1829,125 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
                       <div className="topic-header">
                         <div className="topic-info">
                           <div className="topic-completion">
-                            <input
-                              type="checkbox"
-                              checked={studyPlan.learning_status === 'Done'}
-                              onChange={async (e) => {
-                                const newStatus = e.target.checked ? 'Done' : 'In Queue'
-                                const newProgress = e.target.checked ? 100 : 0
+                            <div className="progress-stages">
+                              <label className="stage-option">
+                                <input
+                                  type="radio"
+                                  name={`progress-${studyPlan.unique_id}`}
+                                  value="Started"
+                                  checked={studyPlan.learning_status === 'Started' || studyPlan.learning_status === 'Studied' || studyPlan.learning_status === 'Done'}
+                                  onChange={async (e) => {
+                                    const newStatus = 'Started'
+                                    const newProgress = 33
 
-                                try {
-                                  await fetch('/api/study-plan', {
-                                    method: 'PUT',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                      unique_id: studyPlan.unique_id,
-                                      learning_status: newStatus,
-                                      progress_percentage: newProgress
-                                    })
-                                  })
+                                    try {
+                                      await fetch('/api/study-plan', {
+                                        method: 'PUT',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                          unique_id: studyPlan.unique_id,
+                                          learning_status: newStatus,
+                                          progress_percentage: newProgress
+                                        })
+                                      })
 
-                                  // Refresh the data
-                                  const response = await fetch('/api/study-plan')
-                                  const updatedStudyPlans = await response.json()
-                                  setStudyPlans(updatedStudyPlans)
-                                  
-                                  // Update editingChapter with refreshed data
-                                  const updatedChapters = groupStudyPlansByChapter(updatedStudyPlans.filter(plan => plan.subject === selectedSubject?.name))
-                                  const updatedChapter = updatedChapters.find(ch => ch.chapter_id === editingChapter.chapter_id)
-                                  if (updatedChapter) {
-                                    setEditingChapter(updatedChapter)
-                                  }
-                                } catch (error) {
-                                  console.error('Failed to update topic status:', error)
-                                }
-                              }}
-                              className="completion-checkbox"
-                            />
+                                      // Refresh the data
+                                      const response = await fetch('/api/study-plan')
+                                      const updatedStudyPlans = await response.json()
+                                      setStudyPlans(updatedStudyPlans)
+                                      
+                                      // Update editingChapter with refreshed data
+                                      const updatedChapters = groupStudyPlansByChapter(updatedStudyPlans.filter(plan => plan.subject === selectedSubject?.name))
+                                      const updatedChapter = updatedChapters.find(ch => ch.chapter_id === editingChapter.chapter_id)
+                                      if (updatedChapter) {
+                                        setEditingChapter(updatedChapter)
+                                      }
+                                    } catch (error) {
+                                      console.error('Failed to update topic status:', error)
+                                    }
+                                  }}
+                                />
+                                <span className="stage-label">Started</span>
+                              </label>
+                              <label className="stage-option">
+                                <input
+                                  type="radio"
+                                  name={`progress-${studyPlan.unique_id}`}
+                                  value="Studied"
+                                  checked={studyPlan.learning_status === 'Studied' || studyPlan.learning_status === 'Done'}
+                                  onChange={async (e) => {
+                                    const newStatus = 'Studied'
+                                    const newProgress = 66
+
+                                    try {
+                                      await fetch('/api/study-plan', {
+                                        method: 'PUT',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                          unique_id: studyPlan.unique_id,
+                                          learning_status: newStatus,
+                                          progress_percentage: newProgress
+                                        })
+                                      })
+
+                                      // Refresh the data
+                                      const response = await fetch('/api/study-plan')
+                                      const updatedStudyPlans = await response.json()
+                                      setStudyPlans(updatedStudyPlans)
+                                      
+                                      // Update editingChapter with refreshed data
+                                      const updatedChapters = groupStudyPlansByChapter(updatedStudyPlans.filter(plan => plan.subject === selectedSubject?.name))
+                                      const updatedChapter = updatedChapters.find(ch => ch.chapter_id === editingChapter.chapter_id)
+                                      if (updatedChapter) {
+                                        setEditingChapter(updatedChapter)
+                                      }
+                                    } catch (error) {
+                                      console.error('Failed to update topic status:', error)
+                                    }
+                                  }}
+                                />
+                                <span className="stage-label">Studied</span>
+                              </label>
+                              <label className="stage-option">
+                                <input
+                                  type="radio"
+                                  name={`progress-${studyPlan.unique_id}`}
+                                  value="Practiced"
+                                  checked={studyPlan.learning_status === 'Done'}
+                                  onChange={async (e) => {
+                                    const newStatus = 'Done'
+                                    const newProgress = 100
+
+                                    try {
+                                      await fetch('/api/study-plan', {
+                                        method: 'PUT',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                          unique_id: studyPlan.unique_id,
+                                          learning_status: newStatus,
+                                          progress_percentage: newProgress
+                                        })
+                                      })
+
+                                      // Refresh the data
+                                      const response = await fetch('/api/study-plan')
+                                      const updatedStudyPlans = await response.json()
+                                      setStudyPlans(updatedStudyPlans)
+                                      
+                                      // Update editingChapter with refreshed data
+                                      const updatedChapters = groupStudyPlansByChapter(updatedStudyPlans.filter(plan => plan.subject === selectedSubject?.name))
+                                      const updatedChapter = updatedChapters.find(ch => ch.chapter_id === editingChapter.chapter_id)
+                                      if (updatedChapter) {
+                                        setEditingChapter(updatedChapter)
+                                      }
+                                    } catch (error) {
+                                      console.error('Failed to update topic status:', error)
+                                    }
+                                  }}
+                                />
+                                <span className="stage-label">Practiced</span>
+                              </label>
+                            </div>
                             <h4 className={`topic-title ${studyPlan.learning_status === 'Done' ? 'completed' : ''}`}>
                               {studyPlan.topic}
                             </h4>
@@ -1900,63 +1984,40 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
                 </div>
               </div>
 
-              <div className="chapter-details">
-                <div className="chapter-info-section">
-                  <h3>Chapter Summary</h3>
-                  <div className="chapter-meta-info">
-                    <div className="meta-item">
-                      <span className="meta-label">Chapter ID:</span>
-                      <span className="meta-value">{editingChapter.chapter_id}</span>
-                    </div>
-                    <div className="meta-item">
-                      <span className="meta-label">Subject:</span>
-                      <span className="meta-value">{editingChapter.subject}</span>
-                    </div>
-                    <div className="meta-item">
-                      <span className="meta-label">Grade:</span>
-                      <span className="meta-value">{editingChapter.grade}</span>
-                    </div>
-                    <div className="meta-item">
-                      <span className="meta-label">Curriculum:</span>
-                      <span className="meta-value">{editingChapter.curriculum}</span>
-                    </div>
-                  </div>
+              <div className="notes-section">
+                <h3>Notes</h3>
+                <textarea
+                  placeholder="Add notes for this chapter..."
+                  rows="6"
+                  className="notes-textarea"
+                  value={editingChapter.notes || ''}
+                  onChange={(e) => {
+                    // Update notes
+                    setEditingChapter({...editingChapter, notes: e.target.value})
+                  }}
+                />
+              </div>
 
-                  <div className="chapter-stats">
-                    <div className="stat-item">
-                      <span className="stat-label">Total Topics:</span>
-                      <span className="stat-value">{editingChapter.totalTopics}</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-label">Completed:</span>
-                      <span className="stat-value">{editingChapter.completedTopics}</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-label">In Progress:</span>
-                      <span className="stat-value">{editingChapter.inProgressTopics}</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-label">Average Progress:</span>
-                      <span className="stat-value">{editingChapter.averageProgress}%</span>
-                    </div>
-                  </div>
-
-                  <div className="chapter-progress-bar">
-                    <div className="progress-bar">
-                      <div
-                        className="progress-fill"
-                        style={{
-                          width: `${Math.round((editingChapter.completedTopics / editingChapter.totalTopics) * 100)}%`,
-                          backgroundColor: editingChapter.completedTopics === editingChapter.totalTopics ? '#10b981' : '#f59e0b'
-                        }}
-                      ></div>
-                    </div>
-                    <span className="progress-text">
-                      {Math.round((editingChapter.completedTopics / editingChapter.totalTopics) * 100)}% Complete
-                    </span>
-                  </div>
+              <div className="voice-section">
+                <h3>Voice Recording</h3>
+                <div className="voice-controls">
+                  <button className="voice-btn" title="Start Recording">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                      <circle cx="12" cy="12" r="4" fill="currentColor"/>
+                    </svg>
+                  </button>
+                  <button className="voice-btn" title="Stop Recording">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="6" y="6" width="12" height="12" stroke="currentColor" strokeWidth="2"/>
+                    </svg>
+                  </button>
+                  <button className="voice-btn" title="Play Recording">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <polygon points="8,5 19,12 8,19" stroke="currentColor" strokeWidth="2" fill="currentColor"/>
+                    </svg>
+                  </button>
                 </div>
-
               </div>
             </div>
           </div>
@@ -2262,23 +2323,6 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
                   </div>
                 </div>
 
-                {/* Overall Status and Date Tracking */}
-                <div className="form-group">
-                  <label className="form-label-icon">📊 Overall Status & Date</label>
-                  <div className="status-date-section">
-                    <div className="status-info">
-                      <span className="status-label">Current Status:</span>
-                      <span className="status-value">{editingStudyPlan.learning_status}</span>
-                    </div>
-                    <div className="date-info">
-                      <span className="date-label">Target Date:</span>
-                      <span className="date-value">
-                        {editingStudyPlan.target_date ? new Date(editingStudyPlan.target_date).toLocaleDateString() : 'Not set'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Notes Section */}
                 <div className="form-group">
                   <label className="form-label-icon">📝 Notes</label>
@@ -2337,6 +2381,23 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
                           </div>
                         ))
                       )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Overall Status and Date Tracking */}
+                <div className="form-group">
+                  <label className="form-label-icon">📊 Overall Status & Date</label>
+                  <div className="status-date-section">
+                    <div className="status-info">
+                      <span className="status-label">Current Status:</span>
+                      <span className="status-value">{editingStudyPlan.learning_status}</span>
+                    </div>
+                    <div className="date-info">
+                      <span className="date-label">Target Date:</span>
+                      <span className="date-value">
+                        {editingStudyPlan.target_date ? new Date(editingStudyPlan.target_date).toLocaleDateString() : 'Not set'}
+                      </span>
                     </div>
                   </div>
                 </div>
