@@ -1260,6 +1260,67 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
       setLoading(false)
     } catch (error) {
       console.error('Failed to fetch data:', error)
+      // Fallback to demo data for static deployment
+      const demoStudyPlans = [
+        {
+          unique_id: "PHY-1.1",
+          curriculum: "CBSE",
+          grade: 12,
+          subject: "Physics",
+          chapter_id: "PHY-1",
+          chapter_name: "Physical World",
+          topic_id: "PHY-1.1",
+          topic: "Scope and excitement of physics",
+          target_date: "2025-12-31T00:00:00.000Z",
+          learning_status: "Done",
+          learning_stage: "Practiced",
+          learning_proficiency: "Expert",
+          progress_percentage: 100,
+          notes: "Completed all practice problems and revision."
+        },
+        {
+          unique_id: "PHY-1.2",
+          curriculum: "CBSE",
+          grade: 12,
+          subject: "Physics",
+          chapter_id: "PHY-1",
+          chapter_name: "Physical World",
+          topic_id: "PHY-1.2",
+          topic: "Physics technology and society",
+          target_date: "2025-12-31T00:00:00.000Z",
+          learning_status: "In Progress",
+          learning_stage: "Studied",
+          learning_proficiency: "Competent",
+          progress_percentage: 66,
+          notes: "Working on applications in daily life."
+        },
+        {
+          unique_id: "CHM-1.1",
+          curriculum: "CBSE",
+          grade: 12,
+          subject: "Chemistry",
+          chapter_id: "CHM-1",
+          chapter_name: "The Solid State",
+          topic_id: "CHM-1.1",
+          topic: "General characteristics of solid state",
+          target_date: "2025-12-31T00:00:00.000Z",
+          learning_status: "To Do",
+          learning_stage: "Initiated",
+          learning_proficiency: "Novice",
+          progress_percentage: 0,
+          notes: "Need to start studying crystal structures."
+        }
+      ]
+
+      const demoSubjects = [
+        { subject_id: 1, name: "Physics", Chapters: [] },
+        { subject_id: 2, name: "Chemistry", Chapters: [] }
+      ]
+
+      setPlans([])
+      setSubjects(demoSubjects)
+      setStudyPlans(demoStudyPlans)
+      setSelectedSubject(demoSubjects[0])
       setLoading(false)
     }
   }
@@ -1623,6 +1684,13 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
             <MeditationIcon />
             {!sidebarCollapsed && <span>Relax</span>}
           </div>
+        </div>
+        <div className="sidebar-footer">
+          {!sidebarCollapsed && (
+            <div className="sidebar-attribution">
+              by Sasha Nagarajan, 11th Grade, Peepal Prodigy School, Madukkarai, Coimbatore
+            </div>
+          )}
         </div>
       </div>
 

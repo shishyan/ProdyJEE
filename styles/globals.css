@@ -1588,6 +1588,13 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
   border-radius: 12px;
   padding: 16px;
   background: rgba(255, 255, 255, 0.05);
+  /* Hide scrollbars */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.topics-scrollable-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, and Opera */
 }
 
 .modal-bottom-sections {
@@ -1598,6 +1605,7 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
   background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
 }
 
 .modal-left-section {
@@ -1832,11 +1840,13 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
   max-width: 1200px;
   width: 95%;
   max-height: 90vh;
-  overflow-y: auto;
+  overflow: hidden; /* Prevent overflow */
   animation: slideIn 0.3s ease-out;
   position: relative !important;
   transform: none !important;
   pointer-events: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes slideIn {
@@ -1866,14 +1876,20 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 }
 
 .close-btn {
-  background: none;
-  border: none;
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.2);
   font-size: 24px;
   cursor: pointer;
-  color: #666;
-  padding: 4px 8px;
-  border-radius: 4px;
+  color: #333;
+  padding: 8px 12px;
+  border-radius: 6px;
   transition: all 0.2s;
+  font-weight: bold;
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .close-btn:hover {
@@ -1883,6 +1899,10 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 
 .modal-body {
   padding: 24px;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .chapter-info-section {
@@ -3791,6 +3811,22 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 
 .sidebar.collapsed .sidebar-icon-svg {
   margin-right: 0;
+}
+
+.sidebar-footer {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+}
+
+.sidebar-attribution {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  line-height: 1.2;
+  font-weight: 400;
+  margin-top: 10px;
 }
 
 /* Adjust main content when sidebar is present */
