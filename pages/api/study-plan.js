@@ -49,7 +49,7 @@ export default async function handler(req, res) {
           chapter_name,
           topic_id,
           topic,
-          target_date: new Date(target_date),
+          target_date: target_date ? new Date(target_date) : new Date('2026-01-01'),
           learning_status: learning_status || 'In Queue',
           learning_stage: learning_stage || 'Initiated',
           learning_proficiency: learning_proficiency || 'Novice',
