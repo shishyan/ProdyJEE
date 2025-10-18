@@ -655,7 +655,11 @@ function Bucket({ bucket, chapters, onEditChapter, onUpdateProgress, getStatusCo
     id: bucket.id,
   })
 
-  const filteredChapters = chapters.filter(chapter => chapter.aggregatedStatus === bucket.status)
+  // Filter chapters: show those matching the bucket status, or "In Queue" if status is undefined/null
+  const filteredChapters = chapters.filter(chapter => {
+    const chapterStatus = chapter.aggregatedStatus || 'In Queue'
+    return chapterStatus === bucket.status
+  })
 
   // Get status-based class for glass effect
   const getStatusClass = (status) => {
@@ -2283,6 +2287,25 @@ export default function Home() {
     { id: 'done', name: 'Done', status: 'Done' }
   ]
 
+  // Debug: Log chapter distribution
+  useEffect(() => {
+    if (studyPlans && studyPlans.length > 0 && selectedSubject) {
+      const filteredPlans = studyPlans.filter(plan => plan.subject === selectedSubject.name)
+      const chapters = groupStudyPlansByChapter(filteredPlans)
+      const statusDistribution = {}
+      chapters.forEach(chapter => {
+        const status = chapter.aggregatedStatus || 'Unknown'
+        statusDistribution[status] = (statusDistribution[status] || 0) + 1
+      })
+      console.log(`📊 Chapters for ${selectedSubject.name}:`, {
+        totalChapters: chapters.length,
+        totalTopics: filteredPlans.length,
+        statusDistribution,
+        chapters: chapters.map(c => ({ name: c.chapter_name, status: c.aggregatedStatus, topics: c.totalTopics }))
+      })
+    }
+  }, [studyPlans, selectedSubject])
+
   useEffect(() => {
     fetchData()
   }, [])
@@ -2805,27 +2828,63 @@ export default function Home() {
         {currentPage === 'kanban' && (
           <>
             {selectedSubject && viewMode === 'kanban' && (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCorners}
-                onDragEnd={handleChapterDragEnd}
-              >
-                <div className="kanban-board">
-                  <div className="buckets-container">
-                    {buckets.map(bucket => (
-                      <Bucket
-                        key={bucket.id}
-                        bucket={bucket}
-                        chapters={groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))}
-                        onEditChapter={onEditChapter}
-                        onUpdateProgress={fetchData}
-                        getStatusColor={getStatusColor}
-                        getProficiencyColor={getProficiencyColor}
-                      />
-                    ))}
-                  </div>
+              <>
+                {/* Debug Panel - Shows all chapters and their statuses */}
+                <div style={{
+                  background: '#f0f0f0',
+                  padding: '10px',
+                  margin: '10px',
+                  borderRadius: '5px',
+                  fontSize: '12px',
+                  maxHeight: '150px',
+                  overflowY: 'auto'
+                }}>
+                  <strong>Debug Info:</strong>
+                  {(() => {
+                    const filteredPlans = studyPlans.filter(plan => plan.subject === selectedSubject.name)
+                    const chapters = groupStudyPlansByChapter(filteredPlans)
+                    const statusDistribution = {}
+                    chapters.forEach(chapter => {
+                      const status = chapter.aggregatedStatus || 'Unknown'
+                      statusDistribution[status] = (statusDistribution[status] || 0) + 1
+                    })
+                    return (
+                      <div>
+                        <div>Total Chapters: <strong>{chapters.length}</strong> | Total Topics: <strong>{filteredPlans.length}</strong></div>
+                        <div>Status Distribution: {Object.entries(statusDistribution).map(([status, count]) => `${status}: ${count}`).join(' | ')}</div>
+                        <div style={{ marginTop: '5px', maxHeight: '100px', overflowY: 'auto' }}>
+                          {chapters.map(c => (
+                            <div key={c.chapter_id} style={{ fontSize: '11px', padding: '2px' }}>
+                              • {c.chapter_name} → <strong>{c.aggregatedStatus}</strong> ({c.totalTopics} topics)
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })()}
                 </div>
-              </DndContext>
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCorners}
+                  onDragEnd={handleChapterDragEnd}
+                >
+                  <div className="kanban-board">
+                    <div className="buckets-container">
+                      {buckets.map(bucket => (
+                        <Bucket
+                          key={bucket.id}
+                          bucket={bucket}
+                          chapters={groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))}
+                          onEditChapter={onEditChapter}
+                          onUpdateProgress={fetchData}
+                          getStatusColor={getStatusColor}
+                          getProficiencyColor={getProficiencyColor}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </DndContext>
+              </>
             )}
 
             {selectedSubject && viewMode === 'study-plan' && (
