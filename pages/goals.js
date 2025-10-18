@@ -90,9 +90,18 @@ export default function GoalsPage() {
     try {
       const response = await fetch('/ProdyJEE/database-export.json')
       const data = await response.json()
-      setStudyPlans(data)
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        setStudyPlans(data)
+      } else if (data && typeof data === 'object') {
+        // If it's an object with a studyPlans property, use that
+        setStudyPlans(data.studyPlans || [])
+      } else {
+        setStudyPlans([])
+      }
     } catch (error) {
       console.error('Failed to load study plans:', error)
+      setStudyPlans([])
     }
   }
 
@@ -182,6 +191,7 @@ export default function GoalsPage() {
   }
 
   const getUniqueChapters = (subject) => {
+    if (!Array.isArray(studyPlans)) return []
     return [...new Set(studyPlans.filter(p => p.subject === subject).map(p => p.chapter_name))]
   }
 
