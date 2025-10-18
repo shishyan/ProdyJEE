@@ -133,6 +133,30 @@ const TargetIcon = () => (
   </svg>
 )
 
+const PlusIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+  </svg>
+)
+
+const HeartIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+  </svg>
+)
+
+const PartyIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+  </svg>
+)
+
+const CakeIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.701 2.701 0 010 3.592 2.704 2.704 0 003 0 2.704 2.704 0 013 0 2.704 2.704 0 003 0 2.704 2.704 0 013 0 2.704 2.704 0 003 0 .986.986 0 00.5-.146A2.693 2.693 0 0021 15.546zM12 3v6m-6-3h12" />
+  </svg>
+)
+
 const CalendarIcon = () => (
   <svg className="sidebar-icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -199,11 +223,14 @@ function SortableTask({ task, onEdit, onUpdateProgress }) {
   const isDueSoon = task.due_date && new Date(task.due_date) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
   const handleProgressChange = async (newProgress) => {
-    await fetch(`/api/tasks/${task.task_id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ progress: newProgress })
-    })
+    // For static deployment, update study plan progress directly
+    const updatedPlans = studyPlans.map(plan =>
+      plan.unique_id === task.unique_id
+        ? { ...plan, progress_percentage: newProgress }
+        : plan
+    )
+    setStudyPlans(updatedPlans)
+    localStorage.setItem('study-plans-data', JSON.stringify(updatedPlans))
     if (onUpdateProgress) onUpdateProgress()
   }
 
@@ -705,12 +732,10 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
   const fetchStudyPlans = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/study-plan')
-      const data = await response.json()
-      // Filter by subject if specified
+      // For static deployment, filter from existing study plans data
       const filteredData = subject
-        ? data.filter(plan => plan.subject.toLowerCase() === subject.name.toLowerCase())
-        : data
+        ? studyPlans.filter(plan => plan.subject.toLowerCase() === subject.name.toLowerCase())
+        : studyPlans
       setStudyPlans(filteredData)
     } catch (error) {
       console.error('Failed to fetch study plans:', error)
@@ -740,18 +765,14 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
 
       const data = { [editingCell.columnKey]: processedValue }
 
-      await fetch(`/api/study-plan/${editingCell.uniqueId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      })
-
-      // Update local state
-      setStudyPlans(prev => prev.map(plan =>
+      // For static deployment, update localStorage and state directly
+      const updatedPlans = studyPlans.map(plan =>
         plan.unique_id === editingCell.uniqueId
           ? { ...plan, [editingCell.columnKey]: processedValue }
           : plan
-      ))
+      )
+      setStudyPlans(updatedPlans)
+      localStorage.setItem('study-plans-data', JSON.stringify(updatedPlans))
 
       if (onUpdate) onUpdate()
     } catch (error) {
@@ -787,17 +808,11 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
         notes: ''
       }
 
-      const response = await fetch('/api/study-plan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newRow)
-      })
-
-      if (response.ok) {
-        const addedRow = await response.json()
-        setStudyPlans(prev => [...prev, addedRow])
-        if (onUpdate) onUpdate()
-      }
+      // For static deployment, add to localStorage and state directly
+      const updatedPlans = [...studyPlans, { ...newRow, unique_id: `NEW-${Date.now()}` }]
+      setStudyPlans(updatedPlans)
+      localStorage.setItem('study-plans-data', JSON.stringify(updatedPlans))
+      if (onUpdate) onUpdate()
     } catch (error) {
       console.error('Failed to add row:', error)
     }
@@ -806,16 +821,11 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
   const handleDeleteRow = async (uniqueId) => {
     if (!confirm('Are you sure you want to delete this row?')) return
 
-    try {
-      await fetch(`/api/study-plan/${uniqueId}`, {
-        method: 'DELETE'
-      })
-
-      setStudyPlans(prev => prev.filter(plan => plan.unique_id !== uniqueId))
-      if (onUpdate) onUpdate()
-    } catch (error) {
-      console.error('Failed to delete row:', error)
-    }
+    // For static deployment, remove from localStorage and state directly
+    const updatedPlans = studyPlans.filter(plan => plan.unique_id !== uniqueId)
+    setStudyPlans(updatedPlans)
+    localStorage.setItem('study-plans-data', JSON.stringify(updatedPlans))
+    if (onUpdate) onUpdate()
   }
 
   const handleInsertRow = async (index) => {
@@ -835,21 +845,13 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
         notes: ''
       }
 
-      const response = await fetch('/api/study-plan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newRow)
-      })
-
-      if (response.ok) {
-        const addedRow = await response.json()
-        setStudyPlans(prev => {
-          const newPlans = [...prev]
-          newPlans.splice(index, 0, addedRow)
-          return newPlans
-        })
-        if (onUpdate) onUpdate()
-      }
+      // For static deployment, insert into localStorage and state directly
+      const newPlan = { ...newRow, unique_id: `INSERT-${Date.now()}` }
+      const updatedPlans = [...studyPlans]
+      updatedPlans.splice(index, 0, newPlan)
+      setStudyPlans(updatedPlans)
+      localStorage.setItem('study-plans-data', JSON.stringify(updatedPlans))
+      if (onUpdate) onUpdate()
     } catch (error) {
       console.error('Failed to insert row:', error)
     }
@@ -2306,12 +2308,20 @@ export default function Home() {
   }, [zenRhythmsEnabled, musicPlaying, backgroundMusic])
 
   const fetchData = async () => {
-    try {
-      const studyPlansRes = await fetch('/api/study-plan')
-      const studyPlansData = await studyPlansRes.json()
+    // For static deployment, use existing data or fallback
+    const existingData = localStorage.getItem('study-plans-data')
+    let finalStudyPlansData = []
 
-      // Check if we have data, if not, use demo data
-      const finalStudyPlansData = studyPlansData && studyPlansData.length > 0 ? studyPlansData : [
+    if (existingData) {
+      try {
+        finalStudyPlansData = JSON.parse(existingData)
+      } catch (parseError) {
+        console.error('Failed to parse localStorage data:', parseError)
+        finalStudyPlansData = []
+      }
+    } else {
+      // Use demo data if no localStorage data
+      finalStudyPlansData = [
         {
           unique_id: "PHY-1.1",
           curriculum: "CBSE",
@@ -2409,72 +2419,21 @@ export default function Home() {
           notes: "Basic concepts of sets and relations."
         }
       ]
-
-      // Extract unique subjects from study plans
-      const uniqueSubjects = [...new Set(finalStudyPlansData.map(plan => plan.subject))]
-      const subjectsData = uniqueSubjects.map((subject, index) => ({
-        subject_id: index + 1,
-        name: subject,
-        Chapters: [] // Empty chapters array since we're not using the old structure
-      }))
-
-      setPlans([]) // Clear plans since we're not using them
-      setSubjects(subjectsData)
-      setStudyPlans(finalStudyPlansData)
-      if (subjectsData.length > 0) setSelectedSubject(subjectsData[0])
-      setLoading(false)
-    } catch (error) {
-      console.error('Failed to fetch data:', error)
-      // Fallback to demo data for static deployment
-      try {
-        const demoDataResponse = await fetch('/ProdyJEE/study-plans-data.js')
-        const demoDataText = await demoDataResponse.text()
-        // Extract the array from the module.exports
-        const demoStudyPlans = eval(demoDataText.replace('module.exports = ', ''))
-        
-        const demoSubjects = [
-          { subject_id: 1, name: "Physics", Chapters: [] },
-          { subject_id: 2, name: "Chemistry", Chapters: [] },
-          { subject_id: 3, name: "Mathematics", Chapters: [] }
-        ]
-
-        setPlans([])
-        setSubjects(demoSubjects)
-        setStudyPlans(demoStudyPlans)
-        setSelectedSubject(demoSubjects[0])
-      } catch (demoError) {
-        console.error('Failed to load demo data:', demoError)
-        // Use minimal fallback if demo data also fails
-        const fallbackStudyPlans = [
-          {
-            unique_id: "PHY-1.1",
-            curriculum: "CBSE",
-            grade: 12,
-            subject: "Physics",
-            chapter_id: "PHY-1",
-            chapter_name: "Physical World",
-            topic_id: "PHY-1.1",
-            topic: "Scope and excitement of physics",
-            target_date: "2025-12-31T00:00:00.000Z",
-            learning_status: "Done",
-            learning_stage: "Practiced",
-            learning_proficiency: "Expert",
-            progress_percentage: 100,
-            notes: "Completed all practice problems and revision."
-          }
-        ]
-
-        const fallbackSubjects = [
-          { subject_id: 1, name: "Physics", Chapters: [] }
-        ]
-
-        setPlans([])
-        setSubjects(fallbackSubjects)
-        setStudyPlans(fallbackStudyPlans)
-        setSelectedSubject(fallbackSubjects[0])
-      }
-      setLoading(false)
     }
+
+    // Extract unique subjects from study plans
+    const uniqueSubjects = [...new Set(finalStudyPlansData.map(plan => plan.subject))]
+    const subjectsData = uniqueSubjects.map((subject, index) => ({
+      subject_id: index + 1,
+      name: subject,
+      Chapters: [] // Empty chapters array since we're not using the old structure
+    }))
+
+    setPlans([]) // Clear plans since we're not using them
+    setSubjects(subjectsData)
+    setStudyPlans(finalStudyPlansData)
+    if (subjectsData.length > 0) setSelectedSubject(subjectsData[0])
+    setLoading(false)
   }
 
   const deleteAllCards = async () => {
@@ -2588,17 +2547,8 @@ export default function Home() {
 
   const onEditStudyPlan = async (studyPlan, event) => {
     setEditingStudyPlan(studyPlan)
-    // Load subtopics for this chapter
-    try {
-      const response = await fetch(`/api/subtopics?chapter_id=${studyPlan.chapter_id}`)
-      const chapterSubtopics = await response.json()
-      // Convert database subtopics to the format expected by the modal
-      const formattedSubtopics = Array.isArray(chapterSubtopics) ? chapterSubtopics.map(subtopic => ({
-        id: subtopic.subtopic_id,
-        text: subtopic.name,
-        completed: subtopic.status === 'Completed'
-      })) : []
-      setSubTopics(formattedSubtopics)
+    // For static deployment, subtopics are not implemented
+    setSubTopics([])
     } catch (error) {
       console.error('Error fetching chapter subtopics:', error)
       setSubTopics([])
@@ -2659,14 +2609,9 @@ export default function Home() {
   const onEditTask = async (task) => {
     setEditingTask(task)
     setSelectedDueDate(task.due_date ? new Date(task.due_date) : null)
-    const [commentsRes, subtasksRes] = await Promise.all([
-      fetch(`/api/comments?task_id=${task.task_id}`),
-      fetch(`/api/subtasks?task_id=${task.task_id}`)
-    ])
-    const commentsData = await commentsRes.json()
-    const subtasksData = await subtasksRes.json()
-    setComments(commentsData)
-    setSubtasks(subtasksData)
+    // For static deployment, comments and subtasks are not implemented
+    setComments([])
+    setSubtasks([])
   }
 
   const onAddTask = (bucketId) => {
@@ -2923,17 +2868,19 @@ export default function Home() {
                 <form onSubmit={async (e) => {
                   e.preventDefault()
                   const formData = new FormData(e.target)
-                  await fetch(`/api/tasks/${editingTask.task_id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      title: formData.get('title'),
-                      description: formData.get('description'),
-                      priority: formData.get('priority'),
-                      progress: parseInt(formData.get('progress')),
-                      due_date: selectedDueDate
-                    })
-                  })
+                  // For static deployment, update study plan directly
+                  const updatedPlans = studyPlans.map(plan =>
+                    plan.unique_id === editingTask.unique_id
+                      ? {
+                          ...plan,
+                          topic: formData.get('title'),
+                          notes: formData.get('description'),
+                          progress_percentage: parseInt(formData.get('progress'))
+                        }
+                      : plan
+                  )
+                  setStudyPlans(updatedPlans)
+                  localStorage.setItem('study-plans-data', JSON.stringify(updatedPlans))
                   setEditingTask(null)
                   fetchPlans()
                 }}>
@@ -3260,17 +3207,27 @@ export default function Home() {
             <form onSubmit={async (e) => {
               e.preventDefault()
               const formData = new FormData(e.target)
-              await fetch('/api/tasks', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  bucket_id: addingTaskToBucket,
-                  title: formData.get('title'),
-                  description: formData.get('description'),
-                  priority: formData.get('priority'),
-                  progress: 0
-                })
-              })
+              // For static deployment, create new study plan directly
+              const bucket = buckets.find(b => b.id === addingTaskToBucket)
+              const newPlan = {
+                unique_id: `TASK-${Date.now()}`,
+                curriculum: selectedSubject?.name || 'JEE',
+                grade: 12,
+                subject: selectedSubject?.name || 'General',
+                chapter_id: `CH-${Date.now()}`,
+                chapter_name: 'New Chapter',
+                topic_id: `T-${Date.now()}`,
+                topic: formData.get('title'),
+                target_date: null,
+                learning_status: bucket.status,
+                learning_stage: 'Initiated',
+                learning_proficiency: 'Novice',
+                progress_percentage: 0,
+                notes: formData.get('description')
+              }
+              const updatedPlans = [...studyPlans, newPlan]
+              setStudyPlans(updatedPlans)
+              localStorage.setItem('study-plans-data', JSON.stringify(updatedPlans))
               setAddingTaskToBucket(null)
               fetchPlans()
             }}>
