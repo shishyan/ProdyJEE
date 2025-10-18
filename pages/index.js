@@ -503,7 +503,7 @@ const groupStudyPlansByChapter = (studyPlans) => {
 }
 
 // Chapter Card Component
-function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatusColor, getProficiencyColor }) {
+function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatusColor, getProficiencyColor, isSelected, onToggleSelect }) {
   const {
     attributes,
     listeners,
@@ -538,13 +538,31 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
       ref={setNodeRef}
       style={{
         ...style,
-        border: 'none',
-        backgroundColor: 'rgba(255, 255, 255, 0.3)',
-        boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1)'
+        border: isSelected ? '2px solid #8b5cf6' : 'none',
+        backgroundColor: isSelected ? 'rgba(139, 92, 246, 0.1)' : 'rgba(255, 255, 255, 0.3)',
+        boxShadow: isSelected ? 'inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(139, 92, 246, 0.3)' : 'inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1)'
       }}
       className={`chapter-card ${isDragging ? 'dragging' : ''} ${chapter.aggregatedStatus === 'In Queue' ? 'backlog-card' : ''}`}
       onClick={(e) => onEdit(chapter, e)}
     >
+      {/* Checkbox for bulk selection */}
+      <div className="chapter-checkbox" style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+        <input
+          type="checkbox"
+          checked={isSelected || false}
+          onChange={(e) => {
+            e.stopPropagation()
+            onToggleSelect && onToggleSelect(chapter.chapter_id)
+          }}
+          style={{
+            width: '18px',
+            height: '18px',
+            cursor: 'pointer',
+            accentColor: '#8b5cf6'
+          }}
+        />
+      </div>
+
       {/* ID and Subject above header */}
       <div className="chapter-meta-top">
         <span className="meta-id">{chapter.chapter_id}</span>
@@ -650,7 +668,7 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
 }
 
 // Bucket Component
-function Bucket({ bucket, chapters, onEditChapter, onUpdateProgress, getStatusColor, getProficiencyColor }) {
+function Bucket({ bucket, chapters, onEditChapter, onUpdateProgress, getStatusColor, getProficiencyColor, selectedChapters, onToggleChapterSelect }) {
   const { setNodeRef, isOver } = useDroppable({
     id: bucket.id,
   })
@@ -692,6 +710,8 @@ function Bucket({ bucket, chapters, onEditChapter, onUpdateProgress, getStatusCo
               onUpdateProgress={onUpdateProgress}
               getStatusColor={getStatusColor}
               getProficiencyColor={getProficiencyColor}
+              isSelected={selectedChapters.has(chapter.chapter_id)}
+              onToggleSelect={onToggleChapterSelect}
             />
           ))}
           {filteredChapters.length === 0 && (
@@ -2249,6 +2269,13 @@ export default function Home() {
   const [mediaRecorder, setMediaRecorder] = useState(null)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true)
   const [currentPage, setCurrentPage] = useState('kanban') // 'kanban', 'schedule', 'timer', 'dashboard'
+  
+  // New MS Planner features
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortBy, setSortBy] = useState('default') // 'default', 'progress', 'duedate', 'proficiency'
+  const [selectedChapters, setSelectedChapters] = useState(new Set())
+  const [filterStatus, setFilterStatus] = useState('all') // 'all', 'Done', 'In Progress', 'To Do', 'In Queue'
+  const [showBulkActions, setShowBulkActions] = useState(false)
 
   // Utility functions for colors
   const getStatusColor = (status) => {
@@ -2652,6 +2679,106 @@ export default function Home() {
     setSubtasks([])
   }
 
+  // MS Planner Features: Sorting and Filtering
+  const sortChapters = (chapters) => {
+    const sorted = [...chapters]
+    
+    switch (sortBy) {
+      case 'progress':
+        return sorted.sort((a, b) => b.averageProgress - a.averageProgress)
+      
+      case 'duedate':
+        return sorted.sort((a, b) => {
+          const dateA = a.studyPlans
+            .map(p => new Date(p.target_date))
+            .filter(d => !isNaN(d))[0] || new Date(9999, 0, 1)
+          const dateB = b.studyPlans
+            .map(p => new Date(p.target_date))
+            .filter(d => !isNaN(d))[0] || new Date(9999, 0, 1)
+          return dateA - dateB
+        })
+      
+      case 'proficiency':
+        const proficiencyOrder = { 'Master': 0, 'Expert': 1, 'Competent': 2, 'Novice': 3 }
+        return sorted.sort((a, b) => {
+          const aProf = Math.max(...a.studyPlans.map(p => proficiencyOrder[p.learning_proficiency] || 999))
+          const bProf = Math.max(...b.studyPlans.map(p => proficiencyOrder[p.learning_proficiency] || 999))
+          return aProf - bProf
+        })
+      
+      default:
+        return sorted
+    }
+  }
+
+  const filterChapters = (chapters) => {
+    return chapters.filter(chapter => {
+      // Status filter
+      if (filterStatus !== 'all' && chapter.aggregatedStatus !== filterStatus) {
+        return false
+      }
+      
+      // Search filter - search in chapter name and topics
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase()
+        const matchesChapter = chapter.chapter_name.toLowerCase().includes(query)
+        const matchesTopic = chapter.studyPlans.some(plan => 
+          plan.topic.toLowerCase().includes(query)
+        )
+        return matchesChapter || matchesTopic
+      }
+      
+      return true
+    })
+  }
+
+  const handleBulkStatusChange = (newStatus) => {
+    if (selectedChapters.size === 0) {
+      alert('Please select chapters first')
+      return
+    }
+
+    if (!confirm(`Update status of ${selectedChapters.size} chapter(s) to "${newStatus}"?`)) {
+      return
+    }
+
+    const updatedPlans = studyPlans.map(plan => {
+      if (selectedChapters.has(plan.chapter_id)) {
+        return { ...plan, learning_status: newStatus }
+      }
+      return plan
+    })
+
+    setStudyPlans(updatedPlans)
+    localStorage.setItem('study-plans-data', JSON.stringify(updatedPlans))
+    setSelectedChapters(new Set())
+    setShowBulkActions(false)
+  }
+
+  const toggleChapterSelect = (chapterId) => {
+    const newSelected = new Set(selectedChapters)
+    if (newSelected.has(chapterId)) {
+      newSelected.delete(chapterId)
+    } else {
+      newSelected.add(chapterId)
+    }
+    setSelectedChapters(newSelected)
+  }
+
+  const selectAllChapters = () => {
+    const allChapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+    const filtered = filterChapters(allChapters)
+    const newSelected = new Set()
+    filtered.forEach(chapter => {
+      newSelected.add(chapter.chapter_id)
+    })
+    setSelectedChapters(newSelected)
+  }
+
+  const deselectAllChapters = () => {
+    setSelectedChapters(new Set())
+  }
+
   const onAddTask = (bucketId) => {
     setAddingTaskToBucket(bucketId)
   }
@@ -2848,40 +2975,193 @@ export default function Home() {
           <>
             {selectedSubject && viewMode === 'kanban' && (
               <>
-                {/* Debug Panel - Shows all chapters and their statuses */}
+                {/* MS Planner Toolbar - Search, Filter, Sort, Bulk Actions */}
                 <div style={{
-                  background: '#f0f0f0',
-                  padding: '10px',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  padding: '15px 20px',
                   margin: '10px',
-                  borderRadius: '5px',
-                  fontSize: '12px',
-                  maxHeight: '150px',
-                  overflowY: 'auto'
+                  borderRadius: '8px',
+                  color: 'white',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
                 }}>
-                  <strong>Debug Info:</strong>
-                  {(() => {
-                    const filteredPlans = studyPlans.filter(plan => plan.subject === selectedSubject.name)
-                    const chapters = groupStudyPlansByChapter(filteredPlans)
-                    const statusDistribution = {}
-                    chapters.forEach(chapter => {
-                      const status = chapter.aggregatedStatus || 'Unknown'
-                      statusDistribution[status] = (statusDistribution[status] || 0) + 1
-                    })
-                    return (
-                      <div>
-                        <div>Total Chapters: <strong>{chapters.length}</strong> | Total Topics: <strong>{filteredPlans.length}</strong></div>
-                        <div>Status Distribution: {Object.entries(statusDistribution).map(([status, count]) => `${status}: ${count}`).join(' | ')}</div>
-                        <div style={{ marginTop: '5px', maxHeight: '100px', overflowY: 'auto' }}>
-                          {chapters.map(c => (
-                            <div key={c.chapter_id} style={{ fontSize: '11px', padding: '2px' }}>
-                              • {c.chapter_name} → <strong>{c.aggregatedStatus}</strong> ({c.totalTopics} topics)
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )
-                  })()}
+                  <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    {/* Search */}
+                    <div style={{ flex: 1, minWidth: '200px' }}>
+                      <input
+                        type="text"
+                        placeholder="🔍 Search chapters or topics..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          borderRadius: '6px',
+                          border: 'none',
+                          fontSize: '14px'
+                        }}
+                      />
+                    </div>
+
+                    {/* Filter by Status */}
+                    <select
+                      value={filterStatus}
+                      onChange={(e) => setFilterStatus(e.target.value)}
+                      style={{
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        fontSize: '14px',
+                        backgroundColor: 'rgba(255,255,255,0.9)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <option value="all">📋 All Status</option>
+                      <option value="Done">✅ Done</option>
+                      <option value="In Progress">⚙️ In Progress</option>
+                      <option value="To Do">📝 To Do</option>
+                      <option value="In Queue">📌 Backlog</option>
+                    </select>
+
+                    {/* Sort */}
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      style={{
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        fontSize: '14px',
+                        backgroundColor: 'rgba(255,255,255,0.9)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <option value="default">↕️ Sort By</option>
+                      <option value="progress">📊 Progress</option>
+                      <option value="duedate">📅 Due Date</option>
+                      <option value="proficiency">⭐ Proficiency</option>
+                    </select>
+
+                    {/* Select/Deselect All Buttons */}
+                    <button
+                      onClick={selectAllChapters}
+                      style={{
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        fontSize: '14px',
+                        backgroundColor: '#8b5cf6',
+                        color: 'white',
+                        cursor: 'pointer',
+                        fontWeight: '500'
+                      }}
+                    >
+                      ✓ Select All
+                    </button>
+
+                    <button
+                      onClick={deselectAllChapters}
+                      style={{
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        fontSize: '14px',
+                        backgroundColor: '#9ca3af',
+                        color: 'white',
+                        cursor: 'pointer',
+                        fontWeight: '500'
+                      }}
+                    >
+                      ✕ Deselect All
+                    </button>
+
+                    {/* Bulk Actions */}
+                    {selectedChapters.size > 0 && (
+                      <button
+                        onClick={() => setShowBulkActions(!showBulkActions)}
+                        style={{
+                          padding: '8px 16px',
+                          borderRadius: '6px',
+                          border: 'none',
+                          backgroundColor: '#ff6b6b',
+                          color: 'white',
+                          cursor: 'pointer',
+                          fontWeight: 'bold',
+                          fontSize: '14px'
+                        }}
+                      >
+                        🎯 {selectedChapters.size} selected
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Bulk Actions Menu */}
+                  {showBulkActions && (
+                    <div style={{
+                      marginTop: '10px',
+                      display: 'flex',
+                      gap: '10px',
+                      flexWrap: 'wrap'
+                    }}>
+                      <button
+                        onClick={() => handleBulkStatusChange('Done')}
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: '4px',
+                          border: 'none',
+                          backgroundColor: '#10b981',
+                          color: 'white',
+                          cursor: 'pointer',
+                          fontSize: '12px'
+                        }}
+                      >
+                        ✅ Mark Done
+                      </button>
+                      <button
+                        onClick={() => handleBulkStatusChange('In Progress')}
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: '4px',
+                          border: 'none',
+                          backgroundColor: '#f59e0b',
+                          color: 'white',
+                          cursor: 'pointer',
+                          fontSize: '12px'
+                        }}
+                      >
+                        ⚙️ In Progress
+                      </button>
+                      <button
+                        onClick={() => handleBulkStatusChange('To Do')}
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: '4px',
+                          border: 'none',
+                          backgroundColor: '#3b82f6',
+                          color: 'white',
+                          cursor: 'pointer',
+                          fontSize: '12px'
+                        }}
+                      >
+                        📝 To Do
+                      </button>
+                      <button
+                        onClick={() => { setSelectedChapters(new Set()); setShowBulkActions(false); }}
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: '4px',
+                          border: '1px solid white',
+                          backgroundColor: 'transparent',
+                          color: 'white',
+                          cursor: 'pointer',
+                          fontSize: '12px'
+                        }}
+                      >
+                        ✕ Cancel
+                      </button>
+                    </div>
+                  )}
                 </div>
+
                 <DndContext
                   sensors={sensors}
                   collisionDetection={closestCorners}
@@ -2889,17 +3169,26 @@ export default function Home() {
                 >
                   <div className="kanban-board">
                     <div className="buckets-container">
-                      {buckets.map(bucket => (
-                        <Bucket
-                          key={bucket.id}
-                          bucket={bucket}
-                          chapters={groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))}
-                          onEditChapter={onEditChapter}
-                          onUpdateProgress={fetchData}
-                          getStatusColor={getStatusColor}
-                          getProficiencyColor={getProficiencyColor}
-                        />
-                      ))}
+                      {buckets.map(bucket => {
+                        const allChapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+                        const filtered = filterChapters(allChapters)
+                        const sorted = sortChapters(filtered)
+                        const bucketChapters = sorted.filter(chapter => chapter.aggregatedStatus === bucket.status)
+                        
+                        return (
+                          <Bucket
+                            key={bucket.id}
+                            bucket={bucket}
+                            chapters={bucketChapters}
+                            onEditChapter={onEditChapter}
+                            onUpdateProgress={fetchData}
+                            getStatusColor={getStatusColor}
+                            getProficiencyColor={getProficiencyColor}
+                            selectedChapters={selectedChapters}
+                            onToggleChapterSelect={toggleChapterSelect}
+                          />
+                        )
+                      })}
                     </div>
                   </div>
                 </DndContext>
