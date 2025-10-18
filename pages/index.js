@@ -1146,7 +1146,1047 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
       </div>
     </div>
   )
-}export default function Home() {
+}
+
+// Schedule View Component
+function ScheduleView() {
+  const [events, setEvents] = useState([])
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [selectedDate, setSelectedDate] = useState(new Date())
+  const [newEvent, setNewEvent] = useState({
+    title: '',
+    type: 'school',
+    date: new Date(),
+    description: '',
+    recurring: false,
+    recurringType: 'monthly'
+  })
+
+  // Load events from localStorage on component mount
+  useEffect(() => {
+    const savedEvents = localStorage.getItem('schedule-events')
+    if (savedEvents) {
+      const parsedEvents = JSON.parse(savedEvents).map(event => ({
+        ...event,
+        date: new Date(event.date)
+      }))
+      setEvents(parsedEvents)
+    } else {
+      // Add some default events
+      const defaultEvents = [
+        {
+          id: 1,
+          title: 'School Period',
+          type: 'school',
+          date: new Date(2025, 9, 18), // October 18, 2025
+          description: 'Regular school classes',
+          recurring: true,
+          recurringType: 'weekly'
+        },
+        {
+          id: 2,
+          title: 'Diwali Festival',
+          type: 'festival',
+          date: new Date(2025, 10, 5), // November 5, 2025
+          description: 'Festival of lights',
+          recurring: false
+        },
+        {
+          id: 3,
+          title: 'Birthday - Mom',
+          type: 'birthday',
+          date: new Date(2025, 11, 15), // December 15, 2025
+          description: 'Mother\'s birthday',
+          recurring: true,
+          recurringType: 'yearly'
+        }
+      ]
+      setEvents(defaultEvents)
+      localStorage.setItem('schedule-events', JSON.stringify(defaultEvents))
+    }
+  }, [])
+
+  // Save events to localStorage whenever events change
+  useEffect(() => {
+    localStorage.setItem('schedule-events', JSON.stringify(events))
+  }, [events])
+
+  const addEvent = () => {
+    if (!newEvent.title.trim()) return
+
+    const event = {
+      id: Date.now(),
+      ...newEvent
+    }
+
+    setEvents(prev => [...prev, event])
+    setNewEvent({
+      title: '',
+      type: 'school',
+      date: new Date(),
+      description: '',
+      recurring: false,
+      recurringType: 'monthly'
+    })
+    setShowAddForm(false)
+  }
+
+  const deleteEvent = (id) => {
+    setEvents(prev => prev.filter(event => event.id !== id))
+  }
+
+  const getEventIcon = (type) => {
+    switch (type) {
+      case 'school': return <BookOpenIcon />
+      case 'menstrual': return <HeartIcon />
+      case 'festival': return <PartyIcon />
+      case 'birthday': return <CakeIcon />
+      case 'holiday': return <CalendarIcon />
+      default: return <ClockIcon />
+    }
+  }
+
+  const getEventColor = (type) => {
+    switch (type) {
+      case 'school': return 'bg-blue-100 text-blue-800 border-blue-200'
+      case 'menstrual': return 'bg-pink-100 text-pink-800 border-pink-200'
+      case 'festival': return 'bg-purple-100 text-purple-800 border-purple-200'
+      case 'birthday': return 'bg-green-100 text-green-800 border-green-200'
+      case 'holiday': return 'bg-orange-100 text-orange-800 border-orange-200'
+      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+    }
+  }
+
+  const getUpcomingEvents = () => {
+    const today = new Date()
+    return events
+      .filter(event => event.date >= today)
+      .sort((a, b) => a.date - b.date)
+      .slice(0, 5)
+  }
+
+  const getEventsForDate = (date) => {
+    return events.filter(event =>
+      event.date.toDateString() === date.toDateString()
+    )
+  }
+
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+
+  const formatTime = (date) => {
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                <CalendarIcon />
+                Schedule Tracker
+              </h1>
+              <p className="text-gray-600 mt-1">Track important dates, periods, and events</p>
+            </div>
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+            >
+              <PlusIcon />
+              Add Event
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Calendar Section */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <h2 className="text-xl font-semibold mb-4">Calendar</h2>
+              <div className="calendar-container">
+                <DatePicker
+                  selected={selectedDate}
+                  onChange={setSelectedDate}
+                  inline
+                  className="w-full"
+                />
+              </div>
+
+              {/* Events for selected date */}
+              <div className="mt-6">
+                <h3 className="text-lg font-medium mb-3">
+                  Events on {formatDate(selectedDate)}
+                </h3>
+                <div className="space-y-3">
+                  {getEventsForDate(selectedDate).length === 0 ? (
+                    <p className="text-gray-500 text-center py-4">No events scheduled</p>
+                  ) : (
+                    getEventsForDate(selectedDate).map(event => (
+                      <div key={event.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${getEventColor(event.type)}`}>
+                            {getEventIcon(event.type)}
+                          </div>
+                          <div>
+                            <h4 className="font-medium">{event.title}</h4>
+                            <p className="text-sm text-gray-600">{event.description}</p>
+                            {event.recurring && (
+                              <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">
+                                Recurring {event.recurringType}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => deleteEvent(event.id)}
+                          className="text-red-500 hover:text-red-700 p-1"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Upcoming Events */}
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <h3 className="text-lg font-semibold mb-4">Upcoming Events</h3>
+              <div className="space-y-3">
+                {getUpcomingEvents().map(event => (
+                  <div key={event.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                    <div className={`p-2 rounded-lg ${getEventColor(event.type)} flex-shrink-0`}>
+                      {getEventIcon(event.type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-sm">{event.title}</h4>
+                      <p className="text-xs text-gray-600">{formatDate(event.date)}</p>
+                      <p className="text-xs text-gray-500 truncate">{event.description}</p>
+                    </div>
+                  </div>
+                ))}
+                {getUpcomingEvents().length === 0 && (
+                  <p className="text-gray-500 text-center py-4">No upcoming events</p>
+                )}
+              </div>
+            </div>
+
+            {/* Event Types */}
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <h3 className="text-lg font-semibold mb-4">Event Types</h3>
+              <div className="space-y-2">
+                {[
+                  { type: 'school', label: 'School Period', icon: BookOpenIcon },
+                  { type: 'menstrual', label: 'Menstrual Period', icon: HeartIcon },
+                  { type: 'festival', label: 'Festival Holiday', icon: PartyIcon },
+                  { type: 'birthday', label: 'Birthday', icon: CakeIcon },
+                  { type: 'holiday', label: 'Public Holiday', icon: CalendarIcon }
+                ].map(({ type, label, icon: Icon }) => (
+                  <div key={type} className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${getEventColor(type)}`}>
+                      <Icon />
+                    </div>
+                    <span className="text-sm">{label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Add Event Modal */}
+      {showAddForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <h2 className="text-xl font-semibold mb-4">Add New Event</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Title</label>
+                <input
+                  type="text"
+                  value={newEvent.title}
+                  onChange={(e) => setNewEvent(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full p-2 border rounded-lg"
+                  placeholder="Event title"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Type</label>
+                <select
+                  value={newEvent.type}
+                  onChange={(e) => setNewEvent(prev => ({ ...prev, type: e.target.value }))}
+                  className="w-full p-2 border rounded-lg"
+                >
+                  <option value="school">School Period</option>
+                  <option value="menstrual">Menstrual Period</option>
+                  <option value="festival">Festival Holiday</option>
+                  <option value="birthday">Birthday</option>
+                  <option value="holiday">Public Holiday</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Date</label>
+                <DatePicker
+                  selected={newEvent.date}
+                  onChange={(date) => setNewEvent(prev => ({ ...prev, date }))}
+                  className="w-full p-2 border rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Description</label>
+                <textarea
+                  value={newEvent.description}
+                  onChange={(e) => setNewEvent(prev => ({ ...prev, description: e.target.value }))}
+                  className="w-full p-2 border rounded-lg"
+                  rows={3}
+                  placeholder="Optional description"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="recurring"
+                  checked={newEvent.recurring}
+                  onChange={(e) => setNewEvent(prev => ({ ...prev, recurring: e.target.checked }))}
+                />
+                <label htmlFor="recurring" className="text-sm">Recurring event</label>
+              </div>
+
+              {newEvent.recurring && (
+                <div>
+                  <label className="block text-sm font-medium mb-1">Recurring Type</label>
+                  <select
+                    value={newEvent.recurringType}
+                    onChange={(e) => setNewEvent(prev => ({ ...prev, recurringType: e.target.value }))}
+                    className="w-full p-2 border rounded-lg"
+                  >
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                  </select>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowAddForm(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={addEvent}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Add Event
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Timer View Component
+function TimerView() {
+  const [timers, setTimers] = useState([])
+  const intervalRef = useRef(null)
+
+  // Initialize timers
+  useEffect(() => {
+    const defaultTimers = [
+      {
+        id: 'sleep',
+        name: 'Sleep Timer',
+        description: 'Time to wind down and sleep',
+        icon: <MoonIcon />,
+        duration: 30 * 60, // 30 minutes
+        timeLeft: 30 * 60,
+        isRunning: false,
+        presets: [15, 30, 45, 60]
+      },
+      {
+        id: 'screen',
+        name: 'Screen Timer',
+        description: 'Limit screen time for eye health',
+        icon: <EyeIcon />,
+        duration: 60 * 60, // 1 hour
+        timeLeft: 60 * 60,
+        isRunning: false,
+        presets: [30, 60, 90, 120]
+      },
+      {
+        id: 'break',
+        name: 'Break Timer',
+        description: 'Take a break from studying',
+        icon: <ClockIcon />,
+        duration: 10 * 60, // 10 minutes
+        timeLeft: 10 * 60,
+        isRunning: false,
+        presets: [5, 10, 15, 20]
+      },
+      {
+        id: 'wakeup',
+        name: 'Wakeup Alarm',
+        description: 'Gentle morning wake up',
+        icon: <SunIcon />,
+        duration: 15 * 60, // 15 minutes
+        timeLeft: 15 * 60,
+        isRunning: false,
+        presets: [10, 15, 20, 30]
+      },
+      {
+        id: 'food',
+        name: 'Food Timer',
+        description: 'Cooking or meal preparation',
+        icon: <UtensilsIcon />,
+        duration: 20 * 60, // 20 minutes
+        timeLeft: 20 * 60,
+        isRunning: false,
+        presets: [10, 15, 20, 30]
+      },
+      {
+        id: 'fitness',
+        name: 'Fitness Timer',
+        description: 'Exercise and workout sessions',
+        icon: <DumbbellIcon />,
+        duration: 45 * 60, // 45 minutes
+        timeLeft: 45 * 60,
+        isRunning: false,
+        presets: [15, 30, 45, 60]
+      }
+    ]
+
+    // Load saved timers from localStorage
+    const savedTimers = localStorage.getItem('timer-states')
+    if (savedTimers) {
+      const parsedTimers = JSON.parse(savedTimers)
+      // Merge with default timers to ensure all timers exist
+      const mergedTimers = defaultTimers.map(defaultTimer => {
+        const savedTimer = parsedTimers.find(t => t.id === defaultTimer.id)
+        return savedTimer ? { ...defaultTimer, ...savedTimer } : defaultTimer
+      })
+      setTimers(mergedTimers)
+    } else {
+      setTimers(defaultTimers)
+    }
+  }, [])
+
+  // Save timer states to localStorage
+  useEffect(() => {
+    if (timers.length > 0) {
+      localStorage.setItem('timer-states', JSON.stringify(timers))
+    }
+  }, [timers])
+
+  // Timer countdown logic
+  useEffect(() => {
+    const runningTimers = timers.filter(timer => timer.isRunning)
+
+    if (runningTimers.length > 0) {
+      intervalRef.current = setInterval(() => {
+        setTimers(prevTimers =>
+          prevTimers.map(timer => {
+            if (timer.isRunning && timer.timeLeft > 0) {
+              return { ...timer, timeLeft: timer.timeLeft - 1 }
+            } else if (timer.isRunning && timer.timeLeft === 0) {
+              // Timer finished
+              return { ...timer, isRunning: false }
+            }
+            return timer
+          })
+        )
+      }, 1000)
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+    }
+  }, [timers])
+
+  // Play notification sound when timer finishes
+  useEffect(() => {
+    timers.forEach(timer => {
+      if (timer.timeLeft === 0 && !timer.isRunning) {
+        // Create a simple beep sound
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+        const oscillator = audioContext.createOscillator()
+        const gainNode = audioContext.createGain()
+
+        oscillator.connect(gainNode)
+        gainNode.connect(audioContext.destination)
+
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime)
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5)
+
+        oscillator.start(audioContext.currentTime)
+        oscillator.stop(audioContext.currentTime + 0.5)
+
+        // Show browser notification if permitted
+        if (Notification.permission === 'granted') {
+          new Notification(`${timer.name} Completed!`, {
+            body: `${timer.description} - Time's up!`,
+            icon: '/favicon.ico'
+          })
+        }
+      }
+    })
+  }, [timers])
+
+  const handleStart = (id) => {
+    setTimers(prev => prev.map(timer =>
+      timer.id === id ? { ...timer, isRunning: true } : timer
+    ))
+  }
+
+  const handlePause = (id) => {
+    setTimers(prev => prev.map(timer =>
+      timer.id === id ? { ...timer, isRunning: false } : timer
+    ))
+  }
+
+  const handleStop = (id) => {
+    setTimers(prev => prev.map(timer =>
+      timer.id === id ? { ...timer, isRunning: false, timeLeft: timer.duration } : timer
+    ))
+  }
+
+  const handleReset = (id) => {
+    setTimers(prev => prev.map(timer =>
+      timer.id === id ? { ...timer, isRunning: false, timeLeft: timer.duration } : timer
+    ))
+  }
+
+  const handleUpdateDuration = (id, newDuration) => {
+    setTimers(prev => prev.map(timer =>
+      timer.id === id ? { ...timer, duration: newDuration, timeLeft: newDuration, isRunning: false } : timer
+    ))
+  }
+
+  // Request notification permission on mount
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission()
+    }
+  }, [])
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                <ClockIcon />
+                Timer Dashboard
+              </h1>
+              <p className="text-gray-600 mt-1">Track time for various activities and routines</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {timers.map(timer => (
+            <div key={timer.id} className={`rounded-xl border-2 p-6 transition-all duration-300 ${timer.isRunning ? 'border-green-500 bg-green-50' : timer.timeLeft === 0 ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-white'}`}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gray-100 rounded-lg">
+                    {timer.icon}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">{timer.name}</h3>
+                    <p className="text-sm text-gray-600">{timer.description}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-mono font-bold">
+                    {(() => {
+                      const hours = Math.floor(timer.timeLeft / 3600)
+                      const minutes = Math.floor((timer.timeLeft % 3600) / 60)
+                      const secs = timer.timeLeft % 60
+
+                      if (hours > 0) {
+                        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+                      }
+                      return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+                    })()}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    of {(() => {
+                      const hours = Math.floor(timer.duration / 3600)
+                      const minutes = Math.floor((timer.duration % 3600) / 60)
+                      const secs = timer.duration % 60
+
+                      if (hours > 0) {
+                        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+                      }
+                      return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+                    })()}
+                  </div>
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+                <div
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    timer.isRunning ? 'bg-green-500' : timer.timeLeft === 0 ? 'bg-red-500' : 'bg-blue-500'
+                  }`}
+                  style={{ width: `${((timer.duration - timer.timeLeft) / timer.duration) * 100}%` }}
+                />
+              </div>
+
+              {/* Controls */}
+              <div className="flex items-center justify-between">
+                <div className="flex gap-2">
+                  {!timer.isRunning && timer.timeLeft === timer.duration && (
+                    <button
+                      onClick={() => handleStart(timer.id)}
+                      className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                    >
+                      <PlayIcon />
+                    </button>
+                  )}
+
+                  {timer.isRunning && (
+                    <button
+                      onClick={() => handlePause(timer.id)}
+                      className="p-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+                    >
+                      <PauseIcon />
+                    </button>
+                  )}
+
+                  {timer.isRunning || timer.timeLeft < timer.duration && (
+                    <button
+                      onClick={() => handleStop(timer.id)}
+                      className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    >
+                      <StopIcon />
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => handleReset(timer.id)}
+                    className="p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                  >
+                    <ResetIcon />
+                  </button>
+                </div>
+
+                <div className="flex gap-2">
+                  {timer.presets.map((preset, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleUpdateDuration(timer.id, preset * 60)}
+                      className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+                    >
+                      {preset}m
+                    </button>
+                  ))}
+
+                  <button
+                    onClick={() => {
+                      const customDuration = prompt('Enter duration in minutes:')
+                      if (customDuration && parseInt(customDuration) > 0) {
+                        handleUpdateDuration(timer.id, parseInt(customDuration) * 60)
+                      }
+                    }}
+                    className="px-3 py-1 text-sm bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors"
+                  >
+                    Custom
+                  </button>
+                </div>
+              </div>
+
+              {/* Status Messages */}
+              {timer.timeLeft === 0 && !timer.isRunning && (
+                <div className="mt-4 p-3 bg-red-100 text-red-800 rounded-lg text-center font-medium">
+                  ⏰ Time's up! {timer.name} completed.
+                </div>
+              )}
+
+              {timer.isRunning && (
+                <div className="mt-4 p-3 bg-green-100 text-green-800 rounded-lg text-center font-medium">
+                  ▶️ {timer.name} is running...
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Instructions */}
+        <div className="mt-12 bg-white rounded-xl shadow-sm border p-6">
+          <h2 className="text-xl font-semibold mb-4">How to Use</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="font-medium mb-2">Timer Controls</h3>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>• <strong>Play</strong>: Start the timer</li>
+                <li>• <strong>Pause</strong>: Pause the running timer</li>
+                <li>• <strong>Stop</strong>: Stop and reset to full duration</li>
+                <li>• <strong>Reset</strong>: Reset to original duration</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-medium mb-2">Duration Presets</h3>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>• Quick preset buttons for common durations</li>
+                <li>• <strong>Custom</strong>: Set any duration in minutes</li>
+                <li>• All changes apply immediately</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Dashboard View Component
+function DashboardView() {
+  const [studyData, setStudyData] = useState(null)
+  const [timerData, setTimerData] = useState(null)
+  const [scheduleData, setScheduleData] = useState(null)
+
+  // Load data from localStorage and simulate API data
+  useEffect(() => {
+    // Simulate study plan data
+    const studyPlans = JSON.parse(localStorage.getItem('study-plans-data') || '[]')
+
+    // Calculate study statistics
+    const totalTopics = studyPlans.length
+    const completedTopics = studyPlans.filter(p => p.learning_status === 'Done').length
+    const inProgressTopics = studyPlans.filter(p => p.learning_status === 'In Progress').length
+    const totalProgress = studyPlans.reduce((sum, plan) => sum + (plan.progress_percentage || 0), 0)
+    const averageProgress = totalTopics > 0 ? Math.round(totalProgress / totalTopics) : 0
+
+    // Group by subject
+    const subjectStats = {}
+    studyPlans.forEach(plan => {
+      if (!subjectStats[plan.subject]) {
+        subjectStats[plan.subject] = { total: 0, completed: 0, inProgress: 0 }
+      }
+      subjectStats[plan.subject].total++
+      if (plan.learning_status === 'Done') subjectStats[plan.subject].completed++
+      if (plan.learning_status === 'In Progress') subjectStats[plan.subject].inProgress++
+    })
+
+    setStudyData({
+      totalTopics,
+      completedTopics,
+      inProgressTopics,
+      averageProgress,
+      subjectStats
+    })
+
+    // Load timer data
+    const timers = JSON.parse(localStorage.getItem('timer-states') || '[]')
+    const totalTimerSessions = timers.length
+    const activeTimers = timers.filter(t => t.isRunning).length
+
+    setTimerData({
+      totalTimerSessions,
+      activeTimers,
+      timers
+    })
+
+    // Load schedule data
+    const events = JSON.parse(localStorage.getItem('schedule-events') || '[]')
+    const upcomingEvents = events.filter(event => new Date(event.date) >= new Date()).length
+
+    setScheduleData({
+      totalEvents: events.length,
+      upcomingEvents,
+      events
+    })
+  }, [])
+
+  // Mock data for charts
+  const weeklyProgressData = [
+    { label: 'Mon', value: 65 },
+    { label: 'Tue', value: 78 },
+    { label: 'Wed', value: 82 },
+    { label: 'Thu', value: 71 },
+    { label: 'Fri', value: 89 },
+    { label: 'Sat', value: 94 },
+    { label: 'Sun', value: 76 }
+  ]
+
+  const subjectProgressData = studyData ? Object.entries(studyData.subjectStats).map(([subject, stats]) => ({
+    label: subject.substring(0, 3),
+    value: Math.round((stats.completed / stats.total) * 100)
+  })) : []
+
+  if (!studyData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                <ChartBarIcon />
+                Dashboard
+              </h1>
+              <p className="text-gray-600 mt-1">Track your progress and productivity</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="p-6 rounded-xl border bg-blue-50 border-blue-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-blue-600">Study Progress</p>
+                <p className="text-3xl font-bold text-blue-700">{studyData.averageProgress}%</p>
+                <p className="text-sm text-blue-600 mt-1">{studyData.completedTopics}/{studyData.totalTopics} topics</p>
+                <div className="flex items-center mt-2">
+                  <TrendingUpIcon />
+                  <span className="text-sm ml-1 text-blue-600">+5% this week</span>
+                </div>
+              </div>
+              <div className="p-3 bg-blue-100 rounded-lg">
+                <BookOpenIcon />
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6 rounded-xl border bg-green-50 border-green-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-green-600">Active Timers</p>
+                <p className="text-3xl font-bold text-green-700">{timerData?.activeTimers || 0}</p>
+                <p className="text-sm text-green-600 mt-1">Currently running</p>
+              </div>
+              <div className="p-3 bg-green-100 rounded-lg">
+                <ClockIcon />
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6 rounded-xl border bg-yellow-50 border-yellow-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-yellow-600">Upcoming Events</p>
+                <p className="text-3xl font-bold text-yellow-700">{scheduleData?.upcomingEvents || 0}</p>
+                <p className="text-sm text-yellow-600 mt-1">This month</p>
+              </div>
+              <div className="p-3 bg-yellow-100 rounded-lg">
+                <CalendarIcon />
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6 rounded-xl border bg-purple-50 border-purple-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-purple-600">Study Streak</p>
+                <p className="text-3xl font-bold text-purple-700">7</p>
+                <p className="text-sm text-purple-600 mt-1">Days in a row</p>
+                <p className="text-sm text-purple-600 mt-2">Keep it up!</p>
+              </div>
+              <div className="p-3 bg-purple-100 rounded-lg">
+                <TrophyIcon />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <div className="bg-white p-6 rounded-xl shadow-sm border">
+            <h3 className="text-lg font-semibold mb-4">Weekly Study Progress</h3>
+            <div className="flex items-end justify-between h-32 gap-2">
+              {weeklyProgressData.map((item, index) => (
+                <div key={index} className="flex-1 flex flex-col items-center">
+                  <div
+                    className="w-full bg-blue-500 rounded-t transition-all duration-300"
+                    style={{ height: `${(item.value / 100) * 100}%` }}
+                  />
+                  <span className="text-xs text-gray-600 mt-2 text-center">{item.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {subjectProgressData.length > 0 && (
+            <div className="bg-white p-6 rounded-xl shadow-sm border">
+              <h3 className="text-lg font-semibold mb-4">Subject-wise Progress</h3>
+              <div className="flex items-end justify-between h-32 gap-2">
+                {subjectProgressData.map((item, index) => (
+                  <div key={index} className="flex-1 flex flex-col items-center">
+                    <div
+                      className="w-full bg-green-500 rounded-t transition-all duration-300"
+                      style={{ height: `${item.value}%` }}
+                    />
+                    <span className="text-xs text-gray-600 mt-2 text-center">{item.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Progress Bars Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <div className="bg-white p-6 rounded-xl shadow-sm border">
+            <h3 className="text-lg font-semibold mb-4">Study Topics Progress</h3>
+            <div className="space-y-4">
+              <div className="w-full">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm font-medium text-gray-700">Completed Topics</span>
+                  <span className="text-sm text-gray-500">{studyData.completedTopics}/{studyData.totalTopics}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="h-2 rounded-full transition-all duration-300 bg-green-500"
+                    style={{ width: `${(studyData.completedTopics / studyData.totalTopics) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="w-full">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm font-medium text-gray-700">In Progress Topics</span>
+                  <span className="text-sm text-gray-500">{studyData.inProgressTopics}/{studyData.totalTopics}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="h-2 rounded-full transition-all duration-300 bg-blue-500"
+                    style={{ width: `${(studyData.inProgressTopics / studyData.totalTopics) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="w-full">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm font-medium text-gray-700">Remaining Topics</span>
+                  <span className="text-sm text-gray-500">{studyData.totalTopics - studyData.completedTopics - studyData.inProgressTopics}/{studyData.totalTopics}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="h-2 rounded-full transition-all duration-300 bg-yellow-500"
+                    style={{ width: `${((studyData.totalTopics - studyData.completedTopics - studyData.inProgressTopics) / studyData.totalTopics) * 100}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border">
+            <h3 className="text-lg font-semibold mb-4">Subject Breakdown</h3>
+            <div className="space-y-4">
+              {Object.entries(studyData.subjectStats).map(([subject, stats]) => (
+                <div key={subject} className="flex items-center justify-between">
+                  <span className="text-sm font-medium">{subject}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600">
+                      {stats.completed}/{stats.total}
+                    </span>
+                    <div className="w-20 bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-blue-500 h-2 rounded-full"
+                        style={{ width: `${(stats.completed / stats.total) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border">
+          <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
+          <div className="space-y-4">
+            <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <TargetIcon />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium">Completed Physics Chapter 1</p>
+                <p className="text-sm text-gray-600">2 hours ago</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <ClockIcon />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium">Started 25-minute study timer</p>
+                <p className="text-sm text-gray-600">4 hours ago</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+              <div className="p-2 bg-yellow-100 rounded-lg">
+                <CalendarIcon />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium">Added Diwali festival to schedule</p>
+                <p className="text-sm text-gray-600">1 day ago</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function Home() {
   const [plans, setPlans] = useState([])
   const [subjects, setSubjects] = useState([])
   const [selectedSubject, setSelectedSubject] = useState(null)
@@ -1178,6 +2218,7 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
   const [isRecording, setIsRecording] = useState(false)
   const [mediaRecorder, setMediaRecorder] = useState(null)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true)
+  const [currentPage, setCurrentPage] = useState('kanban') // 'kanban', 'schedule', 'timer', 'dashboard'
 
   // Utility functions for colors
   const getStatusColor = (status) => {
@@ -1499,21 +2540,17 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
         }
 
         try {
-          // Update all study plans in this chapter to the new status
+          // Update all study plans in this chapter to the new status (local state for static deployment)
           const chapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
           const draggedChapter = chapters.find(ch => ch.chapter_id === chapterId)
 
           if (draggedChapter) {
-            const updatePromises = draggedChapter.studyPlans.map(plan =>
-              fetch(`/api/study-plan/${plan.unique_id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ learning_status: targetBucket.status })
-              })
-            )
-
-            await Promise.all(updatePromises)
-            fetchData() // Refresh data
+            // Update local state directly
+            setStudyPlans(prev => prev.map(plan =>
+              draggedChapter.studyPlans.some(chapterPlan => chapterPlan.unique_id === plan.unique_id)
+                ? { ...plan, learning_status: targetBucket.status }
+                : plan
+            ))
           }
         } catch (error) {
           console.error('Failed to update chapter:', error)
@@ -1652,7 +2689,37 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
               </h3>
             </div>
           )}
+          {/* Right Side - Actions */}
           <div className="navbar-actions">
+            <button
+              className={`nav-action-btn ${currentPage === 'kanban' ? 'active' : ''}`}
+              onClick={() => setCurrentPage('kanban')}
+              title="Kanban Board"
+            >
+              <GridIcon />
+            </button>
+            <button
+              className={`nav-action-btn ${currentPage === 'schedule' ? 'active' : ''}`}
+              onClick={() => setCurrentPage('schedule')}
+              title="Schedule"
+            >
+              <CalendarIcon />
+            </button>
+            <button
+              className={`nav-action-btn ${currentPage === 'timer' ? 'active' : ''}`}
+              onClick={() => setCurrentPage('timer')}
+              title="Timer"
+            >
+              <ClockIcon />
+            </button>
+            <button
+              className={`nav-action-btn ${currentPage === 'dashboard' ? 'active' : ''}`}
+              onClick={() => setCurrentPage('dashboard')}
+              title="Dashboard"
+            >
+              <ChartBarIcon />
+            </button>
+            <div className="nav-separator"></div>
             <button
               className="nav-action-btn"
               onClick={() => setShowSettings(true)}
@@ -1782,37 +2849,53 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
       </div>
 
       <main className="board">
-        {selectedSubject && viewMode === 'kanban' && (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCorners}
-            onDragEnd={handleChapterDragEnd}
-          >
-            <div className="kanban-board">
-              <div className="buckets-container">
-                {buckets.map(bucket => (
-                  <Bucket
-                    key={bucket.id}
-                    bucket={bucket}
-                    chapters={groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))}
-                    onEditChapter={onEditChapter}
-                    onUpdateProgress={fetchData}
-                    getStatusColor={getStatusColor}
-                    getProficiencyColor={getProficiencyColor}
-                  />
-                ))}
-              </div>
-            </div>
-          </DndContext>
+        {currentPage === 'kanban' && (
+          <>
+            {selectedSubject && viewMode === 'kanban' && (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCorners}
+                onDragEnd={handleChapterDragEnd}
+              >
+                <div className="kanban-board">
+                  <div className="buckets-container">
+                    {buckets.map(bucket => (
+                      <Bucket
+                        key={bucket.id}
+                        bucket={bucket}
+                        chapters={groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))}
+                        onEditChapter={onEditChapter}
+                        onUpdateProgress={fetchData}
+                        getStatusColor={getStatusColor}
+                        getProficiencyColor={getProficiencyColor}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </DndContext>
+            )}
+
+            {selectedSubject && viewMode === 'study-plan' && (
+              <StudyPlanGrid
+                subject={selectedSubject}
+                onUpdate={fetchData}
+                getStatusColor={getStatusColor}
+                getProficiencyColor={getProficiencyColor}
+              />
+            )}
+          </>
         )}
 
-        {selectedSubject && viewMode === 'study-plan' && (
-          <StudyPlanGrid 
-            subject={selectedSubject} 
-            onUpdate={fetchData}
-            getStatusColor={getStatusColor}
-            getProficiencyColor={getProficiencyColor}
-          />
+        {currentPage === 'schedule' && (
+          <ScheduleView />
+        )}
+
+        {currentPage === 'timer' && (
+          <TimerView />
+        )}
+
+        {currentPage === 'dashboard' && (
+          <DashboardView />
         )}
       </main>
       <>
@@ -1998,19 +3081,13 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
                                     const newProgress = 33
 
                                     try {
-                                      await fetch('/api/study-plan', {
-                                        method: 'PUT',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({
-                                          unique_id: studyPlan.unique_id,
-                                          learning_status: newStatus,
-                                          progress_percentage: newProgress
-                                        })
-                                      })
+                                      // For static deployment, update local state directly
+                                      setStudyPlans(prev => prev.map(plan =>
+                                        plan.unique_id === studyPlan.unique_id
+                                          ? { ...plan, learning_status: newStatus, progress_percentage: newProgress }
+                                          : plan
+                                      ))
 
-                                      // Refresh the data
-                                      await fetchData()
-                                      
                                       // Update editingChapter with refreshed data
                                       const updatedChapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject?.name))
                                       const updatedChapter = updatedChapters.find(ch => ch.chapter_id === editingChapter.chapter_id)
@@ -2035,19 +3112,13 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
                                     const newProgress = 66
 
                                     try {
-                                      await fetch('/api/study-plan', {
-                                        method: 'PUT',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({
-                                          unique_id: studyPlan.unique_id,
-                                          learning_status: newStatus,
-                                          progress_percentage: newProgress
-                                        })
-                                      })
+                                      // For static deployment, update local state directly
+                                      setStudyPlans(prev => prev.map(plan =>
+                                        plan.unique_id === studyPlan.unique_id
+                                          ? { ...plan, learning_status: newStatus, progress_percentage: newProgress }
+                                          : plan
+                                      ))
 
-                                      // Refresh the data
-                                      await fetchData()
-                                      
                                       // Update editingChapter with refreshed data
                                       const updatedChapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject?.name))
                                       const updatedChapter = updatedChapters.find(ch => ch.chapter_id === editingChapter.chapter_id)
@@ -2072,19 +3143,13 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
                                     const newProgress = 100
 
                                     try {
-                                      await fetch('/api/study-plan', {
-                                        method: 'PUT',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({
-                                          unique_id: studyPlan.unique_id,
-                                          learning_status: newStatus,
-                                          progress_percentage: newProgress
-                                        })
-                                      })
+                                      // For static deployment, update local state directly
+                                      setStudyPlans(prev => prev.map(plan =>
+                                        plan.unique_id === studyPlan.unique_id
+                                          ? { ...plan, learning_status: newStatus, progress_percentage: newProgress }
+                                          : plan
+                                      ))
 
-                                      // Refresh the data
-                                      await fetchData()
-                                      
                                       // Update editingChapter with refreshed data
                                       const updatedChapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject?.name))
                                       const updatedChapter = updatedChapters.find(ch => ch.chapter_id === editingChapter.chapter_id)
