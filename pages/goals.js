@@ -5,6 +5,7 @@ export default function GoalsPage() {
   const [goals, setGoals] = useState({})
   const [selectedSubject, setSelectedSubject] = useState('Chemistry')
   const [showAddGoal, setShowAddGoal] = useState(false)
+  const [showTemplates, setShowTemplates] = useState(false)
   const [formData, setFormData] = useState({
     chapterName: '',
     targetProficiency: 'Competent',
@@ -16,6 +17,48 @@ export default function GoalsPage() {
   const subjects = ['Chemistry', 'Mathematics', 'Physics']
   const proficiencyLevels = ['Novice', 'Competent', 'Expert', 'Master']
   const priorities = ['Low', 'Medium', 'High', 'Critical']
+
+  // ⭐ Star-Based Goal Templates
+  const goalTemplates = {
+    academic: [
+      { phrase: 'Achieve mastery across all subjects in mock tests.', metric: 'Average score across PCM', stars: [{ range: '50–59%', count: 1 }, { range: '60–74%', count: 2 }, { range: '75–84%', count: 3 }, { range: '85–89%', count: 4 }, { range: '≥90%', count: 5 }] },
+      { phrase: 'Excel in Mathematics with precision.', metric: 'Best Math score in any test', stars: [{ range: '60–69%', count: 1 }, { range: '70–79%', count: 2 }, { range: '80–89%', count: 3 }, { range: '90–94%', count: 4 }, { range: '≥95%', count: 5 }] },
+      { phrase: 'Complete the entire syllabus before January.', metric: '% topics marked Grasped or higher', stars: [{ range: '≥50%', count: 1 }, { range: '≥60%', count: 2 }, { range: '≥75%', count: 3 }, { range: '≥90%', count: 4 }, { range: '100%', count: 5 }] },
+      { phrase: 'Solve past year questions to understand exam rhythm.', metric: 'Years of PYQs completed', stars: [{ range: '3 years', count: 1 }, { range: '5 years', count: 2 }, { range: '7 years', count: 3 }, { range: '8–9 years', count: 4 }, { range: 'All 10 years', count: 5 }] },
+      { phrase: 'Refine memory through full syllabus revisions.', metric: 'Number of full revisions', stars: [{ range: '1×', count: 1 }, { range: '2×', count: 2 }, { range: '3×', count: 5 }] }
+    ],
+    behavioral: [
+      { phrase: 'Show up for every test without fail.', metric: 'Missed tests count', stars: [{ range: 'Missed 2', count: 1 }, { range: 'Missed 1', count: 2 }, { range: '100% attendance', count: 5 }] },
+      { phrase: 'Build a streak of homework discipline.', metric: 'Days since last missed submission', stars: [{ range: '≥15 days', count: 1 }, { range: '≥30 days', count: 2 }, { range: '≥50 days', count: 5 }] },
+      { phrase: 'Maintain a leave-free study streak.', metric: 'Days without skipping study', stars: [{ range: '≥15 days', count: 1 }, { range: '≥30 days', count: 2 }, { range: '≥50 days', count: 5 }] },
+      { phrase: 'Resolve doubts consistently each week.', metric: 'Doubts asked per week', stars: [{ range: '1/week', count: 1 }, { range: '3/week', count: 2 }, { range: '5+/week', count: 5 }] },
+      { phrase: 'Log your study hours with commitment.', metric: 'Avg daily study time', stars: [{ range: '≥4 hrs', count: 1 }, { range: '≥5 hrs', count: 2 }, { range: '≥6 hrs', count: 5 }] }
+    ],
+    emotional: [
+      { phrase: 'Reflect weekly to stay emotionally aligned.', metric: 'Journal entries per month', stars: [{ range: '3 entries', count: 1 }, { range: '6 entries', count: 2 }, { range: '10+ entries', count: 5 }] },
+      { phrase: 'Celebrate your small wins with pride.', metric: 'Wins logged per month', stars: [{ range: '3 wins', count: 1 }, { range: '6 wins', count: 2 }, { range: '10+ wins', count: 5 }] },
+      { phrase: 'Rate your confidence and grow it weekly.', metric: 'Weekly self-rating', stars: [{ range: '≥6/10', count: 1 }, { range: '≥7/10', count: 2 }, { range: '≥8/10', count: 5 }] }
+    ]
+  }
+
+  const renderStars = (count) => '⭐'.repeat(count)
+
+  const addTemplateGoal = (template) => {
+    const goalKey = `template-${Date.now()}`
+    const updatedGoals = {
+      ...goals,
+      [goalKey]: {
+        ...template,
+        subject: selectedSubject,
+        createdAt: new Date().toISOString(),
+        completed: false,
+        isTemplate: true,
+        currentValue: 0,
+        currentStars: 0
+      }
+    }
+    saveGoals(updatedGoals)
+  }
 
   useEffect(() => {
     loadGoals()
@@ -462,6 +505,110 @@ export default function GoalsPage() {
                   </div>
                 </>
               )}
+
+              {/* Star-Based Goal Templates */}
+              <div style={{ marginTop: '20px', borderTop: '2px solid #e5e7eb', paddingTop: '15px' }}>
+                <button
+                  onClick={() => setShowTemplates(!showTemplates)}
+                  style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    backgroundColor: showTemplates ? '#8b5cf6' : '#f3f4f6',
+                    color: showTemplates ? 'white' : '#374151',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    marginBottom: '10px'
+                  }}
+                >
+                  {showTemplates ? '−' : '+'} ⭐ Goal Templates
+                </button>
+
+                {showTemplates && (
+                  <div style={{ display: 'grid', gap: '10px' }}>
+                    <div>
+                      <p style={{ margin: '0 0 8px 0', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>📘 Academic</p>
+                      <div style={{ display: 'grid', gap: '6px' }}>
+                        {goalTemplates.academic.map((t, i) => (
+                          <button
+                            key={i}
+                            onClick={() => addTemplateGoal(t)}
+                            title={t.metric}
+                            style={{
+                              padding: '6px 8px',
+                              borderRadius: '4px',
+                              border: '1px solid #e5e7eb',
+                              backgroundColor: 'white',
+                              color: '#374151',
+                              cursor: 'pointer',
+                              fontSize: '11px',
+                              textAlign: 'left',
+                              fontWeight: '500',
+                              whiteSpace: 'normal'
+                            }}
+                          >
+                            {t.phrase.substring(0, 35)}...
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p style={{ margin: '8px 0 8px 0', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>🧠 Behavioral</p>
+                      <div style={{ display: 'grid', gap: '6px' }}>
+                        {goalTemplates.behavioral.map((t, i) => (
+                          <button
+                            key={i}
+                            onClick={() => addTemplateGoal(t)}
+                            title={t.metric}
+                            style={{
+                              padding: '6px 8px',
+                              borderRadius: '4px',
+                              border: '1px solid #e5e7eb',
+                              backgroundColor: 'white',
+                              color: '#374151',
+                              cursor: 'pointer',
+                              fontSize: '11px',
+                              textAlign: 'left',
+                              fontWeight: '500',
+                              whiteSpace: 'normal'
+                            }}
+                          >
+                            {t.phrase.substring(0, 35)}...
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p style={{ margin: '8px 0 8px 0', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>💬 Emotional</p>
+                      <div style={{ display: 'grid', gap: '6px' }}>
+                        {goalTemplates.emotional.map((t, i) => (
+                          <button
+                            key={i}
+                            onClick={() => addTemplateGoal(t)}
+                            title={t.metric}
+                            style={{
+                              padding: '6px 8px',
+                              borderRadius: '4px',
+                              border: '1px solid #e5e7eb',
+                              backgroundColor: 'white',
+                              color: '#374151',
+                              cursor: 'pointer',
+                              fontSize: '11px',
+                              textAlign: 'left',
+                              fontWeight: '500',
+                              whiteSpace: 'normal'
+                            }}
+                          >
+                            {t.phrase.substring(0, 35)}...
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
