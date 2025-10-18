@@ -3087,7 +3087,23 @@ export default function Home() {
 
       {/* Footer Backlog Section */}
       {currentPage === 'kanban' && selectedSubject && groupBy === 'status' && (
-        <div style={{
+        <div 
+          onDragOver={(e) => {
+            e.preventDefault()
+            e.currentTarget.style.background = 'rgba(139, 92, 246, 0.15)'
+          }}
+          onDragLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)'
+          }}
+          onDrop={async (e) => {
+            e.preventDefault()
+            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)'
+            const chapterId = e.dataTransfer.getData('chapterId')
+            if (chapterId) {
+              await updateChapterStatus(chapterId, 'In Queue')
+            }
+          }}
+          style={{
           position: 'fixed',
           bottom: 0,
           left: sidebarCollapsed ? '80px' : '280px',
@@ -3095,11 +3111,10 @@ export default function Home() {
           background: 'rgba(255, 255, 255, 0.25)',
           backdropFilter: 'blur(30px)',
           WebkitBackdropFilter: 'blur(30px)',
-          borderTop: '3px dashed #4a5568',
           padding: '16px 20px',
           boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.15)',
           zIndex: 800,
-          transition: 'left 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
             <h3 style={{ 
