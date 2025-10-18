@@ -184,10 +184,12 @@ export default function Schedule() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f3f2f1' }}>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
       {/* MS Planner Navbar */}
       <div style={{ 
-        backgroundColor: '#5558AF', 
+        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.45) 50%, rgba(255, 255, 255, 0.5) 100%)',
+        backdropFilter: 'blur(30px)',
+        WebkitBackdropFilter: 'blur(30px)', 
         color: 'white',
         padding: '12px 24px',
         display: 'flex',
@@ -214,9 +216,9 @@ export default function Schedule() {
       </div>
 
       {/* Breadcrumb and Header */}
-      <div style={{ backgroundColor: 'white', borderBottom: '1px solid #edebe9', padding: '16px 24px' }}>
+      <div style={{ background: 'rgba(255, 255, 255, 0.25)', borderBottom: '1px solid #edebe9', padding: '16px 24px' }}>
         <div style={{ fontSize: '12px', color: '#605e5c', marginBottom: '8px' }}>
-          <a href="/" style={{ color: '#0078d4', textDecoration: 'none' }}>Home</a>
+          <a href="/ProdyJEE/" style={{ color: '#0078d4', textDecoration: 'none' }}>Home</a>
           <span style={{ margin: '0 4px' }}>/</span>
           <span>Schedule</span>
         </div>
@@ -252,9 +254,11 @@ export default function Schedule() {
           {/* Calendar Section */}
           <div style={{ gridColumn: 'span 2' }}>
             <div style={{ 
-              backgroundColor: 'white', 
-              border: '1px solid #edebe9', 
-              borderRadius: '4px',
+              background: 'rgba(255, 255, 255, 0.25)', 
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)', 
+              borderRadius: '12px',
               padding: '20px',
               boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
             }}>
@@ -333,9 +337,11 @@ export default function Schedule() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {/* Upcoming Events */}
             <div style={{ 
-              backgroundColor: 'white', 
-              border: '1px solid #edebe9', 
-              borderRadius: '4px',
+              background: 'rgba(255, 255, 255, 0.25)', 
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)', 
+              borderRadius: '12px',
               padding: '20px',
               boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
             }}>
@@ -368,9 +374,11 @@ export default function Schedule() {
 
             {/* Event Types */}
             <div style={{ 
-              backgroundColor: 'white', 
-              border: '1px solid #edebe9', 
-              borderRadius: '4px',
+              background: 'rgba(255, 255, 255, 0.25)', 
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)', 
+              borderRadius: '12px',
               padding: '20px',
               boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
             }}>
@@ -408,8 +416,8 @@ export default function Schedule() {
           zIndex: 50 
         }}>
           <div style={{ 
-            backgroundColor: 'white', 
-            borderRadius: '4px',
+            background: 'rgba(255, 255, 255, 0.25)', 
+            borderRadius: '12px',
             padding: '24px',
             width: '100%',
             maxWidth: '480px',
@@ -534,7 +542,7 @@ export default function Schedule() {
                   padding: '8px 16px',
                   border: '1px solid #8a8886',
                   borderRadius: '2px',
-                  backgroundColor: 'white',
+                  background: 'rgba(255, 255, 255, 0.25)',
                   color: '#323130',
                   fontSize: '13px',
                   fontWeight: '600',

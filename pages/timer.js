@@ -527,10 +527,12 @@ export default function Timer() {
   }, [])
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f3f2f1' }}>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
       {/* MS Planner Navbar */}
       <div style={{ 
-        backgroundColor: '#5558AF', 
+        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.45) 50%, rgba(255, 255, 255, 0.5) 100%)',
+        backdropFilter: 'blur(30px)',
+        WebkitBackdropFilter: 'blur(30px)', 
         color: 'white',
         padding: '12px 24px',
         display: 'flex',
@@ -557,9 +559,9 @@ export default function Timer() {
       </div>
 
       {/* Breadcrumb and Header */}
-      <div style={{ backgroundColor: 'white', borderBottom: '1px solid #edebe9', padding: '16px 24px' }}>
+      <div style={{ background: 'rgba(255, 255, 255, 0.25)', borderBottom: '1px solid #edebe9', padding: '16px 24px' }}>
         <div style={{ fontSize: '12px', color: '#605e5c', marginBottom: '8px' }}>
-          <a href="/" style={{ color: '#0078d4', textDecoration: 'none' }}>Home</a>
+          <a href="/ProdyJEE/" style={{ color: '#0078d4', textDecoration: 'none' }}>Home</a>
           <span style={{ margin: '0 4px' }}>/</span>
           <span>Timer</span>
         </div>
@@ -587,8 +589,10 @@ export default function Timer() {
         {/* Instructions - MS Planner Style */}
         <div style={{ 
           marginTop: '24px',
-          backgroundColor: 'white', 
-          border: '1px solid #edebe9', 
+          background: 'rgba(255, 255, 255, 0.25)', 
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)', 
           borderRadius: '4px',
           padding: '20px',
           boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'

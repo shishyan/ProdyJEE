@@ -225,26 +225,28 @@ export default function GoalsPage() {
         <link rel="stylesheet" href="/ProdyJEE/styles/globals.css" />
       </Head>
 
-      <div style={{ minHeight: '100vh', backgroundColor: '#f3f2f1', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-        {/* MS Planner Style Top Navbar */}
+      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+        {/* MS Planner Style Top Navbar with Glassmorphism */}
         <nav style={{ 
-          backgroundColor: '#5558AF', 
-          color: 'white', 
+          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.45) 50%, rgba(255, 255, 255, 0.5) 100%)',
+          backdropFilter: 'blur(30px)',
+          WebkitBackdropFilter: 'blur(30px)',
+          color: '#1a1a1a', 
           padding: '12px 24px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <a href="/" style={{ color: 'white', textDecoration: 'none', fontSize: '16px', fontWeight: '600' }}>
+            <a href="/ProdyJEE/" style={{ color: '#1a1a1a', textDecoration: 'none', fontSize: '16px', fontWeight: '600' }}>
               ← Back to Planner
             </a>
-            <div style={{ borderLeft: '1px solid rgba(255,255,255,0.3)', height: '24px' }}></div>
-            <h1 style={{ margin: 0, fontSize: '20px', fontWeight: '600' }}>Goals & Targets</h1>
+            <div style={{ borderLeft: '1px solid rgba(26,26,26,0.2)', height: '24px' }}></div>
+            <h1 style={{ margin: 0, fontSize: '20px', fontWeight: '600', color: '#1a1a1a' }}>Goals & Targets</h1>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '13px', opacity: 0.9 }}>v1.0.3-361bf16</span>
+            <span style={{ fontSize: '13px', opacity: 0.7, color: '#1a1a1a' }}>v1.0.3-361bf16</span>
           </div>
         </nav>
 
@@ -259,53 +261,61 @@ export default function GoalsPage() {
             <p style={{ color: '#605e5c', fontSize: '14px', margin: '0' }}>Track your academic progress, set proficiency targets, and earn achievement points</p>
           </div>
 
-          {/* Achievement Points Dashboard - MS Planner Style Cards */}
+          {/* Achievement Points Dashboard - Glassmorphism Cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
             <div style={{ 
-              backgroundColor: 'white', 
-              border: '1px solid #edebe9', 
-              borderRadius: '4px', 
+              background: 'rgba(255, 255, 255, 0.25)', 
+              border: '1px solid rgba(255, 255, 255, 0.3)', 
+              borderRadius: '12px', 
               padding: '20px',
-              boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)',
-              transition: 'box-shadow 0.2s ease'
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              transition: 'all 0.3s ease'
             }}>
-              <div style={{ fontSize: '13px', color: '#605e5c', marginBottom: '8px', fontWeight: '600' }}>⭐ STAR POINTS</div>
-              <div style={{ fontSize: '32px', color: '#0078d4', fontWeight: '600', marginBottom: '4px' }}>{starPoints}</div>
-              <div style={{ fontSize: '12px', color: '#8a8886' }}>10 points per star earned</div>
+              <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.7)', marginBottom: '8px', fontWeight: '600' }}>⭐ STAR POINTS</div>
+              <div style={{ fontSize: '32px', color: '#1a1a1a', fontWeight: '600', marginBottom: '4px' }}>{starPoints}</div>
+              <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.6)' }}>10 points per star earned</div>
             </div>
             
             <div style={{ 
-              backgroundColor: 'white', 
-              border: '1px solid #edebe9', 
-              borderRadius: '4px', 
+              background: 'rgba(255, 255, 255, 0.25)', 
+              border: '1px solid rgba(255, 255, 255, 0.3)', 
+              borderRadius: '12px', 
               padding: '20px',
-              boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)',
-              transition: 'box-shadow 0.2s ease'
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              transition: 'all 0.3s ease'
             }}>
-              <div style={{ fontSize: '13px', color: '#605e5c', marginBottom: '8px', fontWeight: '600' }}>🏆 BADGE POINTS</div>
-              <div style={{ fontSize: '32px', color: '#8764b8', fontWeight: '600', marginBottom: '4px' }}>{badgePoints}</div>
-              <div style={{ fontSize: '12px', color: '#8a8886' }}>100 points per badge (5 stars)</div>
+              <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.7)', marginBottom: '8px', fontWeight: '600' }}>🏆 BADGE POINTS</div>
+              <div style={{ fontSize: '32px', color: '#1a1a1a', fontWeight: '600', marginBottom: '4px' }}>{badgePoints}</div>
+              <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.6)' }}>100 points per badge (5 stars)</div>
             </div>
             
             <div style={{ 
-              backgroundColor: 'white', 
-              border: '1px solid #edebe9', 
-              borderRadius: '4px', 
+              background: 'rgba(255, 255, 255, 0.25)', 
+              border: '1px solid rgba(255, 255, 255, 0.3)', 
+              borderRadius: '12px', 
               padding: '20px',
-              boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)',
-              transition: 'box-shadow 0.2s ease'
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              transition: 'all 0.3s ease'
             }}>
-              <div style={{ fontSize: '13px', color: '#605e5c', marginBottom: '8px', fontWeight: '600' }}>✨ TOTAL POINTS</div>
-              <div style={{ fontSize: '32px', color: '#107c10', fontWeight: '600', marginBottom: '4px' }}>{starPoints + badgePoints}</div>
-              <div style={{ fontSize: '12px', color: '#8a8886' }}>Combined achievement score</div>
+              <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.7)', marginBottom: '8px', fontWeight: '600' }}>✨ TOTAL POINTS</div>
+              <div style={{ fontSize: '32px', color: '#1a1a1a', fontWeight: '600', marginBottom: '4px' }}>{starPoints + badgePoints}</div>
+              <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.6)' }}>Combined achievement score</div>
             </div>
           </div>
 
-          {/* Subject Filter Pills - MS Planner Style */}
+          {/* Subject Filter Pills - Glassmorphism Style */}
           <div style={{ 
-            backgroundColor: 'white', 
-            border: '1px solid #edebe9', 
-            borderRadius: '4px', 
+            background: 'rgba(255, 255, 255, 0.25)', 
+            border: '1px solid rgba(255, 255, 255, 0.3)', 
+            borderRadius: '12px',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)', 
             padding: '16px',
             marginBottom: '24px',
             boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
@@ -340,12 +350,14 @@ export default function GoalsPage() {
             <div>
               {subjectGoals.length === 0 ? (
                 <div style={{
-                  backgroundColor: 'white',
-                  border: '1px solid #edebe9',
-                  borderRadius: '4px',
+                  background: 'rgba(255, 255, 255, 0.25)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '12px',
                   padding: '48px',
                   textAlign: 'center',
-                  boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
                 }}>
                   <div style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.3 }}>🎯</div>
                   <p style={{ fontSize: '16px', color: '#323130', margin: '0 0 8px 0', fontWeight: '600' }}>No goals set for {selectedSubject}</p>
@@ -380,11 +392,13 @@ export default function GoalsPage() {
                       <div
                         key={goalKey}
                         style={{
-                          backgroundColor: 'white',
-                          borderRadius: '4px',
+                          background: 'rgba(255, 255, 255, 0.25)',
+                          borderRadius: '12px',
                           padding: '16px',
-                          border: goal.completed ? '2px solid #107c10' : '1px solid #edebe9',
-                          boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)',
+                          border: goal.completed ? '2px solid rgba(16, 124, 16, 0.6)' : '1px solid rgba(255, 255, 255, 0.3)',
+                          backdropFilter: 'blur(20px)',
+                          WebkitBackdropFilter: 'blur(20px)',
+                          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
                           transition: 'all 0.2s ease',
                           opacity: goal.completed ? 0.75 : 1,
                           position: 'relative'
@@ -549,13 +563,15 @@ export default function GoalsPage() {
               )}
             </div>
 
-            {/* Sidebar - MS Planner Style Panel */}
+            {/* Sidebar - Glassmorphism Panel */}
             <div style={{
-              backgroundColor: 'white',
-              border: '1px solid #edebe9',
-              borderRadius: '4px',
+              background: 'rgba(255, 255, 255, 0.25)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              borderRadius: '12px',
               padding: '16px',
-              boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
               height: 'fit-content',
               position: 'sticky',
               top: '24px'

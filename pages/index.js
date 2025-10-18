@@ -2942,19 +2942,19 @@ export default function Home() {
             <HomeIcon />
             {!sidebarCollapsed && <span>Dashboard</span>}
           </div>
-          <a href="/dashboard" className="sidebar-item" title="Analytics" style={{ cursor: 'pointer' }}>
+          <a href="/ProdyJEE/dashboard" className="sidebar-item" title="Analytics" style={{ cursor: 'pointer' }}>
             <BarChartIcon />
             {!sidebarCollapsed && <span>Analytics</span>}
           </a>
-          <a href="/schedule" className="sidebar-item" title="Schedule" style={{ cursor: 'pointer' }}>
+          <a href="/ProdyJEE/schedule" className="sidebar-item" title="Schedule" style={{ cursor: 'pointer' }}>
             <CalendarIcon />
             {!sidebarCollapsed && <span>Schedule</span>}
           </a>
-          <a href="/timer" className="sidebar-item" title="Timer" style={{ cursor: 'pointer' }}>
+          <a href="/ProdyJEE/timer" className="sidebar-item" title="Timer" style={{ cursor: 'pointer' }}>
             <TimerIcon />
             {!sidebarCollapsed && <span>Timer</span>}
           </a>
-          <a href="/goals" className="sidebar-item" title="Goals" style={{ cursor: 'pointer' }}>
+          <a href="/ProdyJEE/goals" className="sidebar-item" title="Goals" style={{ cursor: 'pointer' }}>
             <MeditationIcon />
             {!sidebarCollapsed && <span>Goals</span>}
           </a>

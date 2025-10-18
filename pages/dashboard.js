@@ -222,31 +222,33 @@ export default function Dashboard() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f3f2f1', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-      {/* MS Planner Style Top Navbar */}
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+      {/* MS Planner Style Top Navbar with Glassmorphism */}
       <nav style={{ 
-        backgroundColor: '#5558AF', 
-        color: 'white', 
+        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.45) 50%, rgba(255, 255, 255, 0.5) 100%)',
+        backdropFilter: 'blur(30px)',
+        WebkitBackdropFilter: 'blur(30px)',
+        color: '#1a1a1a', 
         padding: '12px 24px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <a href="/" style={{ color: 'white', textDecoration: 'none', fontSize: '16px', fontWeight: '600' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <a href="/ProdyJEE/" style={{ color: '#1a1a1a', textDecoration: 'none', fontSize: '16px', fontWeight: '600' }}>
             ← Back to Planner
           </a>
-          <div style={{ borderLeft: '1px solid rgba(255,255,255,0.3)', height: '24px' }}></div>
-          <h1 style={{ margin: 0, fontSize: '20px', fontWeight: '600' }}>Analytics Dashboard</h1>
+          <div style={{ borderLeft: '1px solid rgba(26,26,26,0.2)', height: '24px' }}></div>
+          <h1 style={{ margin: 0, fontSize: '20px', fontWeight: '600', color: '#1a1a1a' }}>Analytics Dashboard</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ fontSize: '13px', opacity: 0.9 }}>v1.0.3-361bf16</span>
+          <span style={{ fontSize: '13px', opacity: 0.7, color: '#1a1a1a' }}>v1.0.3-361bf16</span>
         </div>
       </nav>
 
       {/* Breadcrumb & Page Header */}
-      <div style={{ backgroundColor: 'white', borderBottom: '1px solid #edebe9', padding: '16px 24px' }}>
+      <div style={{ background: 'rgba(255, 255, 255, 0.25)', borderBottom: '1px solid #edebe9', padding: '16px 24px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
           <div style={{ fontSize: '12px', color: '#605e5c', marginBottom: '8px' }}>
             <span>Home</span> / <span style={{ fontWeight: '600' }}>Analytics</span>
@@ -260,11 +262,13 @@ export default function Dashboard() {
         {/* KPI Cards - MS Planner Style */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '24px' }}>
           <div style={{ 
-            backgroundColor: 'white', 
-            border: '1px solid #edebe9', 
-            borderRadius: '4px', 
+            background: 'rgba(255, 255, 255, 0.25)', 
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)', 
+            borderRadius: '12px', 
             padding: '20px',
-            boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
           }}>
             <div style={{ fontSize: '13px', color: '#605e5c', marginBottom: '8px', fontWeight: '600' }}>📚 STUDY PROGRESS</div>
             <div style={{ fontSize: '32px', color: '#0078d4', fontWeight: '600', marginBottom: '4px' }}>{studyData.averageProgress}%</div>
@@ -273,11 +277,13 @@ export default function Dashboard() {
           </div>
           
           <div style={{ 
-            backgroundColor: 'white', 
-            border: '1px solid #edebe9', 
-            borderRadius: '4px', 
+            background: 'rgba(255, 255, 255, 0.25)', 
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)', 
+            borderRadius: '12px', 
             padding: '20px',
-            boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
           }}>
             <div style={{ fontSize: '13px', color: '#605e5c', marginBottom: '8px', fontWeight: '600' }}>⏱️ ACTIVE TIMERS</div>
             <div style={{ fontSize: '32px', color: '#107c10', fontWeight: '600', marginBottom: '4px' }}>{timerData?.activeTimers || 0}</div>
@@ -285,11 +291,13 @@ export default function Dashboard() {
           </div>
           
           <div style={{ 
-            backgroundColor: 'white', 
-            border: '1px solid #edebe9', 
-            borderRadius: '4px', 
+            background: 'rgba(255, 255, 255, 0.25)', 
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)', 
+            borderRadius: '12px', 
             padding: '20px',
-            boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
           }}>
             <div style={{ fontSize: '13px', color: '#605e5c', marginBottom: '8px', fontWeight: '600' }}>📅 UPCOMING EVENTS</div>
             <div style={{ fontSize: '32px', color: '#ffaa44', fontWeight: '600', marginBottom: '4px' }}>{scheduleData?.upcomingEvents || 0}</div>
@@ -297,11 +305,13 @@ export default function Dashboard() {
           </div>
           
           <div style={{ 
-            backgroundColor: 'white', 
-            border: '1px solid #edebe9', 
-            borderRadius: '4px', 
+            background: 'rgba(255, 255, 255, 0.25)', 
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)', 
+            borderRadius: '12px', 
             padding: '20px',
-            boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
           }}>
             <div style={{ fontSize: '13px', color: '#605e5c', marginBottom: '8px', fontWeight: '600' }}>🔥 STUDY STREAK</div>
             <div style={{ fontSize: '32px', color: '#8764b8', fontWeight: '600', marginBottom: '4px' }}>7</div>
@@ -312,12 +322,14 @@ export default function Dashboard() {
 
         {/* Achievement Points - MS Planner Style */}
         <div style={{ 
-          backgroundColor: 'white', 
-          border: '1px solid #edebe9', 
-          borderRadius: '4px', 
+          background: 'rgba(255, 255, 255, 0.25)', 
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)', 
+          borderRadius: '12px', 
           padding: '20px',
           marginBottom: '24px',
-          boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
         }}>
           <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#323130', marginBottom: '16px' }}>🏆 Achievement Points</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
@@ -359,11 +371,13 @@ export default function Dashboard() {
         {/* Charts Section - MS Planner Style */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '16px', marginBottom: '24px' }}>
           <div style={{ 
-            backgroundColor: 'white', 
-            border: '1px solid #edebe9', 
-            borderRadius: '4px', 
+            background: 'rgba(255, 255, 255, 0.25)', 
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)', 
+            borderRadius: '12px', 
             padding: '20px',
-            boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
           }}>
             <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#323130', marginBottom: '16px' }}>📊 Weekly Study Progress</h3>
             <SimpleChart
@@ -374,11 +388,13 @@ export default function Dashboard() {
           </div>
           {subjectProgressData.length > 0 && (
             <div style={{ 
-              backgroundColor: 'white', 
-              border: '1px solid #edebe9', 
-              borderRadius: '4px', 
+              background: 'rgba(255, 255, 255, 0.25)', 
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)', 
+              borderRadius: '12px', 
               padding: '20px',
-              boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
             }}>
               <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#323130', marginBottom: '16px' }}>📈 Subject-wise Progress</h3>
               <SimpleChart
@@ -393,11 +409,13 @@ export default function Dashboard() {
         {/* Progress Section - MS Planner Style */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '16px', marginBottom: '24px' }}>
           <div style={{ 
-            backgroundColor: 'white', 
-            border: '1px solid #edebe9', 
-            borderRadius: '4px', 
+            background: 'rgba(255, 255, 255, 0.25)', 
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)', 
+            borderRadius: '12px', 
             padding: '20px',
-            boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
           }}>
             <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#323130', marginBottom: '16px' }}>📚 Study Topics Progress</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -423,11 +441,13 @@ export default function Dashboard() {
           </div>
 
           <div style={{ 
-            backgroundColor: 'white', 
-            border: '1px solid #edebe9', 
-            borderRadius: '4px', 
+            background: 'rgba(255, 255, 255, 0.25)', 
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)', 
+            borderRadius: '12px', 
             padding: '20px',
-            boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
           }}>
             <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#323130', marginBottom: '16px' }}>🎯 Subject Breakdown</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -457,11 +477,13 @@ export default function Dashboard() {
 
         {/* Recent Activity - MS Planner Style */}
         <div style={{ 
-          backgroundColor: 'white', 
-          border: '1px solid #edebe9', 
-          borderRadius: '4px', 
+          background: 'rgba(255, 255, 255, 0.25)', 
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)', 
+          borderRadius: '12px', 
           padding: '20px',
-          boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
         }}>
           <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#323130', marginBottom: '16px' }}>⏱️ Recent Activity</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
