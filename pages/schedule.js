@@ -77,7 +77,8 @@ export default function SchedulePage() {
   const [studyPlans, setStudyPlans] = useState([])
   const [menstrualCycle, setMenstrualCycle] = useState([])
   const [showAddEvent, setShowAddEvent] = useState(false)
-  const [view, setView] = useState('month') // month, week, day
+  const [view, setView] = useState('week') // month, week, day - default to weekly
+  const [newEventForm, setNewEventForm] = useState({ title: '', type: 'personal', date: new Date(), time: '', description: '' })
 
   useEffect(() => {
     loadEvents()
@@ -284,31 +285,112 @@ export default function SchedulePage() {
                 </button>
               </div>
               
-              <button
-                onClick={() => setCurrentDate(new Date())}
-                style={{
-                  padding: '12px 24px',
-                  borderRadius: '12px',
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.transform = 'translateY(-2px)'
-                  e.target.style.boxShadow = '0 6px 16px rgba(102, 126, 234, 0.5)'
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.transform = 'translateY(0)'
-                  e.target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)'
-                }}
-              >
-                Today
-              </button>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                {/* View Switcher */}
+                <div style={{ display: 'flex', gap: '4px', background: 'rgba(255, 255, 255, 0.3)', borderRadius: '10px', padding: '4px' }}>
+                  <button
+                    onClick={() => setView('day')}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: view === 'day' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent',
+                      color: view === 'day' ? 'white' : '#1a1a1a',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    Day
+                  </button>
+                  <button
+                    onClick={() => setView('week')}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: view === 'week' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent',
+                      color: view === 'week' ? 'white' : '#1a1a1a',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    Week
+                  </button>
+                  <button
+                    onClick={() => setView('month')}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: view === 'month' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent',
+                      color: view === 'month' ? 'white' : '#1a1a1a',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    Month
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => setCurrentDate(new Date())}
+                  style={{
+                    padding: '12px 24px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    background: 'rgba(255, 255, 255, 0.4)',
+                    backdropFilter: 'blur(10px)',
+                    color: '#1a1a1a',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.transform = 'translateY(-2px)'
+                    e.target.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.15)'
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.transform = 'translateY(0)'
+                    e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)'
+                  }}
+                >
+                  Today
+                </button>
+
+                <button
+                  onClick={() => setShowAddEvent(true)}
+                  style={{
+                    padding: '12px 24px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    color: 'white',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.transform = 'translateY(-2px)'
+                    e.target.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.5)'
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.transform = 'translateY(0)'
+                    e.target.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.4)'
+                  }}
+                >
+                  + Add Event
+                </button>
+              </div>
             </div>
 
             {/* Legend */}
