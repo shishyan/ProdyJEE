@@ -221,88 +221,156 @@ export default function GoalsPage() {
   return (
     <>
       <Head>
-        <title>Goals - ProdyJEE</title>
+        <title>Goals & Targets - ProdyJEE</title>
+        <link rel="stylesheet" href="/ProdyJEE/styles/globals.css" />
       </Head>
 
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '20px' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          {/* Header */}
-          <div style={{ marginBottom: '30px' }}>
-            <h1 style={{ color: 'white', fontSize: '32px', fontWeight: '700', margin: '0 0 10px 0' }}>[GOAL] Goals & Targets</h1>
-            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '14px', margin: '0' }}>Set learning proficiency targets for each chapter</p>
+      <div style={{ minHeight: '100vh', backgroundColor: '#f3f2f1', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+        {/* MS Planner Style Top Navbar */}
+        <nav style={{ 
+          backgroundColor: '#5558AF', 
+          color: 'white', 
+          padding: '12px 24px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <a href="/" style={{ color: 'white', textDecoration: 'none', fontSize: '16px', fontWeight: '600' }}>
+              ← Back to Planner
+            </a>
+            <div style={{ borderLeft: '1px solid rgba(255,255,255,0.3)', height: '24px' }}></div>
+            <h1 style={{ margin: 0, fontSize: '20px', fontWeight: '600' }}>Goals & Targets</h1>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '13px', opacity: 0.9 }}>v1.0.3-361bf16</span>
+          </div>
+        </nav>
+
+        {/* Main Content */}
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px' }}>
+          {/* Page Header with Breadcrumb */}
+          <div style={{ marginBottom: '24px' }}>
+            <div style={{ fontSize: '12px', color: '#605e5c', marginBottom: '8px' }}>
+              <span>Home</span> / <span style={{ fontWeight: '600' }}>Goals</span>
+            </div>
+            <h2 style={{ color: '#323130', fontSize: '28px', fontWeight: '600', margin: '0 0 8px 0' }}>Learning Goals & Achievement Tracker</h2>
+            <p style={{ color: '#605e5c', fontSize: '14px', margin: '0' }}>Track your academic progress, set proficiency targets, and earn achievement points</p>
+          </div>
+
+          {/* Achievement Points Dashboard - MS Planner Style Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+            <div style={{ 
+              backgroundColor: 'white', 
+              border: '1px solid #edebe9', 
+              borderRadius: '4px', 
+              padding: '20px',
+              boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)',
+              transition: 'box-shadow 0.2s ease'
+            }}>
+              <div style={{ fontSize: '13px', color: '#605e5c', marginBottom: '8px', fontWeight: '600' }}>⭐ STAR POINTS</div>
+              <div style={{ fontSize: '32px', color: '#0078d4', fontWeight: '600', marginBottom: '4px' }}>{starPoints}</div>
+              <div style={{ fontSize: '12px', color: '#8a8886' }}>10 points per star earned</div>
+            </div>
             
-            {/* [STAR] Points Tracker */}
-            <div style={{ display: 'flex', gap: '20px', marginTop: '15px', flexWrap: 'wrap' }}>
-              <div style={{ backgroundColor: 'rgba(255,255,255,0.15)', padding: '12px 20px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
-                <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px', margin: '0 0 4px 0' }}>[STAR] Star Points</p>
-                <p style={{ color: 'white', fontSize: '20px', fontWeight: '700', margin: '0' }}>{starPoints}</p>
-              </div>
-              <div style={{ backgroundColor: 'rgba(255,255,255,0.15)', padding: '12px 20px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
-                <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px', margin: '0 0 4px 0' }}>[BADGE] Badge Points</p>
-                <p style={{ color: 'white', fontSize: '20px', fontWeight: '700', margin: '0' }}>{badgePoints}</p>
-              </div>
-              <div style={{ backgroundColor: 'rgba(255,255,255,0.15)', padding: '12px 20px', borderRadius: '8px', backdropFilter: 'blur(10px)' }}>
-                <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px', margin: '0 0 4px 0' }}>[TOTAL] Total Points</p>
-                <p style={{ color: 'white', fontSize: '20px', fontWeight: '700', margin: '0' }}>{starPoints + badgePoints}</p>
-              </div>
+            <div style={{ 
+              backgroundColor: 'white', 
+              border: '1px solid #edebe9', 
+              borderRadius: '4px', 
+              padding: '20px',
+              boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)',
+              transition: 'box-shadow 0.2s ease'
+            }}>
+              <div style={{ fontSize: '13px', color: '#605e5c', marginBottom: '8px', fontWeight: '600' }}>🏆 BADGE POINTS</div>
+              <div style={{ fontSize: '32px', color: '#8764b8', fontWeight: '600', marginBottom: '4px' }}>{badgePoints}</div>
+              <div style={{ fontSize: '12px', color: '#8a8886' }}>100 points per badge (5 stars)</div>
+            </div>
+            
+            <div style={{ 
+              backgroundColor: 'white', 
+              border: '1px solid #edebe9', 
+              borderRadius: '4px', 
+              padding: '20px',
+              boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)',
+              transition: 'box-shadow 0.2s ease'
+            }}>
+              <div style={{ fontSize: '13px', color: '#605e5c', marginBottom: '8px', fontWeight: '600' }}>✨ TOTAL POINTS</div>
+              <div style={{ fontSize: '32px', color: '#107c10', fontWeight: '600', marginBottom: '4px' }}>{starPoints + badgePoints}</div>
+              <div style={{ fontSize: '12px', color: '#8a8886' }}>Combined achievement score</div>
             </div>
           </div>
 
-          {/* Subject Tabs */}
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '30px', flexWrap: 'wrap' }}>
-            {subjects.map(subject => (
-              <button
-                key={subject}
-                onClick={() => setSelectedSubject(subject)}
-                style={{
-                  padding: '10px 20px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  backgroundColor: selectedSubject === subject ? 'white' : 'rgba(255,255,255,0.2)',
-                  color: selectedSubject === subject ? '#667eea' : 'white',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  fontSize: '14px'
-                }}
-              >
-                {subject}
-              </button>
-            ))}
+          {/* Subject Filter Pills - MS Planner Style */}
+          <div style={{ 
+            backgroundColor: 'white', 
+            border: '1px solid #edebe9', 
+            borderRadius: '4px', 
+            padding: '16px',
+            marginBottom: '24px',
+            boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+          }}>
+            <div style={{ fontSize: '13px', color: '#605e5c', marginBottom: '12px', fontWeight: '600' }}>FILTER BY SUBJECT</div>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {subjects.map(subject => (
+                <button
+                  key={subject}
+                  onClick={() => setSelectedSubject(subject)}
+                  style={{
+                    padding: '6px 16px',
+                    borderRadius: '16px',
+                    border: selectedSubject === subject ? '2px solid #0078d4' : '1px solid #8a8886',
+                    backgroundColor: selectedSubject === subject ? '#deecf9' : 'white',
+                    color: selectedSubject === subject ? '#0078d4' : '#323130',
+                    fontWeight: selectedSubject === subject ? '600' : '400',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    fontSize: '13px'
+                  }}
+                >
+                  {subject}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Main Content */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '20px' }}>
+          {/* Main Content - MS Planner Two Column Layout */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '24px' }}>
             {/* Goals List */}
             <div>
               {subjectGoals.length === 0 ? (
                 <div style={{
-                  background: 'rgba(255,255,255,0.1)',
-                  borderRadius: '12px',
-                  padding: '40px',
+                  backgroundColor: 'white',
+                  border: '1px solid #edebe9',
+                  borderRadius: '4px',
+                  padding: '48px',
                   textAlign: 'center',
-                  color: 'rgba(255,255,255,0.7)',
-                  backdropFilter: 'blur(10px)'
+                  boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
                 }}>
-                  <p style={{ fontSize: '16px', margin: '0 0 15px 0' }}>No goals set for {selectedSubject}</p>
+                  <div style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.3 }}>🎯</div>
+                  <p style={{ fontSize: '16px', color: '#323130', margin: '0 0 8px 0', fontWeight: '600' }}>No goals set for {selectedSubject}</p>
+                  <p style={{ fontSize: '13px', color: '#605e5c', margin: '0 0 20px 0' }}>Start by creating your first learning goal</p>
                   <button
                     onClick={() => setShowAddGoal(true)}
                     style={{
-                      padding: '10px 20px',
-                      borderRadius: '6px',
+                      padding: '8px 24px',
+                      borderRadius: '2px',
                       border: 'none',
-                      backgroundColor: 'white',
-                      color: '#667eea',
+                      backgroundColor: '#0078d4',
+                      color: 'white',
                       fontWeight: '600',
                       cursor: 'pointer',
-                      fontSize: '14px'
+                      fontSize: '14px',
+                      transition: 'background-color 0.2s ease'
                     }}
+                    onMouseOver={(e) => e.target.style.backgroundColor = '#106ebe'}
+                    onMouseOut={(e) => e.target.style.backgroundColor = '#0078d4'}
                   >
                     + Add First Goal
                   </button>
                 </div>
               ) : (
-                <div style={{ display: 'grid', gap: '15px' }}>
+                <div style={{ display: 'grid', gap: '16px' }}>
                   {subjectGoals.map(([goalKey, goal]) => {
                     const daysLeft = getDaysRemaining(goal.targetDate)
                     const isOverdue = daysLeft < 0
@@ -312,67 +380,96 @@ export default function GoalsPage() {
                       <div
                         key={goalKey}
                         style={{
-                          background: 'rgba(255,255,255,0.95)',
-                          borderRadius: '12px',
-                          padding: '20px',
-                          backdropFilter: 'blur(10px)',
-                          border: goal.completed ? '2px solid #10b981' : '1px solid rgba(0,0,0,0.1)',
-                          transition: 'all 0.3s ease',
-                          opacity: goal.completed ? 0.7 : 1
+                          backgroundColor: 'white',
+                          borderRadius: '4px',
+                          padding: '16px',
+                          border: goal.completed ? '2px solid #107c10' : '1px solid #edebe9',
+                          boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)',
+                          transition: 'all 0.2s ease',
+                          opacity: goal.completed ? 0.75 : 1,
+                          position: 'relative'
                         }}
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
                           <div style={{ flex: 1 }}>
                             <h3 style={{
                               margin: '0 0 8px 0',
-                              fontSize: '16px',
+                              fontSize: '15px',
                               fontWeight: '600',
-                              color: goal.completed ? '#10b981' : '#1f2937',
+                              color: goal.completed ? '#107c10' : '#323130',
                               textDecoration: goal.completed ? 'line-through' : 'none'
                             }}>
                               {goal.chapterName}
                             </h3>
-                            <div style={{ display: 'flex', gap: '15px', fontSize: '13px', color: '#6b7280' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                            <div style={{ display: 'flex', gap: '12px', fontSize: '12px', color: '#605e5c', flexWrap: 'wrap' }}>
+                              <div style={{ 
+                                display: 'inline-flex', 
+                                alignItems: 'center', 
+                                gap: '4px',
+                                padding: '2px 8px',
+                                borderRadius: '2px',
+                                backgroundColor: '#f3f2f1'
+                              }}>
                                 <span style={{
                                   display: 'inline-block',
-                                  width: '12px',
-                                  height: '12px',
-                                  borderRadius: '3px',
+                                  width: '8px',
+                                  height: '8px',
+                                  borderRadius: '50%',
                                   backgroundColor: getProficiencyColor(goal.targetProficiency)
                                 }}></span>
                                 {goal.targetProficiency}
                               </div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                              <div style={{ 
+                                display: 'inline-flex', 
+                                alignItems: 'center', 
+                                gap: '4px',
+                                padding: '2px 8px',
+                                borderRadius: '2px',
+                                backgroundColor: '#f3f2f1'
+                              }}>
                                 <span style={{
                                   display: 'inline-block',
-                                  width: '12px',
-                                  height: '12px',
-                                  borderRadius: '3px',
+                                  width: '8px',
+                                  height: '8px',
+                                  borderRadius: '50%',
                                   backgroundColor: getPriorityColor(goal.priority)
                                 }}></span>
                                 {goal.priority}
                               </div>
                             </div>
                           </div>
-                          <div style={{ display: 'flex', gap: '8px' }}>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                             <input
                               type="checkbox"
                               checked={goal.completed}
                               onChange={() => toggleGoalCompletion(goalKey)}
-                              style={{ cursor: 'pointer', width: '20px', height: '20px', accentColor: '#10b981' }}
+                              style={{ 
+                                cursor: 'pointer', 
+                                width: '18px', 
+                                height: '18px', 
+                                accentColor: '#0078d4'
+                              }}
                             />
                             <button
                               onClick={() => deleteGoal(goalKey)}
                               style={{
-                                padding: '4px 8px',
-                                borderRadius: '4px',
-                                border: '1px solid #ef4444',
-                                backgroundColor: 'transparent',
-                                color: '#ef4444',
+                                padding: '4px 12px',
+                                borderRadius: '2px',
+                                border: '1px solid #d13438',
+                                backgroundColor: 'white',
+                                color: '#d13438',
                                 cursor: 'pointer',
                                 fontSize: '12px',
-                                fontWeight: '500'
+                                fontWeight: '400',
+                                transition: 'all 0.2s ease'
+                              }}
+                              onMouseOver={(e) => {
+                                e.target.style.backgroundColor = '#d13438'
+                                e.target.style.color = 'white'
+                              }}
+                              onMouseOut={(e) => {
+                                e.target.style.backgroundColor = 'white'
+                                e.target.style.color = '#d13438'
                               }}
                             >
                               Delete
@@ -380,47 +477,69 @@ export default function GoalsPage() {
                           </div>
                         </div>
 
-                        {/* Timeline */}
-                        <div style={{ marginTop: '12px', padding: '12px', backgroundColor: isOverdue ? '#fee2e2' : isUrgent ? '#fef3c7' : '#ecfdf5', borderRadius: '6px' }}>
+                        {/* Timeline - MS Planner Style */}
+                        <div style={{ 
+                          marginTop: '12px', 
+                          padding: '10px 12px', 
+                          backgroundColor: isOverdue ? '#fde7e9' : isUrgent ? '#fff4ce' : '#dff6dd', 
+                          borderLeft: `3px solid ${isOverdue ? '#d13438' : isUrgent ? '#ffaa44' : '#107c10'}`,
+                          borderRadius: '2px' 
+                        }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '12px', fontWeight: '500', color: isOverdue ? '#dc2626' : isUrgent ? '#d97706' : '#059669' }}>
-                              [CAL] {new Date(goal.targetDate).toLocaleDateString()}
+                            <span style={{ fontSize: '12px', fontWeight: '400', color: isOverdue ? '#a4262c' : isUrgent ? '#8a6200' : '#0b6a0b' }}>
+                              📅 {new Date(goal.targetDate).toLocaleDateString()}
                             </span>
-                            <span style={{ fontSize: '12px', fontWeight: '600', color: isOverdue ? '#dc2626' : isUrgent ? '#d97706' : '#059669' }}>
-                              {isOverdue ? `[CLOCK] ${Math.abs(daysLeft)} days overdue` : `[PIN] ${daysLeft} days left`}
+                            <span style={{ fontSize: '12px', fontWeight: '600', color: isOverdue ? '#a4262c' : isUrgent ? '#8a6200' : '#0b6a0b' }}>
+                              {isOverdue ? `⏰ ${Math.abs(daysLeft)} days overdue` : `📌 ${daysLeft} days left`}
                             </span>
                           </div>
                         </div>
 
-                        {/* [STAR] Star Progress Tracker */}
-                        <div style={{ marginTop: '12px', padding: '12px', backgroundColor: '#fffbeb', borderRadius: '6px', border: '1px solid #fcd34d' }}>
+                        {/* Achievement Progress - MS Planner Style */}
+                        <div style={{ 
+                          marginTop: '12px', 
+                          padding: '12px', 
+                          backgroundColor: '#fef7da', 
+                          borderLeft: '3px solid #ffaa44',
+                          borderRadius: '2px'
+                        }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                            <span style={{ fontSize: '12px', fontWeight: '600', color: '#92400e' }}>[STAR] Progress Stars</span>
-                            <span style={{ fontSize: '12px', fontWeight: '600', color: '#f59e0b' }}>{goal.currentStars || 0} / {goal.stars ? Math.max(...goal.stars.map(s => s.count)) : 5}</span>
+                            <span style={{ fontSize: '12px', fontWeight: '600', color: '#323130' }}>⭐ Progress Stars</span>
+                            <span style={{ fontSize: '12px', fontWeight: '600', color: '#8a6200' }}>{goal.currentStars || 0} / {goal.stars ? Math.max(...goal.stars.map(s => s.count)) : 5}</span>
                           </div>
-                          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                          <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '8px' }}>
                             {[1, 2, 3, 4, 5].map(star => (
                               <button
                                 key={star}
                                 onClick={() => updateGoalStars(goalKey, star)}
                                 style={{
                                   padding: '6px 10px',
-                                  borderRadius: '4px',
-                                  border: '1px solid #fcd34d',
-                                  backgroundColor: (goal.currentStars || 0) >= star ? '#fbbf24' : '#fef3c7',
-                                  color: '#92400e',
+                                  borderRadius: '2px',
+                                  border: '1px solid #d9d9d9',
+                                  backgroundColor: (goal.currentStars || 0) >= star ? '#ffaa44' : 'white',
+                                  color: (goal.currentStars || 0) >= star ? 'white' : '#323130',
                                   cursor: 'pointer',
                                   fontWeight: '600',
                                   fontSize: '12px',
                                   transition: 'all 0.2s ease'
+                                }}
+                                onMouseOver={(e) => {
+                                  if ((goal.currentStars || 0) < star) {
+                                    e.target.style.backgroundColor = '#f3f2f1'
+                                  }
+                                }}
+                                onMouseOut={(e) => {
+                                  if ((goal.currentStars || 0) < star) {
+                                    e.target.style.backgroundColor = 'white'
+                                  }
                                 }}
                               >
                                 {star}
                               </button>
                             ))}
                           </div>
-                          <div style={{ marginTop: '8px', fontSize: '11px', color: '#92400e' }}>
-                            [STAR] {(goal.currentStars || 0) * 10} star points + {Math.floor((goal.currentStars || 0) / 5) * 100} badge points
+                          <div style={{ fontSize: '11px', color: '#605e5c' }}>
+                            💰 {(goal.currentStars || 0) * 10} star points + {Math.floor((goal.currentStars || 0) / 5) * 100} badge points
                           </div>
                         </div>
                       </div>
@@ -430,52 +549,55 @@ export default function GoalsPage() {
               )}
             </div>
 
-            {/* Sidebar - Add Goal Form */}
+            {/* Sidebar - MS Planner Style Panel */}
             <div style={{
-              background: 'rgba(255,255,255,0.95)',
-              borderRadius: '12px',
-              padding: '20px',
-              backdropFilter: 'blur(10px)',
+              backgroundColor: 'white',
+              border: '1px solid #edebe9',
+              borderRadius: '4px',
+              padding: '16px',
+              boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)',
               height: 'fit-content',
               position: 'sticky',
-              top: '20px'
+              top: '24px'
             }}>
-              <h3 style={{ margin: '0 0 15px 0', fontSize: '16px', fontWeight: '600', color: '#1f2937' }}>
-                {showAddGoal ? 'Add New Goal' : 'Quick Stats'}
+              <h3 style={{ margin: '0 0 16px 0', fontSize: '15px', fontWeight: '600', color: '#323130' }}>
+                {showAddGoal ? '📝 Add New Goal' : '📊 Quick Stats'}
               </h3>
 
               {!showAddGoal ? (
                 <>
                   <div style={{ marginBottom: '20px' }}>
-                    <div style={{ marginBottom: '15px' }}>
-                      <p style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#6b7280', fontWeight: '500' }}>Total Goals</p>
-                      <p style={{ margin: '0', fontSize: '24px', fontWeight: '700', color: '#667eea' }}>{subjectGoals.length}</p>
+                    <div style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #edebe9' }}>
+                      <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#605e5c', fontWeight: '400' }}>Total Goals</p>
+                      <p style={{ margin: '0', fontSize: '28px', fontWeight: '600', color: '#0078d4' }}>{subjectGoals.length}</p>
                     </div>
-                    <div style={{ marginBottom: '15px' }}>
-                      <p style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#6b7280', fontWeight: '500' }}>Completed</p>
-                      <p style={{ margin: '0', fontSize: '24px', fontWeight: '700', color: '#10b981' }}>
+                    <div style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #edebe9' }}>
+                      <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#605e5c', fontWeight: '400' }}>Completed</p>
+                      <p style={{ margin: '0', fontSize: '28px', fontWeight: '600', color: '#107c10' }}>
                         {subjectGoals.filter(([_, g]) => g.completed).length}
                       </p>
                     </div>
                     <div>
-                      <p style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#6b7280', fontWeight: '500' }}>Completion Rate</p>
+                      <p style={{ margin: '0 0 8px 0', fontSize: '12px', color: '#605e5c', fontWeight: '400' }}>Completion Rate</p>
                       <div style={{
                         width: '100%',
-                        height: '8px',
-                        backgroundColor: '#e5e7eb',
-                        borderRadius: '4px',
-                        overflow: 'hidden',
-                        marginTop: '8px'
+                        height: '6px',
+                        backgroundColor: '#edebe9',
+                        borderRadius: '3px',
+                        overflow: 'hidden'
                       }}>
                         <div
                           style={{
                             width: `${subjectGoals.length > 0 ? (subjectGoals.filter(([_, g]) => g.completed).length / subjectGoals.length) * 100 : 0}%`,
                             height: '100%',
-                            backgroundColor: '#10b981',
+                            backgroundColor: '#107c10',
                             transition: 'width 0.3s ease'
                           }}
                         ></div>
                       </div>
+                      <p style={{ margin: '6px 0 0 0', fontSize: '14px', fontWeight: '600', color: '#323130' }}>
+                        {subjectGoals.length > 0 ? Math.round((subjectGoals.filter(([_, g]) => g.completed).length / subjectGoals.length) * 100) : 0}%
+                      </p>
                     </div>
                   </div>
 
@@ -483,15 +605,18 @@ export default function GoalsPage() {
                     onClick={() => setShowAddGoal(true)}
                     style={{
                       width: '100%',
-                      padding: '10px 15px',
-                      borderRadius: '6px',
+                      padding: '8px 16px',
+                      borderRadius: '2px',
                       border: 'none',
-                      backgroundColor: '#667eea',
+                      backgroundColor: '#0078d4',
                       color: 'white',
                       fontWeight: '600',
                       cursor: 'pointer',
-                      fontSize: '14px'
+                      fontSize: '14px',
+                      transition: 'background-color 0.2s ease'
                     }}
+                    onMouseOver={(e) => e.target.style.backgroundColor = '#106ebe'}
+                    onMouseOut={(e) => e.target.style.backgroundColor = '#0078d4'}
                   >
                     + Add Goal
                   </button>
