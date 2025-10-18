@@ -222,106 +222,185 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <ChartBarIcon />
-                Dashboard
-              </h1>
-              <p className="text-gray-600 mt-1">Track your progress and productivity</p>
-            </div>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f3f2f1', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+      {/* MS Planner Style Top Navbar */}
+      <nav style={{ 
+        backgroundColor: '#5558AF', 
+        color: 'white', 
+        padding: '12px 24px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <a href="/" style={{ color: 'white', textDecoration: 'none', fontSize: '16px', fontWeight: '600' }}>
+            ← Back to Planner
+          </a>
+          <div style={{ borderLeft: '1px solid rgba(255,255,255,0.3)', height: '24px' }}></div>
+          <h1 style={{ margin: 0, fontSize: '20px', fontWeight: '600' }}>Analytics Dashboard</h1>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ fontSize: '13px', opacity: 0.9 }}>v1.0.3-361bf16</span>
+        </div>
+      </nav>
+
+      {/* Breadcrumb & Page Header */}
+      <div style={{ backgroundColor: 'white', borderBottom: '1px solid #edebe9', padding: '16px 24px' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+          <div style={{ fontSize: '12px', color: '#605e5c', marginBottom: '8px' }}>
+            <span>Home</span> / <span style={{ fontWeight: '600' }}>Analytics</span>
           </div>
+          <h2 style={{ color: '#323130', fontSize: '24px', fontWeight: '600', margin: '0' }}>Performance & Progress Insights</h2>
+          <p style={{ color: '#605e5c', fontSize: '14px', margin: '4px 0 0 0' }}>Monitor your study patterns, achievements, and productivity metrics</p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <KPICard
-            title="Study Progress"
-            value={`${studyData.averageProgress}%`}
-            subtitle={`${studyData.completedTopics}/${studyData.totalTopics} topics`}
-            icon={<BookOpenIcon />}
-            color="blue"
-            trend="+5% this week"
-          />
-          <KPICard
-            title="Active Timers"
-            value={timerData?.activeTimers || 0}
-            subtitle="Currently running"
-            icon={<ClockIcon />}
-            color="green"
-          />
-          <KPICard
-            title="Upcoming Events"
-            value={scheduleData?.upcomingEvents || 0}
-            subtitle="This month"
-            icon={<CalendarIcon />}
-            color="yellow"
-          />
-          <KPICard
-            title="Study Streak"
-            value="7"
-            subtitle="Days in a row"
-            icon={<TrophyIcon />}
-            color="purple"
-            trend="Keep it up!"
-          />
-        </div>
-
-        {/* [STAR] Star Points Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 p-6 rounded-xl shadow-md text-white">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold">[STAR] Star Points</h3>
-              <span className="text-3xl">⭐</span>
-            </div>
-            <p className="text-4xl font-bold">{starPoints}</p>
-            <p className="text-sm text-yellow-100 mt-2">10 points per completed goal star</p>
+      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px' }}>
+        {/* KPI Cards - MS Planner Style */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+          <div style={{ 
+            backgroundColor: 'white', 
+            border: '1px solid #edebe9', 
+            borderRadius: '4px', 
+            padding: '20px',
+            boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+          }}>
+            <div style={{ fontSize: '13px', color: '#605e5c', marginBottom: '8px', fontWeight: '600' }}>📚 STUDY PROGRESS</div>
+            <div style={{ fontSize: '32px', color: '#0078d4', fontWeight: '600', marginBottom: '4px' }}>{studyData.averageProgress}%</div>
+            <div style={{ fontSize: '12px', color: '#8a8886' }}>{studyData.completedTopics}/{studyData.totalTopics} topics completed</div>
+            <div style={{ fontSize: '11px', color: '#107c10', marginTop: '4px', fontWeight: '600' }}>↗ +5% this week</div>
           </div>
-          <div className="bg-gradient-to-br from-indigo-400 to-indigo-600 p-6 rounded-xl shadow-md text-white">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold">[BADGE] Badge Points</h3>
-              <span className="text-3xl">🏆</span>
-            </div>
-            <p className="text-4xl font-bold">{badgePoints}</p>
-            <p className="text-sm text-indigo-100 mt-2">100 points per badge (5 stars = 1 badge)</p>
+          
+          <div style={{ 
+            backgroundColor: 'white', 
+            border: '1px solid #edebe9', 
+            borderRadius: '4px', 
+            padding: '20px',
+            boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+          }}>
+            <div style={{ fontSize: '13px', color: '#605e5c', marginBottom: '8px', fontWeight: '600' }}>⏱️ ACTIVE TIMERS</div>
+            <div style={{ fontSize: '32px', color: '#107c10', fontWeight: '600', marginBottom: '4px' }}>{timerData?.activeTimers || 0}</div>
+            <div style={{ fontSize: '12px', color: '#8a8886' }}>Currently running</div>
           </div>
-          <div className="bg-gradient-to-br from-purple-400 to-purple-600 p-6 rounded-xl shadow-md text-white">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold">[TOTAL] Total Points</h3>
-              <span className="text-3xl">✨</span>
-            </div>
-            <p className="text-4xl font-bold">{starPoints + badgePoints}</p>
-            <p className="text-sm text-purple-100 mt-2">Combined achievement score</p>
+          
+          <div style={{ 
+            backgroundColor: 'white', 
+            border: '1px solid #edebe9', 
+            borderRadius: '4px', 
+            padding: '20px',
+            boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+          }}>
+            <div style={{ fontSize: '13px', color: '#605e5c', marginBottom: '8px', fontWeight: '600' }}>📅 UPCOMING EVENTS</div>
+            <div style={{ fontSize: '32px', color: '#ffaa44', fontWeight: '600', marginBottom: '4px' }}>{scheduleData?.upcomingEvents || 0}</div>
+            <div style={{ fontSize: '12px', color: '#8a8886' }}>This month</div>
+          </div>
+          
+          <div style={{ 
+            backgroundColor: 'white', 
+            border: '1px solid #edebe9', 
+            borderRadius: '4px', 
+            padding: '20px',
+            boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+          }}>
+            <div style={{ fontSize: '13px', color: '#605e5c', marginBottom: '8px', fontWeight: '600' }}>🔥 STUDY STREAK</div>
+            <div style={{ fontSize: '32px', color: '#8764b8', fontWeight: '600', marginBottom: '4px' }}>7</div>
+            <div style={{ fontSize: '12px', color: '#8a8886' }}>Days in a row</div>
+            <div style={{ fontSize: '11px', color: '#8764b8', marginTop: '4px', fontWeight: '600' }}>✨ Keep it up!</div>
           </div>
         </div>
 
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <SimpleChart
-            data={weeklyProgressData}
-            title="Weekly Study Progress"
-            color="blue"
-          />
-          {subjectProgressData.length > 0 && (
+        {/* Achievement Points - MS Planner Style */}
+        <div style={{ 
+          backgroundColor: 'white', 
+          border: '1px solid #edebe9', 
+          borderRadius: '4px', 
+          padding: '20px',
+          marginBottom: '24px',
+          boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+        }}>
+          <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#323130', marginBottom: '16px' }}>🏆 Achievement Points</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+            <div style={{ 
+              padding: '16px', 
+              backgroundColor: '#fff4ce', 
+              borderLeft: '4px solid #ffaa44',
+              borderRadius: '2px'
+            }}>
+              <div style={{ fontSize: '12px', color: '#8a6200', fontWeight: '600', marginBottom: '4px' }}>⭐ STAR POINTS</div>
+              <div style={{ fontSize: '28px', color: '#323130', fontWeight: '600', marginBottom: '2px' }}>{starPoints}</div>
+              <div style={{ fontSize: '11px', color: '#605e5c' }}>10 points per star</div>
+            </div>
+            
+            <div style={{ 
+              padding: '16px', 
+              backgroundColor: '#f3e5f5', 
+              borderLeft: '4px solid #8764b8',
+              borderRadius: '2px'
+            }}>
+              <div style={{ fontSize: '12px', color: '#553285', fontWeight: '600', marginBottom: '4px' }}>🏆 BADGE POINTS</div>
+              <div style={{ fontSize: '28px', color: '#323130', fontWeight: '600', marginBottom: '2px' }}>{badgePoints}</div>
+              <div style={{ fontSize: '11px', color: '#605e5c' }}>100 points per badge (5 stars)</div>
+            </div>
+            
+            <div style={{ 
+              padding: '16px', 
+              backgroundColor: '#dff6dd', 
+              borderLeft: '4px solid #107c10',
+              borderRadius: '2px'
+            }}>
+              <div style={{ fontSize: '12px', color: '#0b6a0b', fontWeight: '600', marginBottom: '4px' }}>✨ TOTAL POINTS</div>
+              <div style={{ fontSize: '28px', color: '#323130', fontWeight: '600', marginBottom: '2px' }}>{starPoints + badgePoints}</div>
+              <div style={{ fontSize: '11px', color: '#605e5c' }}>Combined achievement score</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Charts Section - MS Planner Style */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+          <div style={{ 
+            backgroundColor: 'white', 
+            border: '1px solid #edebe9', 
+            borderRadius: '4px', 
+            padding: '20px',
+            boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+          }}>
+            <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#323130', marginBottom: '16px' }}>📊 Weekly Study Progress</h3>
             <SimpleChart
-              data={subjectProgressData}
-              title="Subject-wise Progress"
-              color="green"
+              data={weeklyProgressData}
+              title=""
+              color="blue"
             />
+          </div>
+          {subjectProgressData.length > 0 && (
+            <div style={{ 
+              backgroundColor: 'white', 
+              border: '1px solid #edebe9', 
+              borderRadius: '4px', 
+              padding: '20px',
+              boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+            }}>
+              <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#323130', marginBottom: '16px' }}>📈 Subject-wise Progress</h3>
+              <SimpleChart
+                data={subjectProgressData}
+                title=""
+                color="green"
+              />
+            </div>
           )}
         </div>
 
-        {/* Progress Bars Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <h3 className="text-lg font-semibold mb-4">Study Topics Progress</h3>
-            <div className="space-y-4">
+        {/* Progress Section - MS Planner Style */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+          <div style={{ 
+            backgroundColor: 'white', 
+            border: '1px solid #edebe9', 
+            borderRadius: '4px', 
+            padding: '20px',
+            boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+          }}>
+            <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#323130', marginBottom: '16px' }}>📚 Study Topics Progress</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <ProgressBar
                 value={studyData.completedTopics}
                 max={studyData.totalTopics}
@@ -343,20 +422,30 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <h3 className="text-lg font-semibold mb-4">Subject Breakdown</h3>
-            <div className="space-y-4">
+          <div style={{ 
+            backgroundColor: 'white', 
+            border: '1px solid #edebe9', 
+            borderRadius: '4px', 
+            padding: '20px',
+            boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+          }}>
+            <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#323130', marginBottom: '16px' }}>🎯 Subject Breakdown</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {Object.entries(studyData.subjectStats).map(([subject, stats]) => (
-                <div key={subject} className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{subject}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">
+                <div key={subject} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '13px', fontWeight: '600', color: '#323130' }}>{subject}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '12px', color: '#605e5c' }}>
                       {stats.completed}/{stats.total}
                     </span>
-                    <div className="w-20 bg-gray-200 rounded-full h-2">
+                    <div style={{ width: '80px', height: '6px', backgroundColor: '#edebe9', borderRadius: '3px', overflow: 'hidden' }}>
                       <div
-                        className="bg-blue-500 h-2 rounded-full"
-                        style={{ width: `${(stats.completed / stats.total) * 100}%` }}
+                        style={{ 
+                          width: `${(stats.completed / stats.total) * 100}%`, 
+                          height: '100%', 
+                          backgroundColor: '#0078d4',
+                          transition: 'width 0.3s ease'
+                        }}
                       />
                     </div>
                   </div>
@@ -366,37 +455,85 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Recent Activity */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
-          <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
-          <div className="space-y-4">
-            <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-              <div className="p-2 bg-green-100 rounded-lg">
+        {/* Recent Activity - MS Planner Style */}
+        <div style={{ 
+          backgroundColor: 'white', 
+          border: '1px solid #edebe9', 
+          borderRadius: '4px', 
+          padding: '20px',
+          boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+        }}>
+          <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#323130', marginBottom: '16px' }}>⏱️ Recent Activity</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '12px', 
+              padding: '12px', 
+              backgroundColor: '#f3f2f1', 
+              borderRadius: '2px' 
+            }}>
+              <div style={{ 
+                padding: '8px', 
+                backgroundColor: '#dff6dd', 
+                borderRadius: '2px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
                 <TargetIcon />
               </div>
-              <div className="flex-1">
-                <p className="font-medium">Completed Physics Chapter 1</p>
-                <p className="text-sm text-gray-600">2 hours ago</p>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: '13px', fontWeight: '600', color: '#323130' }}>Completed Physics Chapter 1</p>
+                <p style={{ fontSize: '12px', color: '#605e5c' }}>2 hours ago</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-              <div className="p-2 bg-blue-100 rounded-lg">
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '12px', 
+              padding: '12px', 
+              backgroundColor: '#f3f2f1', 
+              borderRadius: '2px' 
+            }}>
+              <div style={{ 
+                padding: '8px', 
+                backgroundColor: '#deecf9', 
+                borderRadius: '2px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
                 <ClockIcon />
               </div>
-              <div className="flex-1">
-                <p className="font-medium">Started 25-minute study timer</p>
-                <p className="text-sm text-gray-600">4 hours ago</p>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: '13px', fontWeight: '600', color: '#323130' }}>Started 25-minute study timer</p>
+                <p style={{ fontSize: '12px', color: '#605e5c' }}>4 hours ago</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-              <div className="p-2 bg-yellow-100 rounded-lg">
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '12px', 
+              padding: '12px', 
+              backgroundColor: '#f3f2f1', 
+              borderRadius: '2px' 
+            }}>
+              <div style={{ 
+                padding: '8px', 
+                backgroundColor: '#fff4ce', 
+                borderRadius: '2px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
                 <CalendarIcon />
               </div>
-              <div className="flex-1">
-                <p className="font-medium">Added Diwali festival to schedule</p>
-                <p className="text-sm text-gray-600">1 day ago</p>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: '13px', fontWeight: '600', color: '#323130' }}>Added Diwali festival to schedule</p>
+                <p style={{ fontSize: '12px', color: '#605e5c' }}>1 day ago</p>
               </div>
             </div>
           </div>
