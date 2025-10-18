@@ -93,55 +93,85 @@ const TimerCard = ({ timer, onStart, onPause, onStop, onReset, onUpdateDuration 
     }
   }
 
-  const getTimerColor = () => {
-    if (timer.isRunning) return 'border-green-500 bg-green-50'
-    if (timer.timeLeft === 0) return 'border-red-500 bg-red-50'
-    return 'border-gray-300 bg-white'
+  const getTimerBackgroundColor = () => {
+    if (timer.isRunning) return '#dff6dd' // light green
+    if (timer.timeLeft === 0) return '#fde7e9' // light red
+    return 'white'
+  }
+
+  const getTimerBorderColor = () => {
+    if (timer.isRunning) return '#107c10' // MS green
+    if (timer.timeLeft === 0) return '#a4262c' // MS red
+    return '#edebe9'
   }
 
   const getProgressPercentage = () => {
     return ((timer.duration - timer.timeLeft) / timer.duration) * 100
   }
 
+  const getProgressColor = () => {
+    if (timer.isRunning) return '#107c10'
+    if (timer.timeLeft === 0) return '#a4262c'
+    return '#0078d4'
+  }
+
   return (
-    <div className={`rounded-xl border-2 p-6 transition-all duration-300 ${getTimerColor()}`}>
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-gray-100 rounded-lg">
+    <div style={{
+      backgroundColor: getTimerBackgroundColor(),
+      border: `1px solid ${getTimerBorderColor()}`,
+      borderRadius: '4px',
+      padding: '20px',
+      boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)',
+      transition: 'all 0.3s ease'
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ padding: '8px', backgroundColor: '#f3f2f1', borderRadius: '2px' }}>
             {timer.icon}
           </div>
           <div>
-            <h3 className="font-semibold text-lg">{timer.name}</h3>
-            <p className="text-sm text-gray-600">{timer.description}</p>
+            <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#323130', margin: 0 }}>{timer.name}</h3>
+            <p style={{ fontSize: '12px', color: '#605e5c', margin: '2px 0' }}>{timer.description}</p>
           </div>
         </div>
-        <div className="text-right">
-          <div className="text-2xl font-mono font-bold">
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: '24px', fontFamily: 'monospace', fontWeight: '600', color: '#323130' }}>
             {formatTime(timer.timeLeft)}
           </div>
-          <div className="text-xs text-gray-500">
+          <div style={{ fontSize: '11px', color: '#8a8886' }}>
             of {formatTime(timer.duration)}
           </div>
         </div>
       </div>
 
       {/* Progress Bar */}
-      <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+      <div style={{ width: '100%', height: '6px', backgroundColor: '#edebe9', borderRadius: '3px', marginBottom: '16px', overflow: 'hidden' }}>
         <div
-          className={`h-2 rounded-full transition-all duration-300 ${
-            timer.isRunning ? 'bg-green-500' : timer.timeLeft === 0 ? 'bg-red-500' : 'bg-blue-500'
-          }`}
-          style={{ width: `${getProgressPercentage()}%` }}
+          style={{ 
+            height: '100%', 
+            backgroundColor: getProgressColor(),
+            width: `${getProgressPercentage()}%`,
+            transition: 'all 0.3s ease'
+          }}
         />
       </div>
 
       {/* Controls */}
-      <div className="flex items-center justify-between">
-        <div className="flex gap-2">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+        <div style={{ display: 'flex', gap: '8px' }}>
           {!timer.isRunning && timer.timeLeft === timer.duration && (
             <button
               onClick={() => onStart(timer.id)}
-              className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+              style={{
+                padding: '8px',
+                backgroundColor: '#107c10',
+                color: 'white',
+                border: 'none',
+                borderRadius: '2px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center'
+              }}
             >
               <PlayIcon />
             </button>
@@ -150,16 +180,34 @@ const TimerCard = ({ timer, onStart, onPause, onStop, onReset, onUpdateDuration 
           {timer.isRunning && (
             <button
               onClick={() => onPause(timer.id)}
-              className="p-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+              style={{
+                padding: '8px',
+                backgroundColor: '#ffaa44',
+                color: 'white',
+                border: 'none',
+                borderRadius: '2px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center'
+              }}
             >
               <PauseIcon />
             </button>
           )}
 
-          {timer.isRunning || timer.timeLeft < timer.duration && (
+          {(timer.isRunning || timer.timeLeft < timer.duration) && (
             <button
               onClick={() => onStop(timer.id)}
-              className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              style={{
+                padding: '8px',
+                backgroundColor: '#a4262c',
+                color: 'white',
+                border: 'none',
+                borderRadius: '2px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center'
+              }}
             >
               <StopIcon />
             </button>
@@ -167,18 +215,36 @@ const TimerCard = ({ timer, onStart, onPause, onStop, onReset, onUpdateDuration 
 
           <button
             onClick={() => onReset(timer.id)}
-            className="p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+            style={{
+              padding: '8px',
+              backgroundColor: '#605e5c',
+              color: 'white',
+              border: 'none',
+              borderRadius: '2px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center'
+            }}
           >
             <ResetIcon />
           </button>
         </div>
 
-        <div className="flex gap-2">
+        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
           {timer.presets.map((preset, index) => (
             <button
               key={index}
               onClick={() => onUpdateDuration(timer.id, preset * 60)}
-              className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+              style={{
+                padding: '4px 8px',
+                fontSize: '12px',
+                backgroundColor: '#deecf9',
+                color: '#0078d4',
+                border: 'none',
+                borderRadius: '2px',
+                cursor: 'pointer',
+                fontWeight: '600'
+              }}
             >
               {preset}m
             </button>
@@ -186,7 +252,16 @@ const TimerCard = ({ timer, onStart, onPause, onStop, onReset, onUpdateDuration 
 
           <button
             onClick={() => setShowCustomInput(!showCustomInput)}
-            className="px-3 py-1 text-sm bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors"
+            style={{
+              padding: '4px 8px',
+              fontSize: '12px',
+              backgroundColor: '#f3e5f5',
+              color: '#8764b8',
+              border: 'none',
+              borderRadius: '2px',
+              cursor: 'pointer',
+              fontWeight: '600'
+            }}
           >
             Custom
           </button>
@@ -195,18 +270,33 @@ const TimerCard = ({ timer, onStart, onPause, onStop, onReset, onUpdateDuration 
 
       {/* Custom Duration Input */}
       {showCustomInput && (
-        <div className="mt-4 flex gap-2">
+        <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
           <input
             type="number"
             value={customDuration}
             onChange={(e) => setCustomDuration(e.target.value)}
             placeholder="Minutes"
-            className="flex-1 p-2 border rounded-lg text-sm"
+            style={{
+              flex: 1,
+              padding: '6px 8px',
+              border: '1px solid #8a8886',
+              borderRadius: '2px',
+              fontSize: '13px'
+            }}
             min="1"
           />
           <button
             onClick={handleCustomDuration}
-            className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm"
+            style={{
+              padding: '6px 16px',
+              backgroundColor: '#8764b8',
+              color: 'white',
+              border: 'none',
+              borderRadius: '2px',
+              cursor: 'pointer',
+              fontSize: '13px',
+              fontWeight: '600'
+            }}
           >
             Set
           </button>
@@ -215,13 +305,31 @@ const TimerCard = ({ timer, onStart, onPause, onStop, onReset, onUpdateDuration 
 
       {/* Status Messages */}
       {timer.timeLeft === 0 && !timer.isRunning && (
-        <div className="mt-4 p-3 bg-red-100 text-red-800 rounded-lg text-center font-medium">
-          [CLOCK] Time's up! {timer.name} completed.
+        <div style={{
+          marginTop: '12px',
+          padding: '12px',
+          backgroundColor: '#fde7e9',
+          color: '#a4262c',
+          borderRadius: '2px',
+          textAlign: 'center',
+          fontSize: '13px',
+          fontWeight: '600'
+        }}>
+          ⏰ Time's up! {timer.name} completed.
         </div>
       )}
 
       {timer.isRunning && (
-        <div className="mt-4 p-3 bg-green-100 text-green-800 rounded-lg text-center font-medium">
+        <div style={{
+          marginTop: '12px',
+          padding: '12px',
+          backgroundColor: '#dff6dd',
+          color: '#107c10',
+          borderRadius: '2px',
+          textAlign: 'center',
+          fontSize: '13px',
+          fontWeight: '600'
+        }}>
           ▶️ {timer.name} is running...
         </div>
       )}
@@ -419,24 +527,50 @@ export default function Timer() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <ClockIcon />
-                Timer Dashboard
-              </h1>
-              <p className="text-gray-600 mt-1">Track time for various activities and routines</p>
-            </div>
-          </div>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f3f2f1' }}>
+      {/* MS Planner Navbar */}
+      <div style={{ 
+        backgroundColor: '#5558AF', 
+        color: 'white',
+        padding: '12px 24px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button 
+            onClick={() => window.history.back()}
+            style={{ 
+              background: 'transparent', 
+              border: 'none', 
+              color: 'white', 
+              fontSize: '20px', 
+              cursor: 'pointer',
+              padding: '4px 8px'
+            }}
+          >
+            ←
+          </button>
+          <span style={{ fontSize: '16px', fontWeight: '600' }}>Timer Dashboard</span>
+        </div>
+        <span style={{ fontSize: '12px', opacity: 0.9 }}>v{packageJson.version}</span>
+      </div>
+
+      {/* Breadcrumb and Header */}
+      <div style={{ backgroundColor: 'white', borderBottom: '1px solid #edebe9', padding: '16px 24px' }}>
+        <div style={{ fontSize: '12px', color: '#605e5c', marginBottom: '8px' }}>
+          <a href="/" style={{ color: '#0078d4', textDecoration: 'none' }}>Home</a>
+          <span style={{ margin: '0 4px' }}>/</span>
+          <span>Timer</span>
+        </div>
+        <div>
+          <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#323130', margin: 0 }}>⏱️ Timer Dashboard</h1>
+          <p style={{ fontSize: '13px', color: '#605e5c', marginTop: '4px' }}>Track time for various activities and routines</p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
           {timers.map(timer => (
             <TimerCard
               key={timer.id}
@@ -450,25 +584,32 @@ export default function Timer() {
           ))}
         </div>
 
-        {/* Instructions */}
-        <div className="mt-12 bg-white rounded-xl shadow-sm border p-6">
-          <h2 className="text-xl font-semibold mb-4">How to Use</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Instructions - MS Planner Style */}
+        <div style={{ 
+          marginTop: '24px',
+          backgroundColor: 'white', 
+          border: '1px solid #edebe9', 
+          borderRadius: '4px',
+          padding: '20px',
+          boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+        }}>
+          <h2 style={{ fontSize: '15px', fontWeight: '600', color: '#323130', marginBottom: '16px' }}>ℹ️ How to Use</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
             <div>
-              <h3 className="font-medium mb-2">Timer Controls</h3>
-              <ul className="text-sm text-gray-600 space-y-1">
-                <li>• <strong>Play</strong>: Start the timer</li>
-                <li>• <strong>Pause</strong>: Pause the running timer</li>
-                <li>• <strong>Stop</strong>: Stop and reset to full duration</li>
-                <li>• <strong>Reset</strong>: Reset to original duration</li>
+              <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#323130', marginBottom: '8px' }}>Timer Controls</h3>
+              <ul style={{ fontSize: '13px', color: '#605e5c', listStyle: 'none', padding: 0 }}>
+                <li style={{ marginBottom: '4px' }}>• <strong>Play</strong>: Start the timer</li>
+                <li style={{ marginBottom: '4px' }}>• <strong>Pause</strong>: Pause the running timer</li>
+                <li style={{ marginBottom: '4px' }}>• <strong>Stop</strong>: Stop and reset to full duration</li>
+                <li style={{ marginBottom: '4px' }}>• <strong>Reset</strong>: Reset to original duration</li>
               </ul>
             </div>
             <div>
-              <h3 className="font-medium mb-2">Duration Presets</h3>
-              <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Quick preset buttons for common durations</li>
-                <li>• <strong>Custom</strong>: Set any duration in minutes</li>
-                <li>• All changes apply immediately</li>
+              <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#323130', marginBottom: '8px' }}>Duration Presets</h3>
+              <ul style={{ fontSize: '13px', color: '#605e5c', listStyle: 'none', padding: 0 }}>
+                <li style={{ marginBottom: '4px' }}>• Quick preset buttons for common durations</li>
+                <li style={{ marginBottom: '4px' }}>• <strong>Custom</strong>: Set any duration in minutes</li>
+                <li style={{ marginBottom: '4px' }}>• All changes apply immediately</li>
               </ul>
             </div>
           </div>
