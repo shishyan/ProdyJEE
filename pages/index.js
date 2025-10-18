@@ -1821,9 +1821,11 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
               <button className="close-btn" onClick={() => setEditingChapter(null)}>×</button>
             </div>
             <div className="modal-body">
-              <div className="topics-section">
-                <h3>Topics in this Chapter</h3>
-                <div className="topics-list">
+              {/* Topics Section - Scrollable */}
+              <div className="topics-scrollable-container">
+                <div className="topics-section">
+                  <h3>Topics in this Chapter</h3>
+                  <div className="topics-list">
                   {editingChapter.studyPlans.map(studyPlan => (
                     <div key={studyPlan.unique_id} className="topic-item-detailed">
                       <div className="topic-header">
@@ -1852,12 +1854,10 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
                                       })
 
                                       // Refresh the data
-                                      const response = await fetch('/api/study-plan')
-                                      const updatedStudyPlans = await response.json()
-                                      setStudyPlans(updatedStudyPlans)
+                                      await fetchData()
                                       
                                       // Update editingChapter with refreshed data
-                                      const updatedChapters = groupStudyPlansByChapter(updatedStudyPlans.filter(plan => plan.subject === selectedSubject?.name))
+                                      const updatedChapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject?.name))
                                       const updatedChapter = updatedChapters.find(ch => ch.chapter_id === editingChapter.chapter_id)
                                       if (updatedChapter) {
                                         setEditingChapter(updatedChapter)
@@ -1891,12 +1891,10 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
                                       })
 
                                       // Refresh the data
-                                      const response = await fetch('/api/study-plan')
-                                      const updatedStudyPlans = await response.json()
-                                      setStudyPlans(updatedStudyPlans)
+                                      await fetchData()
                                       
                                       // Update editingChapter with refreshed data
-                                      const updatedChapters = groupStudyPlansByChapter(updatedStudyPlans.filter(plan => plan.subject === selectedSubject?.name))
+                                      const updatedChapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject?.name))
                                       const updatedChapter = updatedChapters.find(ch => ch.chapter_id === editingChapter.chapter_id)
                                       if (updatedChapter) {
                                         setEditingChapter(updatedChapter)
@@ -1930,12 +1928,10 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
                                       })
 
                                       // Refresh the data
-                                      const response = await fetch('/api/study-plan')
-                                      const updatedStudyPlans = await response.json()
-                                      setStudyPlans(updatedStudyPlans)
+                                      await fetchData()
                                       
                                       // Update editingChapter with refreshed data
-                                      const updatedChapters = groupStudyPlansByChapter(updatedStudyPlans.filter(plan => plan.subject === selectedSubject?.name))
+                                      const updatedChapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject?.name))
                                       const updatedChapter = updatedChapters.find(ch => ch.chapter_id === editingChapter.chapter_id)
                                       if (updatedChapter) {
                                         setEditingChapter(updatedChapter)
@@ -1983,8 +1979,10 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
                   ))}
                 </div>
               </div>
+              </div>
 
-              <div className="notes-section">
+              {/* Notes and Voice Sections - Always Visible Below */}
+              <div className="modal-bottom-sections">
                 <h3>Notes</h3>
                 <textarea
                   placeholder="Add notes for this chapter..."

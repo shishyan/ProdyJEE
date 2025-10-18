@@ -1139,7 +1139,6 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 .board {
   flex: 1;
   padding: 20px;
-  padding-top: 100px; /* Reduced from 150px to remove empty space */
   overflow-y: auto;
 }
 
@@ -1574,11 +1573,31 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 
 .modal-body {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 24px;
   padding: 24px;
-  max-height: calc(60vh - 80px);
+  max-height: calc(90vh - 80px);
   overflow-y: auto;
+}
+
+.topics-scrollable-container {
+  flex: 1;
+  max-height: 60vh;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.modal-bottom-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .modal-left-section {
@@ -3083,7 +3102,7 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
-  padding: 0;
+  padding: 0 20px 0 40px; /* Added left padding to prevent overlap with sidebar */
   flex: 1;
 }
 
@@ -3856,7 +3875,7 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 }
 
 .backlog-card {
-  border: 2px dashed #9ca3af;
+  border: 3px dashed #374151;
 }
 
 .chapter-card:hover {
