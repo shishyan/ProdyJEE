@@ -2272,7 +2272,7 @@ export default function Home() {
   const [selectedDueDate, setSelectedDueDate] = useState(null)
   const [backgroundTheme, setBackgroundTheme] = useState('ocean')
   const [navbarBackground, setNavbarBackground] = useState('default')
-  const [viewMode, setViewMode] = useState('kanban') // 'kanban' or 'study-plan'
+  const [viewMode, setViewMode] = useState('kanban') // Only Kanban view - simplified
   const [studyPlans, setStudyPlans] = useState([])
   const [weatherEffect, setWeatherEffect] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
@@ -2819,7 +2819,7 @@ export default function Home() {
             </div>
             <div className="brand-subtitle">
               <span>Peepal Prodigy School</span>
-              <span className="version-tag">v{packageJson.version}</span>
+              <span className="version-tag">v1.0.3-ffa8e94</span>
             </div>
           </div>
 
@@ -2922,28 +2922,6 @@ export default function Home() {
                 ))}
               </div>
             </div>
-
-            {/* View Toggle */}
-            <div className="filter-group">
-              <div className="view-toggle-tabs">
-                <button
-                  className={`view-tab ${viewMode === 'kanban' ? 'active' : ''}`}
-                  onClick={() => setViewMode('kanban')}
-                  title="Kanban View"
-                >
-                  <BookOpenIcon />
-                  <span>Kanban</span>
-                </button>
-                <button
-                  className={`view-tab ${viewMode === 'study-plan' ? 'active' : ''}`}
-                  onClick={() => setViewMode('study-plan')}
-                  title="Study Plan View"
-                >
-                  <GridIcon />
-                  <span>Study Plan</span>
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -2960,26 +2938,26 @@ export default function Home() {
           </button>
         </div>
         <div className="sidebar-content">
-          <div className="sidebar-item" title="Dashboard">
+          <div className="sidebar-item" onClick={() => setCurrentPage('kanban')} title="Dashboard" style={{ cursor: 'pointer' }}>
             <HomeIcon />
             {!sidebarCollapsed && <span>Dashboard</span>}
           </div>
-          <div className="sidebar-item" title="Charts">
+          <a href="/dashboard" className="sidebar-item" title="Analytics" style={{ cursor: 'pointer' }}>
             <BarChartIcon />
-            {!sidebarCollapsed && <span>Charts</span>}
-          </div>
-          <div className="sidebar-item" title="Schedule">
+            {!sidebarCollapsed && <span>Analytics</span>}
+          </a>
+          <a href="/schedule" className="sidebar-item" title="Schedule" style={{ cursor: 'pointer' }}>
             <CalendarIcon />
             {!sidebarCollapsed && <span>Schedule</span>}
-          </div>
-          <div className="sidebar-item" title="Timer">
+          </a>
+          <a href="/timer" className="sidebar-item" title="Timer" style={{ cursor: 'pointer' }}>
             <TimerIcon />
             {!sidebarCollapsed && <span>Timer</span>}
-          </div>
-          <div className="sidebar-item" title="Relax">
+          </a>
+          <a href="/goals" className="sidebar-item" title="Goals" style={{ cursor: 'pointer' }}>
             <MeditationIcon />
-            {!sidebarCollapsed && <span>Relax</span>}
-          </div>
+            {!sidebarCollapsed && <span>Goals</span>}
+          </a>
         </div>
         <div className="sidebar-footer">
           {!sidebarCollapsed && (
