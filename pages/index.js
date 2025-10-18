@@ -2549,10 +2549,6 @@ export default function Home() {
     setEditingStudyPlan(studyPlan)
     // For static deployment, subtopics are not implemented
     setSubTopics([])
-    } catch (error) {
-      console.error('Error fetching chapter subtopics:', error)
-      setSubTopics([])
-    }
   }
 
   const startRecording = async () => {
