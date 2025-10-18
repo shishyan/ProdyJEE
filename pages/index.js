@@ -121,6 +121,33 @@ const TimerIcon = () => (
   </svg>
 )
 
+const getProficiencyIcons = (proficiency) => {
+  const starIcon = (
+    <svg className="proficiency-star" fill="currentColor" viewBox="0 0 20 20" width="16" height="16">
+      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+    </svg>
+  );
+
+  const awardIcon = (
+    <svg className="proficiency-award" fill="currentColor" viewBox="0 0 20 20" width="20" height="20">
+      <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+    </svg>
+  );
+
+  switch (proficiency) {
+    case 'Novice':
+      return <div className="proficiency-icons">{starIcon}</div>;
+    case 'Competent':
+      return <div className="proficiency-icons">{starIcon}{starIcon}{starIcon}</div>;
+    case 'Expert':
+      return <div className="proficiency-icons">{starIcon}{starIcon}{starIcon}{starIcon}{starIcon}</div>;
+    case 'Master':
+      return <div className="proficiency-icons">{awardIcon}</div>;
+    default:
+      return <div className="proficiency-icons">{starIcon}</div>;
+  }
+};
+
 const MeditationIcon = () => (
   <svg className="sidebar-icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -341,16 +368,7 @@ function StudyPlanCard({ studyPlan, bucketColor, onEdit, onUpdateProgress, getSt
         </div>
         <div className="detail-row">
           <span className="detail-label">Proficiency:</span>
-          <span
-            className="proficiency-badge"
-            style={{
-              backgroundColor: `${getProficiencyColor(studyPlan.learning_proficiency)}30`,
-              color: getProficiencyColor(studyPlan.learning_proficiency),
-              border: 'none'
-            }}
-          >
-            {studyPlan.learning_proficiency}
-          </span>
+          {getProficiencyIcons(studyPlan.learning_proficiency)}
         </div>
         <div className="detail-row highlight-row">
           <span className="detail-label highlight-label">Progress:</span>
@@ -564,7 +582,7 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
           </>
         )}
 
-        {earliestTargetDate && (
+        {earliestTargetDate && chapter.aggregatedStatus !== 'In Queue' && (
           <div className="chapter-target-date">
             <span className={`target-date-display ${daysLeft !== null && daysLeft < 0 ? 'overdue' : daysLeft !== null && daysLeft <= 7 ? 'urgent' : ''}`}>
               {daysLeft !== null ? (
@@ -1047,11 +1065,10 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
                       </select>
                     ) : (
                       <span
-                        className="proficiency-badge"
-                        style={{ backgroundColor: `${getProficiencyColor(plan.learning_proficiency)}20`, color: getProficiencyColor(plan.learning_proficiency) }}
+                        className="proficiency-display"
                         onClick={() => handleCellEdit(plan.unique_id, 'learning_proficiency', plan.learning_proficiency)}
                       >
-                        {plan.learning_proficiency}
+                        {getProficiencyIcons(plan.learning_proficiency)}
                       </span>
                     )
                   )}
@@ -1804,9 +1821,88 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
               <button className="close-btn" onClick={() => setEditingChapter(null)}>×</button>
             </div>
             <div className="modal-body">
+              <div className="topics-section">
+                <h3>Topics in this Chapter</h3>
+                <div className="topics-list">
+                  {editingChapter.studyPlans.map(studyPlan => (
+                    <div key={studyPlan.unique_id} className="topic-item-detailed">
+                      <div className="topic-header">
+                        <div className="topic-info">
+                          <div className="topic-completion">
+                            <input
+                              type="checkbox"
+                              checked={studyPlan.learning_status === 'Done'}
+                              onChange={async (e) => {
+                                const newStatus = e.target.checked ? 'Done' : 'In Queue'
+                                const newProgress = e.target.checked ? 100 : 0
+
+                                try {
+                                  await fetch('/api/study-plan', {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                      unique_id: studyPlan.unique_id,
+                                      learning_status: newStatus,
+                                      progress_percentage: newProgress
+                                    })
+                                  })
+
+                                  // Refresh the data
+                                  const response = await fetch('/api/study-plan')
+                                  const updatedStudyPlans = await response.json()
+                                  setStudyPlans(updatedStudyPlans)
+                                  
+                                  // Update editingChapter with refreshed data
+                                  const updatedChapters = groupStudyPlansByChapter(updatedStudyPlans.filter(plan => plan.subject === selectedSubject?.name))
+                                  const updatedChapter = updatedChapters.find(ch => ch.chapter_id === editingChapter.chapter_id)
+                                  if (updatedChapter) {
+                                    setEditingChapter(updatedChapter)
+                                  }
+                                } catch (error) {
+                                  console.error('Failed to update topic status:', error)
+                                }
+                              }}
+                              className="completion-checkbox"
+                            />
+                            <h4 className={`topic-title ${studyPlan.learning_status === 'Done' ? 'completed' : ''}`}>
+                              {studyPlan.topic}
+                            </h4>
+                          </div>
+                          <div className="topic-meta">
+                            <span className="topic-id">ID: {studyPlan.topic_id}</span>
+                            <span
+                              className="status-badge"
+                              style={{
+                                backgroundColor: `${getStatusColor(studyPlan.learning_status)}30`,
+                                color: getStatusColor(studyPlan.learning_status),
+                                border: `1px solid ${getStatusColor(studyPlan.learning_status)}`
+                              }}
+                            >
+                              {studyPlan.learning_status}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="topic-progress">
+                          <span className="progress-value">{studyPlan.progress_percentage}%</span>
+                          <div className="mini-progress-bar">
+                            <div
+                              className="mini-progress-fill"
+                              style={{
+                                width: `${studyPlan.progress_percentage}%`,
+                                backgroundColor: studyPlan.progress_percentage === 100 ? '#10b981' : studyPlan.progress_percentage > 0 ? '#f59e0b' : '#6b7280'
+                              }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="chapter-details">
                 <div className="chapter-info-section">
-                  <h3>Chapter Overview</h3>
+                  <h3>Chapter Summary</h3>
                   <div className="chapter-meta-info">
                     <div className="meta-item">
                       <span className="meta-label">Chapter ID:</span>
@@ -1861,116 +1957,6 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
                   </div>
                 </div>
 
-                <div className="topics-section">
-                  <h3>Topics in this Chapter</h3>
-                  <div className="topics-list">
-                    {editingChapter.studyPlans.map(studyPlan => (
-                      <div key={studyPlan.unique_id} className="topic-item-detailed">
-                        <div className="topic-header">
-                          <div className="topic-info">
-                            <div className="topic-completion">
-                              <input
-                                type="checkbox"
-                                checked={studyPlan.learning_status === 'Done'}
-                                onChange={async (e) => {
-                                  const newStatus = e.target.checked ? 'Done' : 'In Queue'
-                                  const newProgress = e.target.checked ? 100 : 0
-
-                                  try {
-                                    await fetch('/api/study-plan', {
-                                      method: 'PUT',
-                                      headers: { 'Content-Type': 'application/json' },
-                                      body: JSON.stringify({
-                                        unique_id: studyPlan.unique_id,
-                                        learning_status: newStatus,
-                                        progress_percentage: newProgress
-                                      })
-                                    })
-
-                                    // Refresh the data
-                                    const response = await fetch('/api/study-plan')
-                                    const updatedStudyPlans = await response.json()
-                                    setStudyPlans(updatedStudyPlans)
-                                    
-                                    // Update editingChapter with refreshed data
-                                    const updatedChapters = groupStudyPlansByChapter(updatedStudyPlans.filter(plan => plan.subject === selectedSubject?.name))
-                                    const updatedChapter = updatedChapters.find(ch => ch.chapter_id === editingChapter.chapter_id)
-                                    if (updatedChapter) {
-                                      setEditingChapter(updatedChapter)
-                                    }
-                                  } catch (error) {
-                                    console.error('Failed to update topic status:', error)
-                                  }
-                                }}
-                                className="completion-checkbox"
-                              />
-                              <h4 className={`topic-title ${studyPlan.learning_status === 'Done' ? 'completed' : ''}`}>
-                                {studyPlan.topic}
-                              </h4>
-                            </div>
-                            <div className="topic-meta">
-                              <span className="topic-id">ID: {studyPlan.topic_id}</span>
-                              <span
-                                className="status-badge"
-                                style={{
-                                  backgroundColor: `${getStatusColor(studyPlan.learning_status)}30`,
-                                  color: getStatusColor(studyPlan.learning_status),
-                                  border: `1px solid ${getStatusColor(studyPlan.learning_status)}`
-                                }}
-                              >
-                                {studyPlan.learning_status}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="topic-progress">
-                            <span className="progress-value">{studyPlan.progress_percentage}%</span>
-                            <div className="mini-progress-bar">
-                              <div
-                                className="mini-progress-fill"
-                                style={{
-                                  width: `${studyPlan.progress_percentage}%`,
-                                  backgroundColor: studyPlan.progress_percentage === 100 ? '#10b981' : studyPlan.progress_percentage > 0 ? '#f59e0b' : '#6b7280'
-                                }}
-                              ></div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="topic-details">
-                          <div className="detail-row">
-                            <span className="detail-label">Stage:</span>
-                            <span className="detail-value">{studyPlan.learning_stage}</span>
-                          </div>
-                          <div className="detail-row">
-                            <span className="detail-label">Proficiency:</span>
-                            <span
-                              className="proficiency-badge"
-                              style={{
-                                backgroundColor: `${getProficiencyColor(studyPlan.learning_proficiency)}30`,
-                                color: getProficiencyColor(studyPlan.learning_proficiency),
-                                border: 'none'
-                              }}
-                            >
-                              {studyPlan.learning_proficiency}
-                            </span>
-                          </div>
-                          {studyPlan.target_date && (
-                            <div className="detail-row">
-                              <span className="detail-label">Target Date:</span>
-                              <span className="detail-value">{new Date(studyPlan.target_date).toLocaleDateString()}</span>
-                            </div>
-                          )}
-                          {studyPlan.notes && (
-                            <div className="detail-row notes-row">
-                              <span className="detail-label">Notes:</span>
-                              <span className="detail-value notes">{studyPlan.notes}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               </div>
             </div>
           </div>

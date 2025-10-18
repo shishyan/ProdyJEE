@@ -2839,6 +2839,27 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
   border: none;
 }
 
+.proficiency-icons {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.proficiency-star {
+  color: #fbbf24; /* amber-400 */
+}
+
+.proficiency-award {
+  color: #f59e0b; /* amber-500 */
+}
+
+.proficiency-display {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .study-plan-due-date, .study-plan-details-popup {
   display: flex;
   flex-wrap: wrap;
@@ -3809,7 +3830,7 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 12px;
-  padding: 12px;
+  padding: 18px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.1);
 }
