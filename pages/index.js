@@ -2331,20 +2331,38 @@ export default function Home() {
   }, [zenRhythmsEnabled, musicPlaying, backgroundMusic])
 
   const fetchData = async () => {
-    // For static deployment, use existing data or fallback
-    const existingData = localStorage.getItem('study-plans-data')
+    // Try to load from database export first, then localStorage, then fallback
     let finalStudyPlansData = []
 
-    if (existingData) {
-      try {
-        finalStudyPlansData = JSON.parse(existingData)
-      } catch (parseError) {
-        console.error('Failed to parse localStorage data:', parseError)
-        finalStudyPlansData = []
+    try {
+      // Try to fetch the database export from public folder
+      const response = await fetch('/ProdyJEE/database-export.json')
+      if (response.ok) {
+        const data = await response.json()
+        finalStudyPlansData = data.studyPlans || data
+        console.log(`✅ Loaded ${finalStudyPlansData.length} records from database export`)
+      } else {
+        throw new Error('Database export not found')
       }
-    } else {
-      // Use demo data if no localStorage data
-      finalStudyPlansData = [
+    } catch (dbError) {
+      console.warn('⚠️ Database export not available, trying localStorage...', dbError.message)
+      
+      // Fallback to localStorage
+      const existingData = localStorage.getItem('study-plans-data')
+      if (existingData) {
+        try {
+          finalStudyPlansData = JSON.parse(existingData)
+          console.log(`✅ Loaded ${finalStudyPlansData.length} records from localStorage`)
+        } catch (parseError) {
+          console.error('❌ Failed to parse localStorage data:', parseError)
+          finalStudyPlansData = []
+        }
+      }
+
+      // If still no data, use fallback demo data
+      if (finalStudyPlansData.length === 0) {
+        console.warn('⚠️ Using fallback demo data')
+        finalStudyPlansData = [
         {
           unique_id: "PHY-1.1",
           curriculum: "CBSE",
@@ -2442,6 +2460,7 @@ export default function Home() {
           notes: "Basic concepts of sets and relations."
         }
       ]
+      }
     }
 
     // Extract unique subjects from study plans

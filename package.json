@@ -10,6 +10,8 @@
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
     "seed": "node prisma/seed.js",
+    "export:db": "node export-db-to-json.js",
+    "prebuild": "node export-db-to-json.js",
     "version:patch": "npm version patch --no-git-tag-version"
   },
   "dependencies": {
