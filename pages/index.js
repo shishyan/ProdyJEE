@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import packageJson from '../package.json'
+import BackgroundSettings from '../components/BackgroundSettings'
 import {
   DndContext,
   KeyboardSensor,
@@ -2276,6 +2277,7 @@ export default function Home() {
   const [studyPlans, setStudyPlans] = useState([])
   const [weatherEffect, setWeatherEffect] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [showBackgroundSettings, setShowBackgroundSettings] = useState(false)
   const [backgroundMusic, setBackgroundMusic] = useState('zen-mixed')
   const [musicVolume, setMusicVolume] = useState(0.2)
   const [musicPlaying, setMusicPlaying] = useState(true) // Auto-play zen rhythms
@@ -2831,37 +2833,8 @@ export default function Home() {
               </h3>
             </div>
           )}
-          {/* Right Side - Actions */}
+          {/* Right Side - Actions (Duplicates removed - use sidebar for navigation) */}
           <div className="navbar-actions">
-            <button
-              className={`nav-action-btn ${currentPage === 'kanban' ? 'active' : ''}`}
-              onClick={() => setCurrentPage('kanban')}
-              title="Kanban Board"
-            >
-              <GridIcon />
-            </button>
-            <button
-              className={`nav-action-btn ${currentPage === 'schedule' ? 'active' : ''}`}
-              onClick={() => setCurrentPage('schedule')}
-              title="Schedule"
-            >
-              <CalendarIcon />
-            </button>
-            <button
-              className={`nav-action-btn ${currentPage === 'timer' ? 'active' : ''}`}
-              onClick={() => setCurrentPage('timer')}
-              title="Timer"
-            >
-              <ClockIcon />
-            </button>
-            <button
-              className={`nav-action-btn ${currentPage === 'dashboard' ? 'active' : ''}`}
-              onClick={() => setCurrentPage('dashboard')}
-              title="Dashboard"
-            >
-              <ChartBarIcon />
-            </button>
-            <div className="nav-separator"></div>
             <button
               className="nav-action-btn"
               onClick={() => setShowSettings(true)}
@@ -2871,8 +2844,8 @@ export default function Home() {
             </button>
             <button
               className="nav-action-btn"
-              onClick={() => {/* Theme toggle logic */}}
-              title="Themes"
+              onClick={() => setShowBackgroundSettings(true)}
+              title="Background Settings"
             >
               <PaletteIcon />
             </button>
@@ -4134,6 +4107,12 @@ export default function Home() {
           <div className="voice-assistant-pulse"></div>
         </button>
       </div>
+
+      {/* Background Settings Modal */}
+      <BackgroundSettings 
+        show={showBackgroundSettings} 
+        onClose={() => setShowBackgroundSettings(false)} 
+      />
     </div>
   )
 }

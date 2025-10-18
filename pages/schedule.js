@@ -1,576 +1,539 @@
 import { useState, useEffect } from 'react'
 import packageJson from '../package.json'
-import DatePicker from 'react-datepicker'
-import 'react-datepicker/dist/react-datepicker.css'
+import Head from 'next/head'
 
-// Modern Icons as SVG components
-const CalendarIcon = () => (
-  <svg className="nav-icon w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-  </svg>
-)
+// Sample CBSE Weekly Class Schedule
+const cbseSchedule = {
+  Monday: [
+    { time: '8:00-8:45', subject: 'Mathematics', type: 'class', color: '#FF6B6B' },
+    { time: '8:45-9:30', subject: 'Physics', type: 'class', color: '#4ECDC4' },
+    { time: '9:30-9:45', subject: 'Break', type: 'break', color: '#95E1D3' },
+    { time: '9:45-10:30', subject: 'Chemistry', type: 'class', color: '#F38181' },
+    { time: '10:30-11:15', subject: 'English', type: 'class', color: '#AA96DA' },
+    { time: '11:15-12:00', subject: 'Physical Education', type: 'class', color: '#FCBAD3' }
+  ],
+  Tuesday: [
+    { time: '8:00-8:45', subject: 'Chemistry', type: 'class', color: '#F38181' },
+    { time: '8:45-9:30', subject: 'Mathematics', type: 'class', color: '#FF6B6B' },
+    { time: '9:30-9:45', subject: 'Break', type: 'break', color: '#95E1D3' },
+    { time: '9:45-10:30', subject: 'Physics', type: 'class', color: '#4ECDC4' },
+    { time: '10:30-11:15', subject: 'Computer Science', type: 'class', color: '#A8E6CF' },
+    { time: '11:15-12:00', subject: 'English', type: 'class', color: '#AA96DA' }
+  ],
+  Wednesday: [
+    { time: '8:00-8:45', subject: 'Physics', type: 'class', color: '#4ECDC4' },
+    { time: '8:45-9:30', subject: 'Chemistry', type: 'class', color: '#F38181' },
+    { time: '9:30-9:45', subject: 'Break', type: 'break', color: '#95E1D3' },
+    { time: '9:45-10:30', subject: 'Mathematics', type: 'class', color: '#FF6B6B' },
+    { time: '10:30-11:15', subject: 'English', type: 'class', color: '#AA96DA' },
+    { time: '11:15-12:00', subject: 'Library', type: 'class', color: '#FFD3B6' }
+  ],
+  Thursday: [
+    { time: '8:00-8:45', subject: 'Mathematics', type: 'class', color: '#FF6B6B' },
+    { time: '8:45-9:30', subject: 'Physics', type: 'class', color: '#4ECDC4' },
+    { time: '9:30-9:45', subject: 'Break', type: 'break', color: '#95E1D3' },
+    { time: '9:45-10:30', subject: 'Computer Science', type: 'class', color: '#A8E6CF' },
+    { time: '10:30-11:15', subject: 'Chemistry', type: 'class', color: '#F38181' },
+    { time: '11:15-12:00', subject: 'English', type: 'class', color: '#AA96DA' }
+  ],
+  Friday: [
+    { time: '8:00-8:45', subject: 'Chemistry', type: 'class', color: '#F38181' },
+    { time: '8:45-9:30', subject: 'Mathematics', type: 'class', color: '#FF6B6B' },
+    { time: '9:30-9:45', subject: 'Break', type: 'break', color: '#95E1D3' },
+    { time: '9:45-10:30', subject: 'Physics', type: 'class', color: '#4ECDC4' },
+    { time: '10:30-11:15', subject: 'English', type: 'class', color: '#AA96DA' },
+    { time: '11:15-12:00', subject: 'Arts/Music', type: 'class', color: '#FFAAA5' }
+  ],
+  Saturday: [
+    { time: '8:00-8:45', subject: 'Lab - Physics', type: 'lab', color: '#4ECDC4' },
+    { time: '8:45-9:30', subject: 'Lab - Chemistry', type: 'lab', color: '#F38181' },
+    { time: '9:30-9:45', subject: 'Break', type: 'break', color: '#95E1D3' },
+    { time: '9:45-10:30', subject: 'Lab - Computer', type: 'lab', color: '#A8E6CF' },
+    { time: '10:30-11:15', subject: 'Sports', type: 'class', color: '#FCBAD3' },
+    { time: '11:15-12:00', subject: 'Club Activities', type: 'class', color: '#C7CEEA' }
+  ],
+  Sunday: []
+}
 
-const ClockIcon = () => (
-  <svg className="nav-icon w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-)
+// School Holidays (Indian festivals + school breaks)
+const schoolHolidays = [
+  { date: '2025-01-26', name: 'Republic Day', color: '#FF9933' },
+  { date: '2025-03-08', name: 'Holi', color: '#FF69B4' },
+  { date: '2025-04-10', name: 'Ugadi/Gudi Padwa', color: '#FFD700' },
+  { date: '2025-04-14', name: 'Ambedkar Jayanti', color: '#4169E1' },
+  { date: '2025-05-01', name: 'May Day', color: '#DC143C' },
+  { date: '2025-08-15', name: 'Independence Day', color: '#FF9933' },
+  { date: '2025-08-27', name: 'Janmashtami', color: '#9370DB' },
+  { date: '2025-10-02', name: 'Gandhi Jayanti', color: '#228B22' },
+  { date: '2025-10-24', name: 'Dussehra', color: '#FF4500' },
+  { date: '2025-11-12', name: 'Diwali', color: '#FFD700' },
+  { date: '2025-12-25', name: 'Christmas', color: '#DC143C' }
+]
 
-const HeartIcon = () => (
-  <svg className="nav-icon w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-  </svg>
-)
-
-const BookOpenIcon = () => (
-  <svg className="nav-icon w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-  </svg>
-)
-
-const PartyIcon = () => (
-  <svg className="nav-icon w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2M16 7a4 4 0 11-8 0 4 4 0 018 0z" />
-  </svg>
-)
-
-const CakeIcon = () => (
-  <svg className="nav-icon w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-2a4 4 0 00-4-4H7a4 4 0 00-4 4v2" />
-  </svg>
-)
-
-const PlusIcon = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-  </svg>
-)
-
-export default function Schedule() {
-  const [events, setEvents] = useState([])
-  const [showAddForm, setShowAddForm] = useState(false)
+export default function SchedulePage() {
+  const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(new Date())
-  const [newEvent, setNewEvent] = useState({
-    title: '',
-    type: 'school',
-    date: new Date(),
-    description: '',
-    recurring: false,
-    recurringType: 'monthly'
-  })
+  const [events, setEvents] = useState([])
+  const [studyPlans, setStudyPlans] = useState([])
+  const [menstrualCycle, setMenstrualCycle] = useState([])
+  const [showAddEvent, setShowAddEvent] = useState(false)
+  const [view, setView] = useState('month') // month, week, day
 
-  // Load events from localStorage on component mount
   useEffect(() => {
-    const savedEvents = localStorage.getItem('schedule-events')
-    if (savedEvents) {
-      const parsedEvents = JSON.parse(savedEvents).map(event => ({
-        ...event,
-        date: new Date(event.date)
-      }))
-      setEvents(parsedEvents)
-    } else {
-      // Add some default events
-      const defaultEvents = [
-        {
-          id: 1,
-          title: 'School Period',
-          type: 'school',
-          date: new Date(2025, 9, 18), // October 18, 2025
-          description: 'Regular school classes',
-          recurring: true,
-          recurringType: 'weekly'
-        },
-        {
-          id: 2,
-          title: 'Diwali Festival',
-          type: 'festival',
-          date: new Date(2025, 10, 5), // November 5, 2025
-          description: 'Festival of lights',
-          recurring: false
-        },
-        {
-          id: 3,
-          title: 'Birthday - Mom',
-          type: 'birthday',
-          date: new Date(2025, 11, 15), // December 15, 2025
-          description: 'Mother\'s birthday',
-          recurring: true,
-          recurringType: 'yearly'
-        }
-      ]
-      setEvents(defaultEvents)
-      localStorage.setItem('schedule-events', JSON.stringify(defaultEvents))
-    }
+    loadEvents()
+    loadStudyPlans()
+    loadMenstrualData()
   }, [])
 
-  // Save events to localStorage whenever events change
-  useEffect(() => {
-    localStorage.setItem('schedule-events', JSON.stringify(events))
-  }, [events])
-
-  const addEvent = () => {
-    if (!newEvent.title.trim()) return
-
-    const event = {
-      id: Date.now(),
-      ...newEvent
-    }
-
-    setEvents(prev => [...prev, event])
-    setNewEvent({
-      title: '',
-      type: 'school',
-      date: new Date(),
-      description: '',
-      recurring: false,
-      recurringType: 'monthly'
-    })
-    setShowAddForm(false)
-  }
-
-  const deleteEvent = (id) => {
-    setEvents(prev => prev.filter(event => event.id !== id))
-  }
-
-  const getEventIcon = (type) => {
-    switch (type) {
-      case 'school': return <BookOpenIcon />
-      case 'menstrual': return <HeartIcon />
-      case 'festival': return <PartyIcon />
-      case 'birthday': return <CakeIcon />
-      case 'holiday': return <CalendarIcon />
-      default: return <ClockIcon />
+  const loadEvents = () => {
+    const saved = localStorage.getItem('schedule-events')
+    if (saved) {
+      setEvents(JSON.parse(saved).map(e => ({ ...e, date: new Date(e.date) })))
     }
   }
 
-  const getEventColor = (type) => {
-    switch (type) {
-      case 'school': return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'menstrual': return 'bg-pink-100 text-pink-800 border-pink-200'
-      case 'festival': return 'bg-purple-100 text-purple-800 border-purple-200'
-      case 'birthday': return 'bg-green-100 text-green-800 border-green-200'
-      case 'holiday': return 'bg-orange-100 text-orange-800 border-orange-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+  const loadStudyPlans = async () => {
+    try {
+      const response = await fetch('/ProdyJEE/database-export.json')
+      const data = await response.json()
+      setStudyPlans(data)
+    } catch (error) {
+      console.error('Failed to load study plans:', error)
     }
   }
 
-  const getUpcomingEvents = () => {
+  const loadMenstrualData = () => {
+    const saved = localStorage.getItem('menstrual-cycle')
+    if (saved) {
+      setMenstrualCycle(JSON.parse(saved).map(d => new Date(d)))
+    }
+  }
+
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear()
+    const month = date.getMonth()
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    const daysInMonth = lastDay.getDate()
+    const startingDayOfWeek = firstDay.getDay()
+    
+    const days = []
+    // Add empty cells for days before the first of the month
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push(null)
+    }
+    // Add all days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push(new Date(year, month, day))
+    }
+    return days
+  }
+
+  const isToday = (date) => {
+    if (!date) return false
     const today = new Date()
-    return events
-      .filter(event => event.date >= today)
-      .sort((a, b) => a.date - b.date)
-      .slice(0, 5)
+    return date.toDateString() === today.toDateString()
+  }
+
+  const isSelected = (date) => {
+    if (!date) return false
+    return date.toDateString() === selectedDate.toDateString()
+  }
+
+  const getHoliday = (date) => {
+    if (!date) return null
+    const dateStr = date.toISOString().split('T')[0]
+    return schoolHolidays.find(h => h.date === dateStr)
+  }
+
+  const isMenstrualDay = (date) => {
+    if (!date) return false
+    return menstrualCycle.some(d => d.toDateString() === date.toDateString())
   }
 
   const getEventsForDate = (date) => {
-    return events.filter(event =>
-      event.date.toDateString() === date.toDateString()
-    )
+    if (!date) return []
+    return events.filter(e => e.date.toDateString() === date.toDateString())
   }
 
-  const formatDate = (date) => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric'
-    })
+  const getDaySchedule = (date) => {
+    if (!date) return []
+    const dayName = date.toLocaleDateString('en-US', { weekday: 'long' })
+    return cbseSchedule[dayName] || []
   }
 
-  const formatTime = (date) => {
-    return date.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit'
-    })
+  const changeMonth = (delta) => {
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + delta, 1))
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-      {/* MS Planner Navbar */}
+    <>
+      <Head>
+        <title>Schedule & Calendar - ProdyJEE</title>
+        <link rel="stylesheet" href="/ProdyJEE/styles/globals.css" />
+      </Head>
+
       <div style={{ 
-        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.45) 50%, rgba(255, 255, 255, 0.5) 100%)',
-        backdropFilter: 'blur(30px)',
-        WebkitBackdropFilter: 'blur(30px)', 
-        color: 'white',
-        padding: '12px 24px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between'
+        minHeight: '100vh', 
+        backgroundImage: 'url(/ProdyJEE/images/nature-bg.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button 
-            onClick={() => window.history.back()}
-            style={{ 
-              background: 'transparent', 
-              border: 'none', 
-              color: 'white', 
-              fontSize: '20px', 
-              cursor: 'pointer',
-              padding: '4px 8px'
-            }}
-          >
-            ←
-          </button>
-          <span style={{ fontSize: '16px', fontWeight: '600' }}>Schedule Tracker</span>
-        </div>
-        <span style={{ fontSize: '12px', opacity: 0.9 }}>v{packageJson.version}</span>
-      </div>
-
-      {/* Breadcrumb and Header */}
-      <div style={{ background: 'rgba(255, 255, 255, 0.25)', borderBottom: '1px solid #edebe9', padding: '16px 24px' }}>
-        <div style={{ fontSize: '12px', color: '#605e5c', marginBottom: '8px' }}>
-          <a href="/ProdyJEE/" style={{ color: '#0078d4', textDecoration: 'none' }}>Home</a>
-          <span style={{ margin: '0 4px' }}>/</span>
-          <span>Schedule</span>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#323130', margin: 0 }}>📅 Schedule Tracker</h1>
-            <p style={{ fontSize: '13px', color: '#605e5c', marginTop: '4px' }}>Track important dates, periods, and events</p>
-          </div>
-          <button
-            onClick={() => setShowAddForm(true)}
-            style={{
-              backgroundColor: '#0078d4',
-              color: 'white',
-              border: 'none',
-              padding: '8px 16px',
-              borderRadius: '2px',
-              fontSize: '13px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            <PlusIcon />
-            Add Event
-          </button>
-        </div>
-      </div>
-
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
-          {/* Calendar Section */}
-          <div style={{ gridColumn: 'span 2' }}>
-            <div style={{ 
-              background: 'rgba(255, 255, 255, 0.25)', 
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)', 
-              borderRadius: '12px',
-              padding: '20px',
-              boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
-            }}>
-              <h2 style={{ fontSize: '15px', fontWeight: '600', color: '#323130', marginBottom: '16px' }}>📅 Calendar</h2>
-              <div className="calendar-container">
-                <DatePicker
-                  selected={selectedDate}
-                  onChange={setSelectedDate}
-                  inline
-                  className="w-full"
-                />
-              </div>
-
-              {/* Events for selected date */}
-              <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #edebe9' }}>
-                <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#323130', marginBottom: '12px' }}>
-                  Events on {formatDate(selectedDate)}
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {getEventsForDate(selectedDate).length === 0 ? (
-                    <p style={{ fontSize: '13px', color: '#605e5c', textAlign: 'center', padding: '16px' }}>No events scheduled</p>
-                  ) : (
-                    getEventsForDate(selectedDate).map(event => (
-                      <div key={event.id} style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'space-between',
-                        padding: '12px', 
-                        backgroundColor: '#f3f2f1',
-                        borderRadius: '2px'
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div className={`p-2 rounded-lg ${getEventColor(event.type)}`} style={{ padding: '8px', borderRadius: '2px' }}>
-                            {getEventIcon(event.type)}
-                          </div>
-                          <div>
-                            <h4 style={{ fontSize: '13px', fontWeight: '600', color: '#323130', margin: 0 }}>{event.title}</h4>
-                            <p style={{ fontSize: '12px', color: '#605e5c', margin: '2px 0' }}>{event.description}</p>
-                            {event.recurring && (
-                              <span style={{ 
-                                fontSize: '11px', 
-                                backgroundColor: '#edebe9', 
-                                color: '#323130',
-                                padding: '2px 8px',
-                                borderRadius: '2px',
-                                display: 'inline-block',
-                                marginTop: '4px'
-                              }}>
-                                Recurring {event.recurringType}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => deleteEvent(event.id)}
-                          style={{
-                            color: '#a4262c',
-                            backgroundColor: 'transparent',
-                            border: 'none',
-                            fontSize: '20px',
-                            cursor: 'pointer',
-                            padding: '4px 8px'
-                          }}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {/* Upcoming Events */}
-            <div style={{ 
-              background: 'rgba(255, 255, 255, 0.25)', 
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)', 
-              borderRadius: '12px',
-              padding: '20px',
-              boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
-            }}>
-              <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#323130', marginBottom: '12px' }}>📌 Upcoming Events</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {getUpcomingEvents().map(event => (
-                  <div key={event.id} style={{ 
-                    display: 'flex', 
-                    alignItems: 'flex-start', 
-                    gap: '12px',
-                    padding: '12px',
-                    backgroundColor: '#f3f2f1',
-                    borderRadius: '2px'
-                  }}>
-                    <div className={`p-2 rounded-lg ${getEventColor(event.type)}`} style={{ padding: '8px', borderRadius: '2px', flexShrink: 0 }}>
-                      {getEventIcon(event.type)}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <h4 style={{ fontSize: '13px', fontWeight: '600', color: '#323130', margin: 0 }}>{event.title}</h4>
-                      <p style={{ fontSize: '11px', color: '#605e5c', margin: '2px 0' }}>{formatDate(event.date)}</p>
-                      <p style={{ fontSize: '11px', color: '#8a8886', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{event.description}</p>
-                    </div>
-                  </div>
-                ))}
-                {getUpcomingEvents().length === 0 && (
-                  <p style={{ fontSize: '13px', color: '#605e5c', textAlign: 'center', padding: '16px' }}>No upcoming events</p>
-                )}
-              </div>
-            </div>
-
-            {/* Event Types */}
-            <div style={{ 
-              background: 'rgba(255, 255, 255, 0.25)', 
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)', 
-              borderRadius: '12px',
-              padding: '20px',
-              boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
-            }}>
-              <h3 style={{ fontSize: '15px', fontWeight: '600', color: '#323130', marginBottom: '12px' }}>🏷️ Event Types</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {[
-                  { type: 'school', label: 'School Period', icon: BookOpenIcon },
-                  { type: 'menstrual', label: 'Menstrual Period', icon: HeartIcon },
-                  { type: 'festival', label: 'Festival Holiday', icon: PartyIcon },
-                  { type: 'birthday', label: 'Birthday', icon: CakeIcon },
-                  { type: 'holiday', label: 'Public Holiday', icon: CalendarIcon }
-                ].map(({ type, label, icon: Icon }) => (
-                  <div key={type} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div className={`p-2 rounded-lg ${getEventColor(type)}`} style={{ padding: '8px', borderRadius: '2px' }}>
-                      <Icon />
-                    </div>
-                    <span style={{ fontSize: '13px', color: '#323130' }}>{label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Add Event Modal - MS Planner Style */}
-      {showAddForm && (
-        <div style={{ 
-          position: 'fixed', 
-          inset: 0, 
-          backgroundColor: 'rgba(0, 0, 0, 0.4)', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          zIndex: 50 
+        {/* Glassmorphism Navbar */}
+        <nav style={{ 
+          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.45) 50%, rgba(255, 255, 255, 0.5) 100%)',
+          backdropFilter: 'blur(30px)',
+          WebkitBackdropFilter: 'blur(30px)',
+          color: '#1a1a1a', 
+          padding: '12px 24px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 1000
         }}>
-          <div style={{ 
-            background: 'rgba(255, 255, 255, 0.25)', 
-            borderRadius: '12px',
-            padding: '24px',
-            width: '100%',
-            maxWidth: '480px',
-            margin: '0 16px',
-            boxShadow: '0 6.4px 14.4px 0 rgba(0,0,0,0.132), 0 1.2px 3.6px 0 rgba(0,0,0,0.108)'
-          }}>
-            <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#323130', marginBottom: '16px' }}>Add New Event</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#323130', marginBottom: '4px' }}>Title</label>
-                <input
-                  type="text"
-                  value={newEvent.title}
-                  onChange={(e) => setNewEvent(prev => ({ ...prev, title: e.target.value }))}
-                  style={{
-                    width: '100%',
-                    padding: '8px',
-                    border: '1px solid #8a8886',
-                    borderRadius: '2px',
-                    fontSize: '13px',
-                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-                  }}
-                  placeholder="Event title"
-                />
-              </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', maxWidth: '1800px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+              <a href="/ProdyJEE/" style={{ color: '#1a1a1a', textDecoration: 'none', fontSize: '16px', fontWeight: '600' }}>
+                ← Back
+              </a>
+              <div style={{ borderLeft: '1px solid rgba(26,26,26,0.2)', height: '24px' }}></div>
+              <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#1a1a1a' }}>📅 Master Calendar</h1>
+            </div>
+            <span style={{ fontSize: '13px', opacity: 0.7 }}>v{packageJson.version}</span>
+          </div>
+        </nav>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#323130', marginBottom: '4px' }}>Type</label>
-                <select
-                  value={newEvent.type}
-                  onChange={(e) => setNewEvent(prev => ({ ...prev, type: e.target.value }))}
+        {/* Main Calendar Container */}
+        <div style={{ maxWidth: '1800px', margin: '0 auto', padding: '24px' }}>
+          
+          {/* Calendar Header with Navigation */}
+          <div style={{ 
+            background: 'rgba(255, 255, 255, 0.3)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            borderRadius: '16px',
+            padding: '24px',
+            marginBottom: '24px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            border: '1px solid rgba(255, 255, 255, 0.3)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                <button 
+                  onClick={() => changeMonth(-1)}
                   style={{
-                    width: '100%',
-                    padding: '8px',
-                    border: '1px solid #8a8886',
-                    borderRadius: '2px',
-                    fontSize: '13px',
-                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                    padding: '12px 20px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    background: 'rgba(255, 255, 255, 0.4)',
+                    backdropFilter: 'blur(10px)',
+                    cursor: 'pointer',
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.transform = 'scale(1.05)'
+                    e.target.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.15)'
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.transform = 'scale(1)'
+                    e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)'
                   }}
                 >
-                  <option value="school">School Period</option>
-                  <option value="menstrual">Menstrual Period</option>
-                  <option value="festival">Festival Holiday</option>
-                  <option value="birthday">Birthday</option>
-                  <option value="holiday">Public Holiday</option>
-                </select>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#323130', marginBottom: '4px' }}>Date</label>
-                <DatePicker
-                  selected={newEvent.date}
-                  onChange={(date) => setNewEvent(prev => ({ ...prev, date }))}
+                  ←
+                </button>
+                
+                <h2 style={{ 
+                  fontSize: '32px', 
+                  fontWeight: '700', 
+                  color: '#1a1a1a',
+                  margin: 0,
+                  textShadow: '0 2px 8px rgba(255, 255, 255, 0.8)'
+                }}>
+                  {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                </h2>
+                
+                <button 
+                  onClick={() => changeMonth(1)}
                   style={{
-                    width: '100%',
-                    padding: '8px',
-                    border: '1px solid #8a8886',
-                    borderRadius: '2px',
-                    fontSize: '13px'
+                    padding: '12px 20px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    background: 'rgba(255, 255, 255, 0.4)',
+                    backdropFilter: 'blur(10px)',
+                    cursor: 'pointer',
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                    transition: 'all 0.3s ease'
                   }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#323130', marginBottom: '4px' }}>Description</label>
-                <textarea
-                  value={newEvent.description}
-                  onChange={(e) => setNewEvent(prev => ({ ...prev, description: e.target.value }))}
-                  style={{
-                    width: '100%',
-                    padding: '8px',
-                    border: '1px solid #8a8886',
-                    borderRadius: '2px',
-                    fontSize: '13px',
-                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                    resize: 'vertical'
+                  onMouseOver={(e) => {
+                    e.target.style.transform = 'scale(1.05)'
+                    e.target.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.15)'
                   }}
-                  rows={3}
-                  placeholder="Optional description"
-                />
+                  onMouseOut={(e) => {
+                    e.target.style.transform = 'scale(1)'
+                    e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)'
+                  }}
+                >
+                  →
+                </button>
               </div>
+              
+              <button
+                onClick={() => setCurrentDate(new Date())}
+                style={{
+                  padding: '12px 24px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.transform = 'translateY(-2px)'
+                  e.target.style.boxShadow = '0 6px 16px rgba(102, 126, 234, 0.5)'
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = 'translateY(0)'
+                  e.target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)'
+                }}
+              >
+                Today
+              </button>
+            </div>
 
+            {/* Legend */}
+            <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', fontSize: '13px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <input
-                  type="checkbox"
-                  id="recurring"
-                  checked={newEvent.recurring}
-                  onChange={(e) => setNewEvent(prev => ({ ...prev, recurring: e.target.checked }))}
-                />
-                <label htmlFor="recurring" style={{ fontSize: '13px', color: '#323130' }}>Recurring event</label>
+                <div style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#FFD3B6' }}></div>
+                <span>Study Plan</span>
               </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#FF6B6B' }}></div>
+                <span>Class Schedule</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#FF69B4' }}></div>
+                <span>Menstrual Period</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '16px', height: '16px', borderRadius: '4px', background: '#FFD700' }}></div>
+                <span>Holiday</span>
+              </div>
+            </div>
+          </div>
 
-              {newEvent.recurring && (
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#323130', marginBottom: '4px' }}>Recurring Type</label>
-                  <select
-                    value={newEvent.recurringType}
-                    onChange={(e) => setNewEvent(prev => ({ ...prev, recurringType: e.target.value }))}
+          {/* Huge Calendar Grid */}
+          <div style={{ 
+            background: 'rgba(255, 255, 255, 0.25)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            borderRadius: '16px',
+            padding: '24px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            border: '1px solid rgba(255, 255, 255, 0.3)'
+          }}>
+            {/* Weekday Headers */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px', marginBottom: '12px' }}>
+              {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
+                <div key={day} style={{ 
+                  textAlign: 'center', 
+                  fontWeight: '700', 
+                  fontSize: '16px',
+                  color: '#1a1a1a',
+                  padding: '12px',
+                  background: 'rgba(255, 255, 255, 0.3)',
+                  borderRadius: '8px'
+                }}>
+                  {day}
+                </div>
+              ))}
+            </div>
+
+            {/* Calendar Days */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
+              {getDaysInMonth(currentDate).map((date, index) => {
+                const holiday = getHoliday(date)
+                const isMenstrual = isMenstrualDay(date)
+                const dayEvents = getEventsForDate(date)
+                const daySchedule = getDaySchedule(date)
+                
+                return (
+                  <div
+                    key={index}
+                    onClick={() => date && setSelectedDate(date)}
                     style={{
-                      width: '100%',
-                      padding: '8px',
-                      border: '1px solid #8a8886',
-                      borderRadius: '2px',
-                      fontSize: '13px',
-                      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+                      minHeight: '140px',
+                      padding: '12px',
+                      borderRadius: '12px',
+                      background: !date ? 'transparent' : 
+                                  holiday ? 'rgba(255, 215, 0, 0.3)' :
+                                  isMenstrual ? 'rgba(255, 105, 180, 0.2)' :
+                                  isToday(date) ? 'rgba(102, 126, 234, 0.3)' :
+                                  'rgba(255, 255, 255, 0.2)',
+                      border: isSelected(date) ? '3px solid #667eea' : '1px solid rgba(255, 255, 255, 0.3)',
+                      cursor: date ? 'pointer' : 'default',
+                      transition: 'all 0.3s ease',
+                      backdropFilter: date ? 'blur(10px)' : 'none',
+                      boxShadow: isToday(date) ? '0 4px 16px rgba(102, 126, 234, 0.4)' : 'none'
+                    }}
+                    onMouseOver={(e) => {
+                      if (date) {
+                        e.currentTarget.style.transform = 'scale(1.02)'
+                        e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.15)'
+                      }
+                    }}
+                    onMouseOut={(e) => {
+                      if (date) {
+                        e.currentTarget.style.transform = 'scale(1)'
+                        e.currentTarget.style.boxShadow = isToday(date) ? '0 4px 16px rgba(102, 126, 234, 0.4)' : 'none'
+                      }
                     }}
                   >
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="yearly">Yearly</option>
-                  </select>
+                    {date && (
+                      <>
+                        <div style={{ 
+                          fontSize: '20px', 
+                          fontWeight: '700', 
+                          color: isToday(date) ? '#667eea' : '#1a1a1a',
+                          marginBottom: '8px'
+                        }}>
+                          {date.getDate()}
+                        </div>
+                        
+                        {holiday && (
+                          <div style={{ 
+                            fontSize: '11px', 
+                            fontWeight: '600',
+                            color: '#8B4513',
+                            background: 'rgba(255, 215, 0, 0.5)',
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            marginBottom: '4px',
+                            backdropFilter: 'blur(5px)'
+                          }}>
+                            🎉 {holiday.name}
+                          </div>
+                        )}
+                        
+                        {isMenstrual && (
+                          <div style={{ 
+                            fontSize: '10px', 
+                            color: '#C71585',
+                            background: 'rgba(255, 105, 180, 0.3)',
+                            padding: '3px 6px',
+                            borderRadius: '4px',
+                            marginBottom: '4px'
+                          }}>
+                            💗 Period
+                          </div>
+                        )}
+                        
+                        {daySchedule.length > 0 && (
+                          <div style={{ fontSize: '10px', marginTop: '4px' }}>
+                            {daySchedule.slice(0, 2).map((cls, i) => (
+                              <div key={i} style={{ 
+                                background: cls.color + '40',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                marginBottom: '2px',
+                                color: '#1a1a1a',
+                                fontWeight: '600'
+                              }}>
+                                {cls.subject}
+                              </div>
+                            ))}
+                            {daySchedule.length > 2 && (
+                              <div style={{ fontSize: '9px', color: '#666', marginTop: '2px' }}>
+                                +{daySchedule.length - 2} more
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Selected Day Detail Panel */}
+          {selectedDate && (
+            <div style={{ 
+              marginTop: '24px',
+              background: 'rgba(255, 255, 255, 0.3)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              borderRadius: '16px',
+              padding: '32px',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.3)'
+            }}>
+              <h2 style={{ 
+                fontSize: '28px', 
+                fontWeight: '700', 
+                color: '#1a1a1a',
+                marginBottom: '24px'
+              }}>
+                📋 {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+              </h2>
+
+              {/* Class Schedule for Selected Day */}
+              {getDaySchedule(selectedDate).length > 0 && (
+                <div style={{ marginBottom: '24px' }}>
+                  <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px', color: '#1a1a1a' }}>
+                    🏫 Class Schedule
+                  </h3>
+                  <div style={{ display: 'grid', gap: '12px' }}>
+                    {getDaySchedule(selectedDate).map((cls, i) => (
+                      <div key={i} style={{
+                        background: cls.color + '30',
+                        backdropFilter: 'blur(10px)',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        border: '1px solid ' + cls.color + '60',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+                      }}>
+                        <div>
+                          <div style={{ fontSize: '16px', fontWeight: '600', color: '#1a1a1a' }}>
+                            {cls.subject}
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                            {cls.time}
+                          </div>
+                        </div>
+                        <div style={{
+                          padding: '6px 12px',
+                          borderRadius: '8px',
+                          background: cls.color + '50',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          color: '#1a1a1a'
+                        }}>
+                          {cls.type.toUpperCase()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
-
-            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-              <button
-                onClick={() => setShowAddForm(false)}
-                style={{
-                  flex: 1,
-                  padding: '8px 16px',
-                  border: '1px solid #8a8886',
-                  borderRadius: '2px',
-                  background: 'rgba(255, 255, 255, 0.25)',
-                  color: '#323130',
-                  fontSize: '13px',
-                  fontWeight: '600',
-                  cursor: 'pointer'
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={addEvent}
-                style={{
-                  flex: 1,
-                  padding: '8px 16px',
-                  border: 'none',
-                  borderRadius: '2px',
-                  backgroundColor: '#0078d4',
-                  color: 'white',
-                  fontSize: '13px',
-                  fontWeight: '600',
-                  cursor: 'pointer'
-                }}
-              >
-                Add Event
-              </button>
-            </div>
-          </div>
+          )}
         </div>
-      )}
-    </div>
+      </div>
+    </>
   )
 }
