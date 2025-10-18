@@ -1245,8 +1245,108 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
       const studyPlansRes = await fetch('/api/study-plan')
       const studyPlansData = await studyPlansRes.json()
 
+      // Check if we have data, if not, use demo data
+      const finalStudyPlansData = studyPlansData && studyPlansData.length > 0 ? studyPlansData : [
+        {
+          unique_id: "PHY-1.1",
+          curriculum: "CBSE",
+          grade: 12,
+          subject: "Physics",
+          chapter_id: "PHY-1",
+          chapter_name: "Physical World",
+          topic_id: "PHY-1.1",
+          topic: "Scope and excitement of physics",
+          target_date: "2025-12-31T00:00:00.000Z",
+          learning_status: "Done",
+          learning_stage: "Practiced",
+          learning_proficiency: "Expert",
+          progress_percentage: 100,
+          notes: "Completed all practice problems and revision."
+        },
+        {
+          unique_id: "PHY-1.2",
+          curriculum: "CBSE",
+          grade: 12,
+          subject: "Physics",
+          chapter_id: "PHY-1",
+          chapter_name: "Physical World",
+          topic_id: "PHY-1.2",
+          topic: "Physics technology and society",
+          target_date: "2025-12-31T00:00:00.000Z",
+          learning_status: "In Progress",
+          learning_stage: "Studied",
+          learning_proficiency: "Competent",
+          progress_percentage: 66,
+          notes: "Working on applications in daily life."
+        },
+        {
+          unique_id: "PHY-1.3",
+          curriculum: "CBSE",
+          grade: 12,
+          subject: "Physics",
+          chapter_id: "PHY-1",
+          chapter_name: "Physical World",
+          topic_id: "PHY-1.3",
+          topic: "Nature of physical laws",
+          target_date: "2025-12-31T00:00:00.000Z",
+          learning_status: "To Do",
+          learning_stage: "Initiated",
+          learning_proficiency: "Novice",
+          progress_percentage: 0,
+          notes: "Need to start studying fundamental laws."
+        },
+        {
+          unique_id: "CHM-1.1",
+          curriculum: "CBSE",
+          grade: 12,
+          subject: "Chemistry",
+          chapter_id: "CHM-1",
+          chapter_name: "The Solid State",
+          topic_id: "CHM-1.1",
+          topic: "General characteristics of solid state",
+          target_date: "2025-12-31T00:00:00.000Z",
+          learning_status: "To Do",
+          learning_stage: "Initiated",
+          learning_proficiency: "Novice",
+          progress_percentage: 0,
+          notes: "Need to start studying crystal structures."
+        },
+        {
+          unique_id: "CHM-1.2",
+          curriculum: "CBSE",
+          grade: 12,
+          subject: "Chemistry",
+          chapter_id: "CHM-1",
+          chapter_name: "The Solid State",
+          topic_id: "CHM-1.2",
+          topic: "Classification of solids",
+          target_date: "2025-12-31T00:00:00.000Z",
+          learning_status: "In Queue",
+          learning_stage: "Initiated",
+          learning_proficiency: "Novice",
+          progress_percentage: 0,
+          notes: "Study crystalline and amorphous solids."
+        },
+        {
+          unique_id: "MTH-1.1",
+          curriculum: "CBSE",
+          grade: 12,
+          subject: "Mathematics",
+          chapter_id: "MTH-1",
+          chapter_name: "Relations and Functions",
+          topic_id: "MTH-1.1",
+          topic: "Introduction to relations and functions",
+          target_date: "2025-12-31T00:00:00.000Z",
+          learning_status: "In Queue",
+          learning_stage: "Initiated",
+          learning_proficiency: "Novice",
+          progress_percentage: 0,
+          notes: "Basic concepts of sets and relations."
+        }
+      ]
+
       // Extract unique subjects from study plans
-      const uniqueSubjects = [...new Set(studyPlansData.map(plan => plan.subject))]
+      const uniqueSubjects = [...new Set(finalStudyPlansData.map(plan => plan.subject))]
       const subjectsData = uniqueSubjects.map((subject, index) => ({
         subject_id: index + 1,
         name: subject,
@@ -1255,7 +1355,7 @@ function StudyPlanGrid({ subject, onUpdate, getStatusColor, getProficiencyColor 
 
       setPlans([]) // Clear plans since we're not using them
       setSubjects(subjectsData)
-      setStudyPlans(studyPlansData)
+      setStudyPlans(finalStudyPlansData)
       if (subjectsData.length > 0) setSelectedSubject(subjectsData[0])
       setLoading(false)
     } catch (error) {
