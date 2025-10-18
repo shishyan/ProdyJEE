@@ -482,13 +482,10 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
         <span className="meta-subject">{chapter.subject}</span>
       </div>
 
-      <div className="chapter-header" style={{ backgroundColor: `${bucketColor}40` }}>
+      <div className="chapter-header" {...attributes} {...listeners} style={{ cursor: isDragging ? 'grabbing' : 'grab', background: `linear-gradient(135deg, ${getStatusColor(chapter.aggregatedStatus)}20, ${getStatusColor(chapter.aggregatedStatus)}60)` }}>
         <div className="chapter-info">
           <h4
             className="chapter-title"
-            {...attributes}
-            {...listeners}
-            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
             onClick={(e) => {
               e.stopPropagation()
             }}
@@ -513,36 +510,36 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
           </div>
         </div>
 
-        <div className="chapter-stats-grid">
-          <div className="stat-item">
-            <span className="stat-label">Topics:</span>
-            <span className="stat-value">{chapter.totalTopics}</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-label">Completed:</span>
-            <span className="stat-value">{chapter.completedTopics}</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-label">In Progress:</span>
-            <span className="stat-value">{chapter.inProgressTopics}</span>
-          </div>
-        </div>
+        {chapter.aggregatedStatus !== 'In Queue' && (
+          <>
+            <div className="chapter-stats-grid">
+              <div className="stat-item">
+                <span className="stat-label">Topics:</span>
+                <span className="stat-value">{chapter.totalTopics}</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-label">Completed:</span>
+                <span className="stat-value">{chapter.completedTopics}</span>
+              </div>
+            </div>
 
-        <div className="chapter-progress">
-          <div className="progress-bar">
-            <div
-              className="progress-fill"
-              style={{
-                width: `${progressPercentage}%`,
-                backgroundColor: progressPercentage === 100 ? '#10b981' : progressPercentage > 0 ? '#f59e0b' : '#6b7280'
-              }}
-            ></div>
-          </div>
-          <div className="progress-info">
-            <span className="progress-label">Progress</span>
-            <span className="progress-text">{progressPercentage}% Complete</span>
-          </div>
-        </div>
+            <div className="chapter-progress">
+              <div className="progress-bar">
+                <div
+                  className="progress-fill"
+                  style={{
+                    width: `${progressPercentage}%`,
+                    backgroundColor: progressPercentage === 100 ? '#10b981' : progressPercentage > 0 ? '#f59e0b' : '#6b7280'
+                  }}
+                ></div>
+              </div>
+              <div className="progress-info">
+                <span className="progress-label">Progress</span>
+                <span className="progress-text">{progressPercentage}% Complete</span>
+              </div>
+            </div>
+          </>
+        )}
 
         {earliestTargetDate && (
           <div className="chapter-target-date">
@@ -574,6 +571,7 @@ function Bucket({ bucket, chapters, onEditChapter, onUpdateProgress, getStatusCo
       case 'Done': return 'bucket-done';
       case 'In Progress': return 'bucket-in-progress';
       case 'To Do': return 'bucket-todo';
+      case 'In Queue': return 'bucket-backlog';
       default: return '';
     }
   }
@@ -588,7 +586,7 @@ function Bucket({ bucket, chapters, onEditChapter, onUpdateProgress, getStatusCo
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="space-y-3">
+        <div className="space-y-8">
           {filteredChapters.map(chapter => (
             <ChapterCard
               key={chapter.chapter_id}
