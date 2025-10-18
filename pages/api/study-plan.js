@@ -36,9 +36,12 @@ export default async function handler(req, res) {
         notes
       } = req.body
 
+      // Generate unique_id if not provided
+      const finalUniqueId = unique_id || `USER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+
       const studyPlan = await prisma.studyPlan.create({
         data: {
-          unique_id,
+          unique_id: finalUniqueId,
           curriculum,
           grade: parseInt(grade),
           subject,
