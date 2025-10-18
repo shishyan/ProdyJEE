@@ -218,8 +218,8 @@ const backgroundOptions = [
 
 export default function BackgroundSettings({ show, onClose }) {
   const [selectedBg, setSelectedBg] = useState('nature')
-  const [blurIntensity, setBlurIntensity] = useState(0)
-  const [brightness, setBrightness] = useState(100)
+  const [transparency, setTransparency] = useState(30) // 0-100, higher = more transparent overlay
+  const [contrast, setContrast] = useState(100) // 50-150, default 100
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [customImageUrl, setCustomImageUrl] = useState('')
 
@@ -228,8 +228,8 @@ export default function BackgroundSettings({ show, onClose }) {
     if (saved) {
       const config = JSON.parse(saved)
       setSelectedBg(config.id || 'nature')
-      setBlurIntensity(config.blur || 0)
-      setBrightness(config.brightness || 100)
+      setTransparency(config.transparency || 30)
+      setContrast(config.contrast || 100)
     }
   }, [])
 
@@ -253,8 +253,8 @@ export default function BackgroundSettings({ show, onClose }) {
       const config = {
         id: bgId,
         url: imageUrl,
-        blur: blurIntensity,
-        brightness: brightness
+        transparency: transparency,
+        contrast: contrast
       }
       localStorage.setItem('app-background', JSON.stringify(config))
       setSelectedBg(bgId)
@@ -268,7 +268,11 @@ export default function BackgroundSettings({ show, onClose }) {
       document.body.style.backgroundSize = 'cover'
       document.body.style.backgroundPosition = 'center'
       document.body.style.backgroundAttachment = 'fixed'
-      document.body.style.filter = `blur(${blurIntensity}px) brightness(${brightness}%)`
+      document.body.style.filter = `contrast(${contrast}%)`
+      
+      // Apply transparency overlay using ::before pseudo-element
+      const overlayOpacity = transparency / 100
+      document.body.style.setProperty('--bg-overlay-opacity', overlayOpacity)
     }
   }
 
@@ -500,58 +504,66 @@ export default function BackgroundSettings({ show, onClose }) {
             Fine-tune Appearance
           </h3>
           
-          {/* Blur Control */}
+          {/* Transparency Control */}
           <div style={{ marginBottom: '24px' }}>
             <label style={{ display: 'block', marginBottom: '12px', fontSize: '14px', fontWeight: '600', color: '#666' }}>
-              Background Blur: {blurIntensity}px
+              Background Transparency: {transparency}%
             </label>
             <input 
               type="range" 
               min="0" 
-              max="20" 
-              value={blurIntensity}
+              max="80" 
+              value={transparency}
               onChange={(e) => {
                 const val = parseInt(e.target.value)
-                setBlurIntensity(val)
+                setTransparency(val)
                 const config = JSON.parse(localStorage.getItem('app-background') || '{}')
-                config.blur = val
+                config.transparency = val
                 localStorage.setItem('app-background', JSON.stringify(config))
+                document.body.style.setProperty('--bg-overlay-opacity', val / 100)
               }}
               style={{
                 width: '100%',
                 height: '8px',
                 borderRadius: '4px',
                 outline: 'none',
-                background: 'linear-gradient(to right, #667eea, #764ba2)'
+                background: 'linear-gradient(to right, rgba(0,0,0,0), rgba(0,0,0,0.8))'
               }}
             />
+            <p style={{ fontSize: '12px', color: '#718096', marginTop: '8px' }}>
+              Higher transparency reduces distraction from background
+            </p>
           </div>
 
-          {/* Brightness Control */}
+          {/* Contrast Control */}
           <div>
             <label style={{ display: 'block', marginBottom: '12px', fontSize: '14px', fontWeight: '600', color: '#666' }}>
-              Brightness: {brightness}%
+              Image Contrast: {contrast}%
             </label>
             <input 
               type="range" 
               min="50" 
               max="150" 
-              value={brightness}
+              value={contrast}
               onChange={(e) => {
                 const val = parseInt(e.target.value)
-                setBrightness(val)
+                setContrast(val)
                 const config = JSON.parse(localStorage.getItem('app-background') || '{}')
-                config.brightness = val
+                config.contrast = val
                 localStorage.setItem('app-background', JSON.stringify(config))
+                document.body.style.filter = `contrast(${val}%)`
               }}
               style={{
                 width: '100%',
                 height: '8px',
                 borderRadius: '4px',
                 outline: 'none',
-                background: 'linear-gradient(to right, #333, #fff)'
+                background: 'linear-gradient(to right, #94a3b8, #1e293b)'
               }}
             />
+            <p style={{ fontSize: '12px', color: '#718096', marginTop: '8px' }}>
+              Adjust image sharpness and color intensity
+            </p>
           </div>
         </div>
 

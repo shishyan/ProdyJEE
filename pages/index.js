@@ -562,24 +562,6 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
       className={`chapter-card ${isDragging ? 'dragging' : ''} ${chapter.aggregatedStatus === 'In Queue' ? 'backlog-card' : ''}`}
       onClick={(e) => onEdit(chapter, e)}
     >
-      {/* Checkbox for bulk selection */}
-      <div className="chapter-checkbox" style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-        <input
-          type="checkbox"
-          checked={isSelected || false}
-          onChange={(e) => {
-            e.stopPropagation()
-            onToggleSelect && onToggleSelect(chapter.chapter_id)
-          }}
-          style={{
-            width: '18px',
-            height: '18px',
-            cursor: 'pointer',
-            accentColor: '#8b5cf6'
-          }}
-        />
-      </div>
-
       {/* ID and Subject above header */}
       <div className="chapter-meta-top">
         <span className="meta-id">{chapter.chapter_id}</span>
@@ -689,10 +671,11 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
 }
 
 // Bucket Component
-function Bucket({ bucket, chapters, onEditChapter, onUpdateProgress, getStatusColor, getProficiencyColor, selectedChapters, onToggleChapterSelect }) {
+function Bucket({ bucket, chapters, onEditChapter, onUpdateProgress, onUpdateChapterStatus, getStatusColor, getProficiencyColor, selectedChapters, onToggleChapterSelect }) {
   const { setNodeRef, isOver } = useDroppable({
     id: bucket.id,
   })
+  const [isDragOver, setIsDragOver] = useState(false)
 
   // Filter chapters: show those matching the bucket status, or "In Queue" if status is undefined/null
   const filteredChapters = chapters.filter(chapter => {
@@ -711,10 +694,36 @@ function Bucket({ bucket, chapters, onEditChapter, onUpdateProgress, getStatusCo
     }
   }
 
+  // Handle native drag and drop from footer backlog
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    setIsDragOver(true)
+  }
+
+  const handleDragLeave = (e) => {
+    e.preventDefault()
+    setIsDragOver(false)
+  }
+
+  const handleDrop = async (e) => {
+    e.preventDefault()
+    setIsDragOver(false)
+    
+    const chapterId = e.dataTransfer.getData('chapterId')
+    if (chapterId && onUpdateChapterStatus) {
+      // Update chapter status to bucket status
+      await onUpdateChapterStatus(chapterId, bucket.status)
+    }
+  }
+
   return (
     <div
       ref={setNodeRef}
-      className={`bucket bg-gray-50 rounded-lg p-4 min-h-[500px] flex flex-col ${isOver ? 'ring-2 ring-blue-500 bg-blue-50' : ''} ${getStatusClass(bucket.status)}`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className={`bucket bg-gray-50 rounded-lg p-4 min-h-[500px] flex flex-col ${isOver || isDragOver ? 'ring-2 ring-blue-500 bg-blue-50' : ''} ${getStatusClass(bucket.status)}`}
     >
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900">{bucket.name} ({filteredChapters.length})</h3>
@@ -2643,6 +2652,27 @@ export default function Home() {
     }
   }
 
+  // Function to update chapter status from footer backlog
+  const updateChapterStatus = async (chapterId, newStatus) => {
+    try {
+      const chapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+      const chapter = chapters.find(ch => ch.chapter_id === chapterId)
+
+      if (chapter) {
+        // Update local state
+        const updatedPlans = studyPlans.map(plan =>
+          chapter.studyPlans.some(chapterPlan => chapterPlan.unique_id === plan.unique_id)
+            ? { ...plan, learning_status: newStatus }
+            : plan
+        )
+        setStudyPlans(updatedPlans)
+        localStorage.setItem('study-plans-data', JSON.stringify(updatedPlans))
+      }
+    } catch (error) {
+      console.error('Failed to update chapter status:', error)
+    }
+  }
+
   const onEditChapter = async (chapter, event) => {
     setEditingChapter(chapter)
   }
@@ -2876,6 +2906,17 @@ export default function Home() {
           {/* Right Side - Actions (Duplicates removed - use sidebar for navigation) */}
           <div className="navbar-actions">
             <button
+              className={`nav-action-btn ${weatherEffect ? 'active' : ''}`}
+              onClick={() => setWeatherEffect(!weatherEffect)}
+              title={weatherEffect ? 'Disable Weather Effects' : 'Enable Weather Effects'}
+              style={{
+                backgroundColor: weatherEffect ? 'rgba(96, 165, 250, 0.2)' : 'transparent',
+                color: weatherEffect ? '#3b82f6' : 'inherit'
+              }}
+            >
+              <CloudIcon />
+            </button>
+            <button
               className="nav-action-btn"
               onClick={() => setShowSettings(true)}
               title="Settings"
@@ -2986,97 +3027,6 @@ export default function Home() {
           <>
             {selectedSubject && viewMode === 'kanban' && (
               <>
-                {/* Horizontal Scrolling Backlog Section (Hero-style) */}
-                {groupBy === 'status' && (
-                  <div style={{
-                    background: 'rgba(255, 255, 255, 0.25)',
-                    backdropFilter: 'blur(20px)',
-                    WebkitBackdropFilter: 'blur(20px)',
-                    borderRadius: '16px',
-                    padding: '20px',
-                    margin: '0 16px 20px 16px',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.3)'
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                      <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#1a1a1a', margin: 0 }}>
-                        📌 Backlog
-                      </h2>
-                      <span style={{ fontSize: '14px', color: '#666', fontWeight: '600' }}>
-                        Drag cards to start working →
-                      </span>
-                    </div>
-                    <div style={{
-                      display: 'flex',
-                      gap: '16px',
-                      overflowX: 'auto',
-                      paddingBottom: '8px',
-                      scrollbarWidth: 'thin',
-                      scrollbarColor: 'rgba(0,0,0,0.3) transparent'
-                    }}>
-                      {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
-                        .filter(chapter => chapter.aggregatedStatus === 'In Queue')
-                        .map((chapter) => (
-                          <div
-                            key={chapter.chapter_id}
-                            draggable
-                            style={{
-                              minWidth: '280px',
-                              maxWidth: '280px',
-                              background: 'rgba(255, 255, 255, 0.4)',
-                              backdropFilter: 'blur(10px)',
-                              borderRadius: '12px',
-                              padding: '16px',
-                              cursor: 'grab',
-                              transition: 'all 0.3s ease',
-                              border: '1px solid rgba(255, 255, 255, 0.5)',
-                              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)'
-                            }}
-                            onMouseOver={(e) => {
-                              e.currentTarget.style.transform = 'translateY(-4px)'
-                              e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.15)'
-                            }}
-                            onMouseOut={(e) => {
-                              e.currentTarget.style.transform = 'translateY(0)'
-                              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.1)'
-                            }}
-                          >
-                            <div style={{ fontWeight: '700', fontSize: '16px', color: '#1a1a1a', marginBottom: '8px' }}>
-                              {chapter.chapter_name}
-                            </div>
-                            <div style={{ fontSize: '14px', color: '#666', marginBottom: '12px' }}>
-                              {chapter.topics?.length || 0} topics
-                            </div>
-                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                              <span style={{
-                                padding: '4px 8px',
-                                borderRadius: '6px',
-                                fontSize: '12px',
-                                fontWeight: '600',
-                                background: getStatusColor(chapter.aggregatedStatus) + '20',
-                                color: getStatusColor(chapter.aggregatedStatus),
-                                border: `1px solid ${getStatusColor(chapter.aggregatedStatus)}40`
-                              }}>
-                                {chapter.aggregatedStatus}
-                              </span>
-                              <span style={{
-                                padding: '4px 8px',
-                                borderRadius: '6px',
-                                fontSize: '12px',
-                                fontWeight: '600',
-                                background: getProficiencyColor(chapter.aggregatedProficiency) + '20',
-                                color: getProficiencyColor(chapter.aggregatedProficiency),
-                                border: `1px solid ${getProficiencyColor(chapter.aggregatedProficiency)}40`
-                              }}>
-                                ⭐ {chapter.aggregatedProficiency}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                )}
-
                 <DndContext
                   sensors={sensors}
                   collisionDetection={closestCorners}
@@ -3097,6 +3047,7 @@ export default function Home() {
                             chapters={bucketChapters}
                             onEditChapter={onEditChapter}
                             onUpdateProgress={fetchData}
+                            onUpdateChapterStatus={updateChapterStatus}
                             getStatusColor={getStatusColor}
                             getProficiencyColor={getProficiencyColor}
                             selectedChapters={selectedChapters}
@@ -3133,10 +3084,120 @@ export default function Home() {
           <DashboardView />
         )}
       </main>
+
+      {/* Footer Backlog Section */}
+      {currentPage === 'kanban' && selectedSubject && groupBy === 'status' && (
+        <div style={{
+          position: 'fixed',
+          bottom: 0,
+          left: sidebarCollapsed ? '80px' : '280px',
+          right: 0,
+          background: 'rgba(255, 255, 255, 0.25)',
+          backdropFilter: 'blur(30px)',
+          WebkitBackdropFilter: 'blur(30px)',
+          borderTop: '3px dashed #4a5568',
+          padding: '16px 20px',
+          boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.15)',
+          zIndex: 800,
+          transition: 'left 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
+            <h3 style={{ 
+              fontSize: '16px', 
+              fontWeight: '700', 
+              color: '#1a1a1a', 
+              margin: 0,
+              textTransform: 'uppercase',
+              letterSpacing: '1px'
+            }}>
+              📦 Backlog Queue
+            </h3>
+            <span style={{ 
+              fontSize: '12px', 
+              color: '#4a5568', 
+              fontWeight: '600',
+              background: 'rgba(74, 85, 104, 0.1)',
+              padding: '4px 12px',
+              borderRadius: '12px'
+            }}>
+              {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+                .filter(chapter => chapter.aggregatedStatus === 'In Queue').length} chapters waiting
+            </span>
+          </div>
+          <div style={{
+            display: 'flex',
+            gap: '12px',
+            overflowX: 'auto',
+            paddingBottom: '8px',
+            scrollbarWidth: 'thin',
+            scrollbarColor: 'rgba(74, 85, 104, 0.5) transparent'
+          }}>
+            {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+              .filter(chapter => chapter.aggregatedStatus === 'In Queue')
+              .map((chapter) => (
+                <div
+                  key={chapter.chapter_id}
+                  draggable
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData('chapterId', chapter.chapter_id)
+                    e.dataTransfer.effectAllowed = 'move'
+                  }}
+                  style={{
+                    minWidth: '180px',
+                    maxWidth: '180px',
+                    background: 'rgba(255, 255, 255, 0.4)',
+                    backdropFilter: 'blur(10px)',
+                    borderRadius: '10px',
+                    padding: '12px 14px',
+                    cursor: 'grab',
+                    transition: 'all 0.3s ease',
+                    border: '2px dashed #718096',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-3px)'
+                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.15)'
+                    e.currentTarget.style.borderColor = '#4a5568'
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
+                    e.currentTarget.style.borderColor = '#718096'
+                  }}
+                >
+                  <div style={{ 
+                    fontSize: '11px', 
+                    fontWeight: '700', 
+                    color: '#718096', 
+                    marginBottom: '6px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
+                  }}>
+                    Ch. {chapter.chapter_id}
+                  </div>
+                  <div style={{ 
+                    fontWeight: '600', 
+                    fontSize: '14px', 
+                    color: '#1a1a1a',
+                    lineHeight: '1.3',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical'
+                  }}>
+                    {chapter.chapter_name}
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
       <>
         {editingTask && (
         <div className="modal-overlay">
-          <div className="task-modal">
+          <div className="task-modal glass-card">
             <div className="modal-header">
               <h2>{editingTask.title}</h2>
               <button className="close-btn" onClick={() => setEditingTask(null)}>×</button>
@@ -3899,67 +3960,7 @@ export default function Home() {
               <button className="close-btn" onClick={() => setShowSettings(false)}>×</button>
             </div>
             <div className="modal-body">
-              <div className="settings-section">
-                <h3>Background Theme</h3>
-                <div className="setting-item">
-                  <PaletteIcon />
-                  <select value={backgroundTheme} onChange={(e) => setBackgroundTheme(e.target.value)}>
-                    <option value="forest-mountain">Forest Mountain</option>
-                    <option value="green-forest">Green Forest</option>
-                    <option value="bamboo">Bamboo Grove</option>
-                    <option value="jungle">Tropical Jungle</option>
-                    <option value="meadow">Spring Meadow</option>
-                    <option value="gradient">Ocean Gradient</option>
-                    <option value="nature">Wild Nature</option>
-                    <option value="flowers">Flower Garden</option>
-                    <option value="animals">Safari Animals</option>
-                    <option value="mountains">Snow Mountains</option>
-                    <option value="ocean">Deep Ocean</option>
-                    <option value="desert">Golden Desert</option>
-                    <option value="sunset">Tropical Sunset</option>
-                    <option value="aurora">Northern Aurora</option>
-                    <option value="galaxy">Starry Galaxy</option>
-                    <option value="sakura">Cherry Blossom</option>
-                    <option value="autumn">Autumn Leaves</option>
-                    <option value="winter">Winter Wonderland</option>
-                    <option value="rainbow">Rainbow Sky</option>
-                    <option value="zen-garden">Zen Garden</option>
-                    <option value="crystal">Crystal Cave</option>
-                    <option value="lava">Volcanic Lava</option>
-                    <option value="ice">Arctic Ice</option>
-                    <option value="cosmic">Cosmic Nebula</option>
-                    <option value="ethereal">Ethereal Mist</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="settings-section">
-                <h3>Navigation Bar Background</h3>
-                <div className="setting-item">
-                  <PaletteIcon />
-                  <select value={navbarBackground || 'default'} onChange={(e) => setNavbarBackground(e.target.value)}>
-                    <option value="default">Default (Semi-transparent)</option>
-                    <option value="glass">Glass Effect</option>
-                    <option value="solid">Solid White</option>
-                    <option value="gradient">Gradient</option>
-                    <option value="blur">Heavy Blur</option>
-                    <option value="minimal">Minimal</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="settings-section">
-                <h3>Weather Effects</h3>
-                <div className="setting-item">
-                  <CloudIcon />
-                  <button
-                    className={`nav-btn ${weatherEffect ? 'active' : ''}`}
-                    onClick={() => setWeatherEffect(!weatherEffect)}
-                  >
-                    {weatherEffect ? 'Disable' : 'Enable'} Weather Effects
-                  </button>
-                </div>
-              </div>
+              {/* Background Theme and Weather Effects moved to top navbar */}
 
               <div className="settings-section">
                 <h3>Background Music</h3>

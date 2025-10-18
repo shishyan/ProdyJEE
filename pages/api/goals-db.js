@@ -1,4 +1,4 @@
-const db = require('../../../lib/db')
+const db = require('../../lib/db')
 
 export default function handler(req, res) {
   if (req.method === 'GET') {
