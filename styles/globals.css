@@ -272,8 +272,8 @@ body {
 
 .header-brand {
   display: flex;
-  align-items: center;
-  gap: 16px;
+  flex-direction: column;
+  gap: 4px;
   min-width: 200px;
 }
 
@@ -412,6 +412,14 @@ body {
 .navbar-breadcrumb .breadcrumb-item.active {
   font-weight: 600;
   color: #667eea;
+}
+
+.navbar-breadcrumb .breadcrumb-item.active.clickable {
+  cursor: pointer;
+}
+
+.navbar-breadcrumb .breadcrumb-item.active.clickable:hover {
+  background: rgba(102, 126, 234, 0.25);
 }
 
 .navbar-breadcrumb .breadcrumb-separator {
@@ -1394,7 +1402,7 @@ body:not(:has(.top-header-container)):not(:has(.top-navbar-container)) .left-sid
   display: flex;
   align-items: baseline;
   gap: 2px;
-  font-size: 24px;
+  font-size: 18px; /* Reduced from 24px */
   font-weight: 700;
 }
 
@@ -1416,8 +1424,10 @@ body:not(:has(.top-header-container)):not(:has(.top-navbar-container)) .left-sid
 
 .brand-subtitle {
   display: flex;
-  flex-direction: column;
-  font-size: 11px;
+  flex-direction: row; /* Changed from column to row for inline display */
+  gap: 8px;
+  align-items: center;
+  font-size: 10px; /* Reduced from 11px */
   color: #718096;
   line-height: 1.3;
 }
@@ -4586,7 +4596,8 @@ main.board {
 /* Kanban Board Styles */
 .kanban-board {
   padding: 0;
-  height: calc(100vh - 130px); /* Viewport height minus header/nav */
+  height: auto; /* Let content determine height instead of fixed viewport calculation */
+  max-height: calc(100vh - 200px); /* Prevent overflow but allow natural sizing */
   display: flex;
   flex-direction: column;
   overflow: hidden; /* No scrollbars */
@@ -5442,7 +5453,7 @@ main.board {
 }
 
 .backlog-card {
-  border: 3px dashed #374151;
+  border: 3px dashed #9ca3af !important; /* Strong dashed grey border for backlog cards */
 }
 
 .chapter-card:hover {

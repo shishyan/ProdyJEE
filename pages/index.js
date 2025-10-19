@@ -3111,11 +3111,27 @@ export default function Home() {
                 <span>Home</span>
               </button>
               <span className="breadcrumb-separator">/</span>
-              <span className="breadcrumb-item active">Study Plans</span>
+              <button 
+                className={`breadcrumb-item ${!selectedSubject ? 'active' : 'clickable'}`}
+                onClick={() => {
+                  setSelectedSubject(null)
+                  setCurrentPage('kanban')
+                }}
+              >
+                Study Plans
+              </button>
               {selectedSubject && (
                 <>
                   <span className="breadcrumb-separator">/</span>
-                  <span className="breadcrumb-item active">{selectedSubject.name}</span>
+                  <button 
+                    className="breadcrumb-item active clickable"
+                    onClick={() => {
+                      // Keep subject selected, just reset to top of page
+                      setCurrentPage('kanban')
+                    }}
+                  >
+                    {selectedSubject.name}
+                  </button>
                 </>
               )}
             </div>
