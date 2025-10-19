@@ -203,6 +203,48 @@ const MeditationIcon = () => (
   </svg>
 )
 
+const MenuIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+  </svg>
+)
+
+const XIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+  </svg>
+)
+
+const SettingsIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+  </svg>
+)
+
+const MicrophoneIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+  </svg>
+)
+
+const LoaderIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+  </svg>
+)
+
+const LayoutIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1v-3z" />
+  </svg>
+)
+
+const NavigationIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+  </svg>
+)
 
 
 
@@ -2280,7 +2322,7 @@ export default function Home() {
   const [filterPriority, setFilterPriority] = useState('All')
   const [filterLabel, setFilterLabel] = useState('All')
   const [selectedDueDate, setSelectedDueDate] = useState(null)
-  const [backgroundTheme, setBackgroundTheme] = useState('ocean')
+  const [backgroundTheme, setBackgroundTheme] = useState('mountain')
   const [navbarBackground, setNavbarBackground] = useState('default')
   const [viewMode, setViewMode] = useState('kanban') // Only Kanban view - simplified
   const [groupBy, setGroupBy] = useState('status') // status, stage, proficiency
@@ -2307,6 +2349,7 @@ export default function Home() {
   const [showNavBar, setShowNavBar] = useState(true)
   const [showSidebar, setShowSidebar] = useState(true)
   const [showFooter, setShowFooter] = useState(true)
+  const [showSettingsPanel, setShowSettingsPanel] = useState(false)
   
   // New MS Planner features
   const [searchQuery, setSearchQuery] = useState('')
@@ -3042,6 +3085,13 @@ export default function Home() {
               >
                 <PaletteIcon />
               </button>
+              <button
+                className={`header-action-btn ${showSettingsPanel ? 'active' : ''}`}
+                onClick={() => setShowSettingsPanel(!showSettingsPanel)}
+                title="Layout Settings"
+              >
+                <SettingsIcon />
+              </button>
               <a
                 href="/login"
                 className="header-action-btn user-profile"
@@ -3054,47 +3104,27 @@ export default function Home() {
         </header>
       )}
 
-      {/* 2. TOP NAVIGATION BAR CONTAINER - Full width hero style */}
+      {/* 2. TOP NAVIGATION BAR CONTAINER - Filters and Controls Only */}
       {showNavBar && (
         <nav className="top-navbar-container">
           <div className="navbar-wrapper">
-            {/* Main Navigation Menu */}
-            <div className="navbar-menu">
-              <button
-                className={`navbar-menu-item ${currentPage === 'kanban' ? 'active' : ''}`}
+            {/* Breadcrumb Navigation */}
+            <div className="navbar-breadcrumb">
+              <button 
+                className="breadcrumb-item clickable"
                 onClick={() => setCurrentPage('kanban')}
               >
                 <HomeIcon />
-                <span>Dashboard</span>
+                <span>Home</span>
               </button>
-              <a
-                href="/ProdyJEE/dashboard"
-                className="navbar-menu-item"
-              >
-                <BarChartIcon />
-                <span>Analytics</span>
-              </a>
-              <a
-                href="/ProdyJEE/schedule"
-                className="navbar-menu-item"
-              >
-                <CalendarIcon />
-                <span>Schedule</span>
-              </a>
-              <a
-                href="/ProdyJEE/timer"
-                className="navbar-menu-item"
-              >
-                <TimerIcon />
-                <span>Timer</span>
-              </a>
-              <a
-                href="/ProdyJEE/goals"
-                className="navbar-menu-item"
-              >
-                <MeditationIcon />
-                <span>Goals</span>
-              </a>
+              <span className="breadcrumb-separator">/</span>
+              <span className="breadcrumb-item active">Study Plans</span>
+              {selectedSubject && (
+                <>
+                  <span className="breadcrumb-separator">/</span>
+                  <span className="breadcrumb-item active">{selectedSubject.name}</span>
+                </>
+              )}
             </div>
 
             {/* Subject Filter Tabs */}
@@ -3119,9 +3149,9 @@ export default function Home() {
                   onChange={(e) => setGroupBy(e.target.value)}
                   className="navbar-select"
                 >
-                  <option value="status">📊 Group by Status</option>
-                  <option value="stage">🎯 Group by Stage</option>
-                  <option value="proficiency">⭐ Group by Proficiency</option>
+                  <option value="status">Group by Status</option>
+                  <option value="stage">Group by Stage</option>
+                  <option value="proficiency">Group by Proficiency</option>
                 </select>
               </div>
             )}
@@ -3140,95 +3170,51 @@ export default function Home() {
                 onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
                 title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
               >
-                {sidebarCollapsed ? '☰' : '✕'}
+                {sidebarCollapsed ? <MenuIcon /> : <XIcon />}
               </button>
               {!sidebarCollapsed && <h3 className="sidebar-title">Quick Access</h3>}
             </div>
             
             <div className="sidebar-content">
-              {/* Breadcrumb */}
+              {/* Main Navigation Menu */}
               {!sidebarCollapsed && (
                 <div className="sidebar-section">
-                  <div className="breadcrumb-path">
-                    <span className="breadcrumb-item">Home</span>
-                    <span className="breadcrumb-separator">/</span>
-                    <span className="breadcrumb-item active">Study Plans</span>
-                    {selectedSubject && (
-                      <>
-                        <span className="breadcrumb-separator">/</span>
-                        <span className="breadcrumb-item active">{selectedSubject.name}</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Quick Stats */}
-              {!sidebarCollapsed && selectedSubject && (
-                <div className="sidebar-section">
-                  <h4 className="sidebar-section-title">Overview</h4>
-                  <div className="sidebar-stat">
-                    <span className="stat-label">Total Chapters:</span>
-                    <span className="stat-value">
-                      {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name)).length}
-                    </span>
-                  </div>
-                  {groupBy === 'status' && (
-                    <>
-                      <div className="sidebar-stat">
-                        <span className="stat-label">Backlog:</span>
-                        <span className="stat-value stat-backlog">
-                          {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
-                            .filter(chapter => chapter.aggregatedStatus === 'In Queue').length}
-                        </span>
-                      </div>
-                      <div className="sidebar-stat">
-                        <span className="stat-label">In Progress:</span>
-                        <span className="stat-value stat-progress">
-                          {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
-                            .filter(chapter => chapter.aggregatedStatus === 'In Progress').length}
-                        </span>
-                      </div>
-                      <div className="sidebar-stat">
-                        <span className="stat-label">Completed:</span>
-                        <span className="stat-value stat-done">
-                          {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
-                            .filter(chapter => chapter.aggregatedStatus === 'Done').length}
-                        </span>
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
-
-              {/* Toggle Buttons for Containers */}
-              {!sidebarCollapsed && (
-                <div className="sidebar-section">
-                  <h4 className="sidebar-section-title">Layout Controls</h4>
+                  <h4 className="sidebar-section-title">Navigation</h4>
                   <button
-                    className="sidebar-control-btn"
-                    onClick={() => setShowTopHeader(!showTopHeader)}
+                    className={`sidebar-nav-item ${currentPage === 'kanban' ? 'active' : ''}`}
+                    onClick={() => setCurrentPage('kanban')}
                   >
-                    {showTopHeader ? '👁️' : '👁️‍🗨️'} Header
+                    <HomeIcon />
+                    <span>Dashboard</span>
                   </button>
-                  <button
-                    className="sidebar-control-btn"
-                    onClick={() => setShowNavBar(!showNavBar)}
+                  <a
+                    href="/ProdyJEE/dashboard"
+                    className="sidebar-nav-item"
                   >
-                    {showNavBar ? '👁️' : '👁️‍🗨️'} Nav Bar
-                  </button>
-                  <button
-                    className="sidebar-control-btn"
-                    onClick={() => setShowSidebar(!showSidebar)}
+                    <BarChartIcon />
+                    <span>Analytics</span>
+                  </a>
+                  <a
+                    href="/ProdyJEE/schedule"
+                    className="sidebar-nav-item"
                   >
-                    {showSidebar ? '👁️' : '👁️‍🗨️'} Sidebar
-                  </button>
-                  <button
-                    className="sidebar-control-btn"
-                    onClick={() => setShowFooter(!showFooter)}
+                    <CalendarIcon />
+                    <span>Schedule</span>
+                  </a>
+                  <a
+                    href="/ProdyJEE/timer"
+                    className="sidebar-nav-item"
                   >
-                    {showFooter ? '👁️' : '👁️‍🗨️'} Footer
-                  </button>
+                    <TimerIcon />
+                    <span>Timer</span>
+                  </a>
+                  <a
+                    href="/ProdyJEE/goals"
+                    className="sidebar-nav-item"
+                  >
+                    <MeditationIcon />
+                    <span>Goals</span>
+                  </a>
                 </div>
               )}
             </div>
@@ -3281,8 +3267,9 @@ export default function Home() {
                     
                     {/* Keyboard Navigation Hint */}
                     <div className="keyboard-hint">
-                      <div style={{ marginBottom: '4px', fontWeight: 600, color: '#1a202c' }}>
-                        🎯 Scrollbar-Free Navigation
+                      <div style={{ marginBottom: '4px', fontWeight: 600, color: '#1a202c', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <NavigationIcon />
+                        <span>Scrollbar-Free Navigation</span>
                       </div>
                       <div>
                         <kbd>Ctrl</kbd> + <kbd>←</kbd> / <kbd>→</kbd> Navigate columns
@@ -3291,7 +3278,7 @@ export default function Home() {
                         <kbd>Ctrl</kbd> + <kbd>Home</kbd> / <kbd>End</kbd> Jump to start/end
                       </div>
                       <div style={{ marginTop: '4px', fontSize: '10px', color: '#9ca3af' }}>
-                        💡 Mouse wheel also scrolls horizontally
+                        Mouse wheel also scrolls horizontally
                       </div>
                     </div>
                   </div>
@@ -3326,13 +3313,55 @@ export default function Home() {
       </div>
       {/* End of Content Wrapper */}
 
-      {/* 5. FOOTER CONTAINER - Voice Assistant AI */}
+      {/* 5. FOOTER CONTAINER - Overview Summary & Voice Assistant AI */}
       {showFooter && (
         <footer className="footer-container">
           <div className="footer-content">
-            <div className="footer-info">
+            {/* Left - Overview Summary */}
+            <div className="footer-overview">
+              {selectedSubject && (
+                <>
+                  <div className="footer-stat">
+                    <span className="footer-stat-icon"><BookOpenIcon /></span>
+                    <span className="footer-stat-value">
+                      {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name)).length}
+                    </span>
+                    <span className="footer-stat-label">Chapters</span>
+                  </div>
+                  {groupBy === 'status' && (
+                    <>
+                      <div className="footer-stat backlog">
+                        <span className="footer-stat-icon"><ClockIcon /></span>
+                        <span className="footer-stat-value">
+                          {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+                            .filter(chapter => chapter.aggregatedStatus === 'In Queue').length}
+                        </span>
+                        <span className="footer-stat-label">Backlog</span>
+                      </div>
+                      <div className="footer-stat progress">
+                        <span className="footer-stat-icon"><LoaderIcon /></span>
+                        <span className="footer-stat-value">
+                          {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+                            .filter(chapter => chapter.aggregatedStatus === 'In Progress').length}
+                        </span>
+                        <span className="footer-stat-label">In Progress</span>
+                      </div>
+                      <div className="footer-stat done">
+                        <span className="footer-stat-icon"><CheckCircleIcon /></span>
+                        <span className="footer-stat-value">
+                          {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+                            .filter(chapter => chapter.aggregatedStatus === 'Done').length}
+                        </span>
+                        <span className="footer-stat-label">Completed</span>
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
               <span className="footer-text">© 2024 ProdyJEE - Peepal Prodigy School</span>
             </div>
+
+            {/* Right - Voice Assistant */}
             <div className="footer-assistant">
               <button
                 className="voice-assistant-btn"
@@ -3342,13 +3371,130 @@ export default function Home() {
                 }}
                 title="Voice Assistant - Click to activate"
               >
-                <div className="voice-icon">🎙️</div>
+                <div className="voice-icon"><MicrophoneIcon /></div>
                 <div className="voice-pulse"></div>
                 <span className="voice-label">AI Assistant</span>
               </button>
             </div>
           </div>
         </footer>
+      )}
+
+      {/* Modern Settings Panel */}
+      {showSettingsPanel && (
+        <div className="settings-panel-overlay" onClick={() => setShowSettingsPanel(false)}>
+          <div className="settings-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="settings-panel-header">
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <LayoutIcon />
+                <span>Layout Settings</span>
+              </h3>
+              <button 
+                className="settings-close-btn"
+                onClick={() => setShowSettingsPanel(false)}
+              >
+                <XIcon />
+              </button>
+            </div>
+            
+            <div className="settings-panel-content">
+              <div className="settings-section">
+                <h4 className="settings-section-title">Container Visibility</h4>
+                <p className="settings-section-description">
+                  Toggle visibility of different layout containers
+                </p>
+                
+                <div className="settings-toggle-group">
+                  <div className="settings-toggle-item">
+                    <div className="settings-toggle-info">
+                      <span className="settings-toggle-icon"><GridIcon /></span>
+                      <div className="settings-toggle-text">
+                        <span className="settings-toggle-label">Top Header</span>
+                        <span className="settings-toggle-desc">Brand, search, and actions</span>
+                      </div>
+                    </div>
+                    <label className="toggle-switch">
+                      <input 
+                        type="checkbox" 
+                        checked={showTopHeader}
+                        onChange={() => setShowTopHeader(!showTopHeader)}
+                      />
+                      <span className="toggle-slider"></span>
+                    </label>
+                  </div>
+
+                  <div className="settings-toggle-item">
+                    <div className="settings-toggle-info">
+                      <span className="settings-toggle-icon"><NavigationIcon /></span>
+                      <div className="settings-toggle-text">
+                        <span className="settings-toggle-label">Navigation Bar</span>
+                        <span className="settings-toggle-desc">Subject filters and controls</span>
+                      </div>
+                    </div>
+                    <label className="toggle-switch">
+                      <input 
+                        type="checkbox" 
+                        checked={showNavBar}
+                        onChange={() => setShowNavBar(!showNavBar)}
+                      />
+                      <span className="toggle-slider"></span>
+                    </label>
+                  </div>
+
+                  <div className="settings-toggle-item">
+                    <div className="settings-toggle-info">
+                      <span className="settings-toggle-icon"><MenuIcon /></span>
+                      <div className="settings-toggle-text">
+                        <span className="settings-toggle-label">Left Sidebar</span>
+                        <span className="settings-toggle-desc">Navigation and breadcrumbs</span>
+                      </div>
+                    </div>
+                    <label className="toggle-switch">
+                      <input 
+                        type="checkbox" 
+                        checked={showSidebar}
+                        onChange={() => setShowSidebar(!showSidebar)}
+                      />
+                      <span className="toggle-slider"></span>
+                    </label>
+                  </div>
+
+                  <div className="settings-toggle-item">
+                    <div className="settings-toggle-info">
+                      <span className="settings-toggle-icon"><BarChartIcon /></span>
+                      <div className="settings-toggle-text">
+                        <span className="settings-toggle-label">Footer</span>
+                        <span className="settings-toggle-desc">Overview and AI assistant</span>
+                      </div>
+                    </div>
+                    <label className="toggle-switch">
+                      <input 
+                        type="checkbox" 
+                        checked={showFooter}
+                        onChange={() => setShowFooter(!showFooter)}
+                      />
+                      <span className="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="settings-panel-footer">
+                <button 
+                  className="settings-reset-btn"
+                  onClick={() => {
+                    setShowTopHeader(true)
+                    setShowNavBar(true)
+                    setShowSidebar(true)
+                    setShowFooter(true)
+                  }}
+                >
+                  Reset to Default
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Modals and Overlays */}
