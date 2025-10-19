@@ -356,6 +356,7 @@ body {
   z-index: 950;
   transition: transform 0.3s ease;
   pointer-events: auto;
+  height: 80px; /* Fixed height to prevent overlap */
 }
 
 .navbar-wrapper {
@@ -364,7 +365,8 @@ body {
   justify-content: space-between;
   padding: 16px 24px;
   gap: 24px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* Prevent wrapping that causes height changes */
+  height: 100%;
 }
 
 /* Navbar Breadcrumb */
@@ -505,7 +507,7 @@ body {
 /* Content Wrapper - Contains Sidebar + Main Content */
 .content-wrapper {
   display: flex;
-  margin-top: 130px; /* Header (70px) + Navbar (60px) */
+  margin-top: 150px; /* Header (70px) + Navbar (80px) - adjusted for actual navbar height */
   min-height: calc(100vh - 200px);
   position: relative;
 }
@@ -514,7 +516,7 @@ body {
 .left-sidebar-container {
   position: fixed;
   left: 0;
-  top: 130px;
+  top: 150px; /* Positioned below header (70px) + navbar (80px) */
   bottom: 50px; /* Space for footer */
   width: 280px;
   background: transparent;
@@ -724,7 +726,12 @@ body {
   padding: 32px;
   min-height: calc(100vh - 180px);
   transition: margin-left 0.3s ease;
-  background-color: #f5f7fa;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.95) 100%);
+  border-radius: 20px;
+  border: 1px solid rgba(229, 231, 235, 0.5);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  margin-right: 16px;
+  margin-bottom: 16px;
 }
 
 .left-sidebar-container.collapsed ~ .main-content-container {
