@@ -2302,6 +2302,12 @@ export default function Home() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true)
   const [currentPage, setCurrentPage] = useState('kanban') // 'kanban', 'schedule', 'timer', 'dashboard'
   
+  // Container visibility states for responsive layout
+  const [showTopHeader, setShowTopHeader] = useState(true)
+  const [showNavBar, setShowNavBar] = useState(true)
+  const [showSidebar, setShowSidebar] = useState(true)
+  const [showFooter, setShowFooter] = useState(true)
+  
   // New MS Planner features
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState('default') // 'default', 'progress', 'duedate', 'proficiency'
@@ -2409,6 +2415,130 @@ export default function Home() {
       return () => clearInterval(rhythmInterval)
     }
   }, [zenRhythmsEnabled, musicPlaying, backgroundMusic])
+
+  // Scrollbar-free keyboard navigation
+  useEffect(() => {
+    const handleKeyboardNav = (e) => {
+      const bucketsContainer = document.querySelector('.buckets-container')
+      if (!bucketsContainer) return
+
+      const scrollAmount = 350 // Width of one bucket approximately
+
+      switch(e.key) {
+        case 'ArrowLeft':
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault()
+            bucketsContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' })
+          }
+          break
+        case 'ArrowRight':
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault()
+            bucketsContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' })
+          }
+          break
+        case 'Home':
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault()
+            bucketsContainer.scrollTo({ left: 0, behavior: 'smooth' })
+          }
+          break
+        case 'End':
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault()
+            bucketsContainer.scrollTo({ left: bucketsContainer.scrollWidth, behavior: 'smooth' })
+          }
+          break
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyboardNav)
+    return () => window.removeEventListener('keydown', handleKeyboardNav)
+  }, [])
+
+  // Scroll progress indicator
+  useEffect(() => {
+    const handleScroll = () => {
+      const bucketsContainer = document.querySelector('.buckets-container')
+      if (!bucketsContainer) return
+
+      const scrollPercentage = (bucketsContainer.scrollLeft / (bucketsContainer.scrollWidth - bucketsContainer.clientWidth)) * 100
+      
+      let progressBar = document.querySelector('.kanban-scroll-progress')
+      if (!progressBar) {
+        progressBar = document.createElement('div')
+        progressBar.className = 'kanban-scroll-progress'
+        progressBar.style.cssText = `
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          height: 3px;
+          background: linear-gradient(90deg, #6366f1 0%, #a855f7 100%);
+          transition: width 0.1s ease;
+          z-index: 10;
+          box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        `
+        bucketsContainer.parentElement?.appendChild(progressBar)
+      }
+      progressBar.style.width = `${scrollPercentage}%`
+    }
+
+    const bucketsContainer = document.querySelector('.buckets-container')
+    if (bucketsContainer) {
+      bucketsContainer.addEventListener('scroll', handleScroll)
+      return () => bucketsContainer.removeEventListener('scroll', handleScroll)
+    }
+  }, [currentPage])
+
+  // Touch gesture support for mobile scrollbar-free navigation
+  useEffect(() => {
+    const bucketsContainer = document.querySelector('.buckets-container')
+    if (!bucketsContainer) return
+
+    let touchStartX = 0
+    let touchStartY = 0
+    let scrollStartX = 0
+    
+    const handleTouchStart = (e) => {
+      touchStartX = e.touches[0].clientX
+      touchStartY = e.touches[0].clientY
+      scrollStartX = bucketsContainer.scrollLeft
+    }
+    
+    const handleTouchMove = (e) => {
+      const touchCurrentX = e.touches[0].clientX
+      const touchCurrentY = e.touches[0].clientY
+      const deltaX = touchStartX - touchCurrentX
+      const deltaY = Math.abs(touchStartY - touchCurrentY)
+      
+      // If horizontal swipe is more significant than vertical, scroll horizontally
+      if (Math.abs(deltaX) > deltaY) {
+        e.preventDefault() // Prevent vertical scroll
+        bucketsContainer.scrollLeft = scrollStartX + deltaX
+      }
+    }
+    
+    const handleTouchEnd = () => {
+      // Optional: snap to nearest column after swipe
+      const bucketWidth = 340 // Approximate width of one bucket
+      const currentScroll = bucketsContainer.scrollLeft
+      const nearestColumn = Math.round(currentScroll / bucketWidth)
+      bucketsContainer.scrollTo({
+        left: nearestColumn * bucketWidth,
+        behavior: 'smooth'
+      })
+    }
+
+    bucketsContainer.addEventListener('touchstart', handleTouchStart, { passive: true })
+    bucketsContainer.addEventListener('touchmove', handleTouchMove, { passive: false })
+    bucketsContainer.addEventListener('touchend', handleTouchEnd)
+    
+    return () => {
+      bucketsContainer.removeEventListener('touchstart', handleTouchStart)
+      bucketsContainer.removeEventListener('touchmove', handleTouchMove)
+      bucketsContainer.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [currentPage])
 
   const fetchData = async () => {
     // Try to load from database export first, then localStorage, then fallback
@@ -2860,170 +2990,262 @@ export default function Home() {
   if (loading) return <div>Loading...</div>
 
   return (
-    <div className="planner">
-      {/* Professional Top Header */}
-      <nav className={`top-navbar navbar-${navbarBackground || 'default'}`}>
-        <div className="navbar-content">
-          {/* Left Side - App Logo, Title, Subtitle */}
-          <div className="navbar-brand">
-            <div className="brand-logo">
-              <span className="brand-main">Prody</span>
-              <span className="brand-jee">JEE</span>
-              <span className="brand-accent">™</span>
-            </div>
-            <div className="brand-subtitle">
-              <span>Peepal Prodigy School</span>
-              <span className="version-tag">v1.0.3-ffa8e94</span>
-            </div>
-          </div>
-
-          {/* Center - Dynamic Title + Group By */}
-          {selectedSubject && viewMode === 'kanban' && (
-            <div className="navbar-center" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <h3 className="navbar-title">
-                Kanban Board - {selectedSubject.name} ({groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name)).length} chapters)
-              </h3>
-              <select
-                value={groupBy}
-                onChange={(e) => setGroupBy(e.target.value)}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(0,0,0,0.1)',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  backgroundColor: 'rgba(255,255,255,0.95)',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                }}
-              >
-                <option value="status">📊 Group by Status</option>
-                <option value="stage">🎯 Group by Stage</option>
-                <option value="proficiency">⭐ Group by Proficiency</option>
-              </select>
-            </div>
-          )}
-          {/* Right Side - Actions (Duplicates removed - use sidebar for navigation) */}
-          <div className="navbar-actions">
-            <button
-              className={`nav-action-btn ${weatherEffect ? 'active' : ''}`}
-              onClick={() => setWeatherEffect(!weatherEffect)}
-              title={weatherEffect ? 'Disable Weather Effects' : 'Enable Weather Effects'}
-              style={{
-                backgroundColor: weatherEffect ? 'rgba(96, 165, 250, 0.2)' : 'transparent',
-                color: weatherEffect ? '#3b82f6' : 'inherit'
-              }}
-            >
-              <CloudIcon />
-            </button>
-            <button
-              className="nav-action-btn"
-              onClick={() => setShowSettings(true)}
-              title="Settings"
-            >
-              <CogIcon />
-            </button>
-            <button
-              className="nav-action-btn"
-              onClick={() => setShowBackgroundSettings(true)}
-              title="Background Settings"
-            >
-              <PaletteIcon />
-            </button>
-            <a
-              href="/login"
-              className="nav-action-btn user-profile"
-              title="User Profile"
-            >
-              <UserIcon />
-            </a>
-          </div>
-        </div>
-      </nav>
-
-      {/* Horizontal Navigation Bar - Breadcrumb + Filters */}
-      <div className="horizontal-navbar">
-        <div className="nav-content">
-          {/* Breadcrumb Section */}
-          <div className="breadcrumb-section">
-            <div className="breadcrumb-path">
-              <span className="breadcrumb-item">Home</span>
-              <span className="breadcrumb-separator">/</span>
-              <span className="breadcrumb-item active">Study Plans</span>
-              {selectedSubject && (
-                <>
-                  <span className="breadcrumb-separator">/</span>
-                  <span className="breadcrumb-item active">{selectedSubject.name}</span>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Filter Tabs Section */}
-          <div className="filter-tabs-section">
-            {/* Subjects Filter Tabs */}
-            <div className="filter-group">
-              <div className="filter-tabs">
-                {subjects.slice(0, 4).map(subject => (
-                  <button
-                    key={subject.subject_id}
-                    className={`filter-tab ${selectedSubject?.subject_id === subject.subject_id ? 'active' : ''}`}
-                    onClick={() => setSelectedSubject(subject)}
-                  >
-                    <BookOpenIcon />
-                    <span>{subject.name}</span>
-                  </button>
-                ))}
+    <div className="app-container">
+      {/* 1. TOP HEADER CONTAINER - Fixed at top */}
+      {showTopHeader && (
+        <header className="top-header-container">
+          <div className="header-content">
+            {/* Left Side - App Logo, Title, Subtitle */}
+            <div className="header-brand">
+              <div className="brand-logo">
+                <span className="brand-main">Prody</span>
+                <span className="brand-jee">JEE</span>
+                <span className="brand-accent">™</span>
+              </div>
+              <div className="brand-subtitle">
+                <span>Peepal Prodigy School</span>
+                <span className="version-tag">v1.0.3-ffa8e94</span>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Collapsible Sidebar */}
-      <div className={`sidebar ${sidebarCollapsed ? 'collapsed' : 'expanded'}`}>
-        <div className="sidebar-header">
-          <button 
-            className="sidebar-toggle"
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-          >
-            {sidebarCollapsed ? '☰' : '✕'}
-          </button>
-        </div>
-        <div className="sidebar-content">
-          <div className="sidebar-item" onClick={() => setCurrentPage('kanban')} title="Dashboard" style={{ cursor: 'pointer' }}>
-            <HomeIcon />
-            {!sidebarCollapsed && <span>Dashboard</span>}
-          </div>
-          <a href="/ProdyJEE/dashboard" className="sidebar-item" title="Analytics" style={{ cursor: 'pointer' }}>
-            <BarChartIcon />
-            {!sidebarCollapsed && <span>Analytics</span>}
-          </a>
-          <a href="/ProdyJEE/schedule" className="sidebar-item" title="Schedule" style={{ cursor: 'pointer' }}>
-            <CalendarIcon />
-            {!sidebarCollapsed && <span>Schedule</span>}
-          </a>
-          <a href="/ProdyJEE/timer" className="sidebar-item" title="Timer" style={{ cursor: 'pointer' }}>
-            <TimerIcon />
-            {!sidebarCollapsed && <span>Timer</span>}
-          </a>
-          <a href="/ProdyJEE/goals" className="sidebar-item" title="Goals" style={{ cursor: 'pointer' }}>
-            <MeditationIcon />
-            {!sidebarCollapsed && <span>Goals</span>}
-          </a>
-        </div>
-        <div className="sidebar-footer">
-          {!sidebarCollapsed && (
-            <div className="sidebar-attribution">
-              by Sasha Nagarajan, 11th Grade, Peepal Prodigy School, Madukkarai, Coimbatore
+            {/* Center - Search Bar */}
+            <div className="header-search">
+              <input
+                type="text"
+                placeholder="Search chapters, subjects, goals..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input"
+              />
             </div>
-          )}
-        </div>
-      </div>
 
-      <main className="board" style={{ paddingTop: 0 }}>
-        {currentPage === 'kanban' && (
+            {/* Right Side - User Profile, Settings, Actions */}
+            <div className="header-actions">
+              <button
+                className={`header-action-btn ${weatherEffect ? 'active' : ''}`}
+                onClick={() => setWeatherEffect(!weatherEffect)}
+                title={weatherEffect ? 'Disable Weather Effects' : 'Enable Weather Effects'}
+              >
+                <CloudIcon />
+              </button>
+              <button
+                className="header-action-btn"
+                onClick={() => setShowSettings(true)}
+                title="Settings"
+              >
+                <CogIcon />
+              </button>
+              <button
+                className="header-action-btn"
+                onClick={() => setShowBackgroundSettings(true)}
+                title="Background Settings"
+              >
+                <PaletteIcon />
+              </button>
+              <a
+                href="/login"
+                className="header-action-btn user-profile"
+                title="User Profile"
+              >
+                <UserIcon />
+              </a>
+            </div>
+          </div>
+        </header>
+      )}
+
+      {/* 2. TOP NAVIGATION BAR CONTAINER - Full width hero style */}
+      {showNavBar && (
+        <nav className="top-navbar-container">
+          <div className="navbar-wrapper">
+            {/* Main Navigation Menu */}
+            <div className="navbar-menu">
+              <button
+                className={`navbar-menu-item ${currentPage === 'kanban' ? 'active' : ''}`}
+                onClick={() => setCurrentPage('kanban')}
+              >
+                <HomeIcon />
+                <span>Dashboard</span>
+              </button>
+              <a
+                href="/ProdyJEE/dashboard"
+                className="navbar-menu-item"
+              >
+                <BarChartIcon />
+                <span>Analytics</span>
+              </a>
+              <a
+                href="/ProdyJEE/schedule"
+                className="navbar-menu-item"
+              >
+                <CalendarIcon />
+                <span>Schedule</span>
+              </a>
+              <a
+                href="/ProdyJEE/timer"
+                className="navbar-menu-item"
+              >
+                <TimerIcon />
+                <span>Timer</span>
+              </a>
+              <a
+                href="/ProdyJEE/goals"
+                className="navbar-menu-item"
+              >
+                <MeditationIcon />
+                <span>Goals</span>
+              </a>
+            </div>
+
+            {/* Subject Filter Tabs */}
+            <div className="navbar-filters">
+              {subjects.slice(0, 4).map(subject => (
+                <button
+                  key={subject.subject_id}
+                  className={`navbar-filter-tab ${selectedSubject?.subject_id === subject.subject_id ? 'active' : ''}`}
+                  onClick={() => setSelectedSubject(subject)}
+                >
+                  <BookOpenIcon />
+                  <span>{subject.name}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Group By Controls */}
+            {selectedSubject && viewMode === 'kanban' && (
+              <div className="navbar-controls">
+                <select
+                  value={groupBy}
+                  onChange={(e) => setGroupBy(e.target.value)}
+                  className="navbar-select"
+                >
+                  <option value="status">📊 Group by Status</option>
+                  <option value="stage">🎯 Group by Stage</option>
+                  <option value="proficiency">⭐ Group by Proficiency</option>
+                </select>
+              </div>
+            )}
+          </div>
+        </nav>
+      )}
+
+      {/* Content Wrapper - Contains Sidebar + Main Content */}
+      <div className="content-wrapper">
+        {/* 3. LEFT SIDEBAR CONTAINER */}
+        {showSidebar && (
+          <aside className={`left-sidebar-container ${sidebarCollapsed ? 'collapsed' : 'expanded'}`}>
+            <div className="sidebar-header">
+              <button 
+                className="sidebar-toggle-btn"
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+              >
+                {sidebarCollapsed ? '☰' : '✕'}
+              </button>
+              {!sidebarCollapsed && <h3 className="sidebar-title">Quick Access</h3>}
+            </div>
+            
+            <div className="sidebar-content">
+              {/* Breadcrumb */}
+              {!sidebarCollapsed && (
+                <div className="sidebar-section">
+                  <div className="breadcrumb-path">
+                    <span className="breadcrumb-item">Home</span>
+                    <span className="breadcrumb-separator">/</span>
+                    <span className="breadcrumb-item active">Study Plans</span>
+                    {selectedSubject && (
+                      <>
+                        <span className="breadcrumb-separator">/</span>
+                        <span className="breadcrumb-item active">{selectedSubject.name}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Quick Stats */}
+              {!sidebarCollapsed && selectedSubject && (
+                <div className="sidebar-section">
+                  <h4 className="sidebar-section-title">Overview</h4>
+                  <div className="sidebar-stat">
+                    <span className="stat-label">Total Chapters:</span>
+                    <span className="stat-value">
+                      {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name)).length}
+                    </span>
+                  </div>
+                  {groupBy === 'status' && (
+                    <>
+                      <div className="sidebar-stat">
+                        <span className="stat-label">Backlog:</span>
+                        <span className="stat-value stat-backlog">
+                          {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+                            .filter(chapter => chapter.aggregatedStatus === 'In Queue').length}
+                        </span>
+                      </div>
+                      <div className="sidebar-stat">
+                        <span className="stat-label">In Progress:</span>
+                        <span className="stat-value stat-progress">
+                          {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+                            .filter(chapter => chapter.aggregatedStatus === 'In Progress').length}
+                        </span>
+                      </div>
+                      <div className="sidebar-stat">
+                        <span className="stat-label">Completed:</span>
+                        <span className="stat-value stat-done">
+                          {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+                            .filter(chapter => chapter.aggregatedStatus === 'Done').length}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Toggle Buttons for Containers */}
+              {!sidebarCollapsed && (
+                <div className="sidebar-section">
+                  <h4 className="sidebar-section-title">Layout Controls</h4>
+                  <button
+                    className="sidebar-control-btn"
+                    onClick={() => setShowTopHeader(!showTopHeader)}
+                  >
+                    {showTopHeader ? '👁️' : '👁️‍🗨️'} Header
+                  </button>
+                  <button
+                    className="sidebar-control-btn"
+                    onClick={() => setShowNavBar(!showNavBar)}
+                  >
+                    {showNavBar ? '👁️' : '👁️‍🗨️'} Nav Bar
+                  </button>
+                  <button
+                    className="sidebar-control-btn"
+                    onClick={() => setShowSidebar(!showSidebar)}
+                  >
+                    {showSidebar ? '👁️' : '👁️‍🗨️'} Sidebar
+                  </button>
+                  <button
+                    className="sidebar-control-btn"
+                    onClick={() => setShowFooter(!showFooter)}
+                  >
+                    {showFooter ? '👁️' : '👁️‍🗨️'} Footer
+                  </button>
+                </div>
+              )}
+            </div>
+            
+            <div className="sidebar-footer">
+              {!sidebarCollapsed && (
+                <div className="sidebar-attribution">
+                  by Sasha Nagarajan, 11th Grade, Peepal Prodigy School, Madukkarai, Coimbatore
+                </div>
+              )}
+            </div>
+          </aside>
+        )}
+
+        {/* 4. MAIN CONTENT CONTAINER */}
+        <main className="main-content-container">
+          {currentPage === 'kanban' && (
           <>
             {selectedSubject && viewMode === 'kanban' && (
               <>
@@ -3034,7 +3256,7 @@ export default function Home() {
                 >
                   <div className="kanban-board">
                     <div className="buckets-container">
-                      {buckets.filter(bucket => groupBy !== 'status' || bucket.id !== 'backlog').map(bucket => {
+                      {buckets.map(bucket => {
                         const allChapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
                         const filtered = filterChapters(allChapters)
                         const sorted = sortChapters(filtered)
@@ -3055,6 +3277,22 @@ export default function Home() {
                           />
                         )
                       })}
+                    </div>
+                    
+                    {/* Keyboard Navigation Hint */}
+                    <div className="keyboard-hint">
+                      <div style={{ marginBottom: '4px', fontWeight: 600, color: '#1a202c' }}>
+                        🎯 Scrollbar-Free Navigation
+                      </div>
+                      <div>
+                        <kbd>Ctrl</kbd> + <kbd>←</kbd> / <kbd>→</kbd> Navigate columns
+                      </div>
+                      <div>
+                        <kbd>Ctrl</kbd> + <kbd>Home</kbd> / <kbd>End</kbd> Jump to start/end
+                      </div>
+                      <div style={{ marginTop: '4px', fontSize: '10px', color: '#9ca3af' }}>
+                        💡 Mouse wheel also scrolls horizontally
+                      </div>
                     </div>
                   </div>
                 </DndContext>
@@ -3083,134 +3321,38 @@ export default function Home() {
         {currentPage === 'dashboard' && (
           <DashboardView />
         )}
-      </main>
+        </main>
+        {/* End of MAIN CONTENT CONTAINER */}
+      </div>
+      {/* End of Content Wrapper */}
 
-      {/* Footer Backlog Section */}
-      {currentPage === 'kanban' && selectedSubject && groupBy === 'status' && (
-        <div 
-          onDragOver={(e) => {
-            e.preventDefault()
-            e.currentTarget.style.background = 'rgba(139, 92, 246, 0.15)'
-          }}
-          onDragLeave={(e) => {
-            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)'
-          }}
-          onDrop={async (e) => {
-            e.preventDefault()
-            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)'
-            const chapterId = e.dataTransfer.getData('chapterId')
-            if (chapterId) {
-              await updateChapterStatus(chapterId, 'In Queue')
-            }
-          }}
-          style={{
-          position: 'fixed',
-          bottom: 0,
-          left: sidebarCollapsed ? '80px' : '280px',
-          right: 0,
-          background: 'rgba(255, 255, 255, 0.25)',
-          backdropFilter: 'blur(30px)',
-          WebkitBackdropFilter: 'blur(30px)',
-          padding: '16px 20px',
-          boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.15)',
-          zIndex: 800,
-          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
-            <h3 style={{ 
-              fontSize: '16px', 
-              fontWeight: '700', 
-              color: '#1a1a1a', 
-              margin: 0,
-              textTransform: 'uppercase',
-              letterSpacing: '1px'
-            }}>
-              📦 Backlog Queue
-            </h3>
-            <span style={{ 
-              fontSize: '12px', 
-              color: '#4a5568', 
-              fontWeight: '600',
-              background: 'rgba(74, 85, 104, 0.1)',
-              padding: '4px 12px',
-              borderRadius: '12px'
-            }}>
-              {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
-                .filter(chapter => chapter.aggregatedStatus === 'In Queue').length} chapters waiting
-            </span>
+      {/* 5. FOOTER CONTAINER - Voice Assistant AI */}
+      {showFooter && (
+        <footer className="footer-container">
+          <div className="footer-content">
+            <div className="footer-info">
+              <span className="footer-text">© 2024 ProdyJEE - Peepal Prodigy School</span>
+            </div>
+            <div className="footer-assistant">
+              <button
+                className="voice-assistant-btn"
+                onClick={() => {
+                  // Voice assistant logic - future implementation
+                  alert('Voice Assistant AI - Coming Soon!\nCapture notes, to-dos, and voice commands.')
+                }}
+                title="Voice Assistant - Click to activate"
+              >
+                <div className="voice-icon">🎙️</div>
+                <div className="voice-pulse"></div>
+                <span className="voice-label">AI Assistant</span>
+              </button>
+            </div>
           </div>
-          <div style={{
-            display: 'flex',
-            gap: '12px',
-            overflowX: 'auto',
-            paddingBottom: '8px',
-            scrollbarWidth: 'thin',
-            scrollbarColor: 'rgba(74, 85, 104, 0.5) transparent'
-          }}>
-            {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
-              .filter(chapter => chapter.aggregatedStatus === 'In Queue')
-              .map((chapter) => (
-                <div
-                  key={chapter.chapter_id}
-                  draggable
-                  onDragStart={(e) => {
-                    e.dataTransfer.setData('chapterId', chapter.chapter_id)
-                    e.dataTransfer.effectAllowed = 'move'
-                  }}
-                  style={{
-                    minWidth: '180px',
-                    maxWidth: '180px',
-                    background: 'rgba(255, 255, 255, 0.4)',
-                    backdropFilter: 'blur(10px)',
-                    borderRadius: '10px',
-                    padding: '12px 14px',
-                    cursor: 'grab',
-                    transition: 'all 0.3s ease',
-                    border: '2px dashed #718096',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-3px)'
-                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.15)'
-                    e.currentTarget.style.borderColor = '#4a5568'
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)'
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
-                    e.currentTarget.style.borderColor = '#718096'
-                  }}
-                >
-                  <div style={{ 
-                    fontSize: '11px', 
-                    fontWeight: '700', 
-                    color: '#718096', 
-                    marginBottom: '6px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px'
-                  }}>
-                    Ch. {chapter.chapter_id}
-                  </div>
-                  <div style={{ 
-                    fontWeight: '600', 
-                    fontSize: '14px', 
-                    color: '#1a1a1a',
-                    lineHeight: '1.3',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical'
-                  }}>
-                    {chapter.chapter_name}
-                  </div>
-                </div>
-              ))}
-          </div>
-        </div>
+        </footer>
       )}
 
-      <>
-        {editingTask && (
+      {/* Modals and Overlays */}
+      {editingTask && (
         <div className="modal-overlay">
           <div className="task-modal glass-card">
             <div className="modal-header">
@@ -3608,7 +3750,7 @@ export default function Home() {
           </div>
         </div>
       )}
-      </>
+
       {/* Weather Effect Overlay */}
       {weatherEffect && (
         <div className="weather-overlay">
@@ -4055,18 +4197,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
-      {/* Voice Assistant - Bottom Right Corner */}
-      <div className="voice-assistant-container">
-        <button
-          className="voice-assistant-btn"
-          onClick={() => {/* Voice assistant logic */}}
-          title="Voice Assistant"
-        >
-          <div className="voice-assistant-icon">🎙️</div>
-          <div className="voice-assistant-pulse"></div>
-        </button>
-      </div>
 
       {/* Background Settings Modal */}
       <BackgroundSettings 

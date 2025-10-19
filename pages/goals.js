@@ -235,265 +235,335 @@ export default function GoalsPage() {
         <link rel="stylesheet" href="/ProdyJEE/styles/globals.css" />
       </Head>
 
-      <div style={{ minHeight: '100vh', backgroundImage: 'url(https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-        {/* MS Planner Style Top Navbar with Glassmorphism */}
-        <nav style={{ 
-          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.45) 50%, rgba(255, 255, 255, 0.5) 100%)',
-          backdropFilter: 'blur(30px)',
-          WebkitBackdropFilter: 'blur(30px)',
-          color: '#1a1a1a', 
-          padding: '12px 24px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <a href="/ProdyJEE/" style={{ color: '#1a1a1a', textDecoration: 'none', fontSize: '16px', fontWeight: '600' }}>
-              ← Back to Planner
-            </a>
-            <div style={{ borderLeft: '1px solid rgba(26,26,26,0.2)', height: '24px' }}></div>
-            <h1 style={{ margin: 0, fontSize: '20px', fontWeight: '600', color: '#1a1a1a' }}>Goals & Targets</h1>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '13px', opacity: 0.7, color: '#1a1a1a' }}>v1.0.3-361bf16</span>
-          </div>
-        </nav>
-
-        {/* Main Content */}
-        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px' }}>
-          {/* Page Header with Breadcrumb */}
-          <div style={{ marginBottom: '24px' }}>
-            <div style={{ fontSize: '12px', color: '#605e5c', marginBottom: '8px' }}>
-              <span>Home</span> / <span style={{ fontWeight: '600' }}>Goals</span>
+      <div className="planner">
+        {/* Main Content - Integrated with Layout */}
+        <div style={{ padding: '32px', backgroundColor: '#f5f7fa', minHeight: '100vh' }}>
+          {/* Page Header */}
+          <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h1 style={{ margin: 0, fontSize: '28px', fontWeight: '700', color: '#1a202c', marginBottom: '8px' }}>🎯 My Goals</h1>
+              <p style={{ margin: 0, fontSize: '15px', color: '#718096' }}>Track your academic progress and earn achievement points</p>
             </div>
-            <h2 style={{ color: '#323130', fontSize: '28px', fontWeight: '600', margin: '0 0 8px 0' }}>Learning Goals & Achievement Tracker</h2>
-            <p style={{ color: '#605e5c', fontSize: '14px', margin: '0' }}>Track your academic progress, set proficiency targets, and earn achievement points</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#fef3c7', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                <span style={{ fontSize: '20px' }}>⭐</span>
+                <span style={{ fontSize: '16px', fontWeight: '700', color: '#92400e' }}>{starPoints + badgePoints} pts</span>
+              </div>
+              <button
+                onClick={() => setShowAddGoal(true)}
+                style={{
+                  padding: '12px 24px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  backgroundColor: '#6366f1',
+                  color: 'white',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  fontSize: '15px',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.backgroundColor = '#4f46e5'
+                  e.target.style.transform = 'translateY(-2px)'
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.backgroundColor = '#6366f1'
+                  e.target.style.transform = 'translateY(0)'
+                }}
+              >
+                + New Goal
+              </button>
+            </div>
           </div>
 
-          {/* Achievement Points Dashboard - Glassmorphism Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+          {/* Stats Cards Row */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '32px' }}>
             <div style={{ 
-              background: 'rgba(255, 255, 255, 0.25)', 
-              border: '1px solid rgba(255, 255, 255, 0.3)', 
-              borderRadius: '12px', 
-              padding: '20px',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-              transition: 'all 0.3s ease'
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+              borderRadius: '16px', 
+              padding: '24px',
+              boxShadow: '0 10px 25px rgba(102, 126, 234, 0.3)',
+              color: 'white'
             }}>
-              <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.7)', marginBottom: '8px', fontWeight: '600' }}>⭐ STAR POINTS</div>
-              <div style={{ fontSize: '32px', color: '#1a1a1a', fontWeight: '600', marginBottom: '4px' }}>{starPoints}</div>
-              <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.6)' }}>10 points per star earned</div>
+              <div style={{ fontSize: '14px', opacity: 0.9, marginBottom: '8px', fontWeight: '500' }}>⭐ Star Points</div>
+              <div style={{ fontSize: '36px', fontWeight: '700', marginBottom: '4px' }}>{starPoints}</div>
+              <div style={{ fontSize: '13px', opacity: 0.85 }}>10 pts per star</div>
             </div>
             
             <div style={{ 
-              background: 'rgba(255, 255, 255, 0.25)', 
-              border: '1px solid rgba(255, 255, 255, 0.3)', 
-              borderRadius: '12px', 
-              padding: '20px',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-              transition: 'all 0.3s ease'
+              background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', 
+              borderRadius: '16px', 
+              padding: '24px',
+              boxShadow: '0 10px 25px rgba(240, 147, 251, 0.3)',
+              color: 'white'
             }}>
-              <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.7)', marginBottom: '8px', fontWeight: '600' }}>🏆 BADGE POINTS</div>
-              <div style={{ fontSize: '32px', color: '#1a1a1a', fontWeight: '600', marginBottom: '4px' }}>{badgePoints}</div>
-              <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.6)' }}>100 points per badge (5 stars)</div>
+              <div style={{ fontSize: '14px', opacity: 0.9, marginBottom: '8px', fontWeight: '500' }}>🏆 Badge Points</div>
+              <div style={{ fontSize: '36px', fontWeight: '700', marginBottom: '4px' }}>{badgePoints}</div>
+              <div style={{ fontSize: '13px', opacity: 0.85 }}>100 pts per badge</div>
             </div>
             
             <div style={{ 
-              background: 'rgba(255, 255, 255, 0.25)', 
-              border: '1px solid rgba(255, 255, 255, 0.3)', 
-              borderRadius: '12px', 
-              padding: '20px',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-              transition: 'all 0.3s ease'
+              background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', 
+              borderRadius: '16px', 
+              padding: '24px',
+              boxShadow: '0 10px 25px rgba(79, 172, 254, 0.3)',
+              color: 'white'
             }}>
-              <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.7)', marginBottom: '8px', fontWeight: '600' }}>✨ TOTAL POINTS</div>
-              <div style={{ fontSize: '32px', color: '#1a1a1a', fontWeight: '600', marginBottom: '4px' }}>{starPoints + badgePoints}</div>
-              <div style={{ fontSize: '12px', color: 'rgba(0,0,0,0.6)' }}>Combined achievement score</div>
+              <div style={{ fontSize: '14px', opacity: 0.9, marginBottom: '8px', fontWeight: '500' }}>✨ Total Score</div>
+              <div style={{ fontSize: '36px', fontWeight: '700', marginBottom: '4px' }}>{starPoints + badgePoints}</div>
+              <div style={{ fontSize: '13px', opacity: 0.85 }}>Combined points</div>
             </div>
           </div>
 
-          {/* Subject Filter Pills - Glassmorphism Style */}
+          {/* Subject Filter Pills - Modern Style */}
           <div style={{ 
-            background: 'rgba(255, 255, 255, 0.25)', 
-            border: '1px solid rgba(255, 255, 255, 0.3)', 
-            borderRadius: '12px',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)', 
-            padding: '16px',
+            backgroundColor: 'white', 
+            borderRadius: '16px',
+            padding: '20px',
             marginBottom: '24px',
-            boxShadow: '0 1.6px 3.6px 0 rgba(0,0,0,0.132)'
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
           }}>
-            <div style={{ fontSize: '13px', color: '#605e5c', marginBottom: '12px', fontWeight: '600' }}>FILTER BY SUBJECT</div>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {subjects.map(subject => (
-                <button
-                  key={subject}
-                  onClick={() => setSelectedSubject(subject)}
-                  style={{
-                    padding: '6px 16px',
-                    borderRadius: '16px',
-                    border: selectedSubject === subject ? '2px solid #0078d4' : '1px solid #8a8886',
-                    backgroundColor: selectedSubject === subject ? '#deecf9' : 'white',
-                    color: selectedSubject === subject ? '#0078d4' : '#323130',
-                    fontWeight: selectedSubject === subject ? '600' : '400',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    fontSize: '13px'
-                  }}
-                >
-                  {subject}
-                </button>
-              ))}
+            <div style={{ fontSize: '13px', color: '#718096', marginBottom: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Filter by Subject</div>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              {subjects.map(subject => {
+                const subjectColors = {
+                  'Chemistry': { bg: '#fef3c7', border: '#fbbf24', text: '#92400e' },
+                  'Mathematics': { bg: '#dbeafe', border: '#3b82f6', text: '#1e40af' },
+                  'Physics': { bg: '#fce7f3', border: '#ec4899', text: '#831843' }
+                }
+                const colors = subjectColors[subject] || { bg: '#f3f4f6', border: '#9ca3af', text: '#1f2937' }
+                
+                return (
+                  <button
+                    key={subject}
+                    onClick={() => setSelectedSubject(subject)}
+                    style={{
+                      padding: '10px 20px',
+                      borderRadius: '12px',
+                      border: selectedSubject === subject ? `2px solid ${colors.border}` : '2px solid transparent',
+                      backgroundColor: selectedSubject === subject ? colors.bg : '#f9fafb',
+                      color: selectedSubject === subject ? colors.text : '#4b5563',
+                      fontWeight: selectedSubject === subject ? '600' : '500',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      fontSize: '14px'
+                    }}
+                  >
+                    {subject}
+                  </button>
+                )
+              })}
             </div>
           </div>
 
-          {/* Main Content - MS Planner Two Column Layout */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '24px' }}>
+          {/* Main Content - Modern Two Column Layout */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '24px' }}>
             {/* Goals List */}
             <div>
               {subjectGoals.length === 0 ? (
                 <div style={{
-                  background: 'rgba(255, 255, 255, 0.25)',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  borderRadius: '12px',
-                  padding: '48px',
+                  backgroundColor: 'white',
+                  borderRadius: '16px',
+                  padding: '64px 32px',
                   textAlign: 'center',
-                  backdropFilter: 'blur(20px)',
-                  WebkitBackdropFilter: 'blur(20px)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
                 }}>
-                  <div style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.3 }}>🎯</div>
-                  <p style={{ fontSize: '16px', color: '#323130', margin: '0 0 8px 0', fontWeight: '600' }}>No goals set for {selectedSubject}</p>
-                  <p style={{ fontSize: '13px', color: '#605e5c', margin: '0 0 20px 0' }}>Start by creating your first learning goal</p>
+                  <div style={{ fontSize: '64px', marginBottom: '16px', opacity: 0.5 }}>🎯</div>
+                  <p style={{ fontSize: '18px', color: '#1a202c', margin: '0 0 8px 0', fontWeight: '600' }}>No goals set for {selectedSubject}</p>
+                  <p style={{ fontSize: '14px', color: '#718096', margin: '0 0 24px 0' }}>Start by creating your first learning goal or choose from templates</p>
                   <button
                     onClick={() => setShowAddGoal(true)}
                     style={{
-                      padding: '8px 24px',
-                      borderRadius: '2px',
+                      padding: '12px 32px',
+                      borderRadius: '10px',
                       border: 'none',
-                      backgroundColor: '#0078d4',
+                      backgroundColor: '#6366f1',
                       color: 'white',
                       fontWeight: '600',
                       cursor: 'pointer',
-                      fontSize: '14px',
-                      transition: 'background-color 0.2s ease'
+                      fontSize: '15px',
+                      transition: 'all 0.2s ease',
+                      boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
                     }}
-                    onMouseOver={(e) => e.target.style.backgroundColor = '#106ebe'}
-                    onMouseOut={(e) => e.target.style.backgroundColor = '#0078d4'}
+                    onMouseOver={(e) => {
+                      e.target.style.backgroundColor = '#4f46e5'
+                      e.target.style.transform = 'translateY(-2px)'
+                      e.target.style.boxShadow = '0 6px 16px rgba(99, 102, 241, 0.4)'
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.backgroundColor = '#6366f1'
+                      e.target.style.transform = 'translateY(0)'
+                      e.target.style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.3)'
+                    }}
                   >
                     + Add First Goal
                   </button>
                 </div>
               ) : (
-                <div style={{ display: 'grid', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
                   {subjectGoals.map(([goalKey, goal]) => {
                     const daysLeft = getDaysRemaining(goal.targetDate)
                     const isOverdue = daysLeft < 0
                     const isUrgent = daysLeft <= 7 && daysLeft >= 0
+                    
+                    // Category-based colors
+                    const categoryColors = {
+                      academic: { bg: '#eff6ff', border: '#3b82f6', dot: '#2563eb' },
+                      behavioral: { bg: '#fef3c7', border: '#f59e0b', dot: '#d97706' },
+                      emotional: { bg: '#fce7f3', border: '#ec4899', dot: '#db2777' }
+                    }
+                    const category = goal.phrase ? (
+                      goalTemplates.academic.some(t => t.phrase === goal.phrase) ? 'academic' :
+                      goalTemplates.behavioral.some(t => t.phrase === goal.phrase) ? 'behavioral' : 'emotional'
+                    ) : 'academic'
+                    const colors = categoryColors[category]
 
                     return (
                       <div
                         key={goalKey}
                         style={{
-                          background: 'rgba(255, 255, 255, 0.25)',
-                          borderRadius: '12px',
-                          padding: '16px',
-                          border: goal.completed ? '2px solid rgba(16, 124, 16, 0.6)' : '1px solid rgba(255, 255, 255, 0.3)',
-                          backdropFilter: 'blur(20px)',
-                          WebkitBackdropFilter: 'blur(20px)',
-                          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                          backgroundColor: 'white',
+                          borderRadius: '16px',
+                          padding: '20px',
+                          border: goal.completed ? '2px solid #10b981' : '1px solid #e2e8f0',
+                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
                           transition: 'all 0.2s ease',
-                          opacity: goal.completed ? 0.75 : 1,
-                          position: 'relative'
+                          opacity: goal.completed ? 0.7 : 1,
+                          position: 'relative',
+                          cursor: 'pointer'
+                        }}
+                        onMouseOver={(e) => {
+                          if (!goal.completed) {
+                            e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.1)'
+                            e.currentTarget.style.transform = 'translateY(-2px)'
+                          }
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.05)'
+                          e.currentTarget.style.transform = 'translateY(0)'
                         }}
                       >
+                        {/* Category Tag */}
+                        <div style={{ 
+                          display: 'inline-flex', 
+                          alignItems: 'center', 
+                          gap: '6px',
+                          padding: '4px 12px',
+                          borderRadius: '20px',
+                          backgroundColor: colors.bg,
+                          marginBottom: '12px',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          color: colors.dot,
+                          border: `1px solid ${colors.border}`
+                        }}>
+                          <span style={{
+                            display: 'inline-block',
+                            width: '6px',
+                            height: '6px',
+                            borderRadius: '50%',
+                            backgroundColor: colors.dot
+                          }}></span>
+                          {category.charAt(0).toUpperCase() + category.slice(1)}
+                        </div>
+
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
                           <div style={{ flex: 1 }}>
                             <h3 style={{
                               margin: '0 0 8px 0',
-                              fontSize: '15px',
+                              fontSize: '16px',
                               fontWeight: '600',
-                              color: goal.completed ? '#107c10' : '#323130',
-                              textDecoration: goal.completed ? 'line-through' : 'none'
+                              color: goal.completed ? '#10b981' : '#1a202c',
+                              textDecoration: goal.completed ? 'line-through' : 'none',
+                              lineHeight: '1.4'
                             }}>
-                              {goal.chapterName}
+                              {goal.phrase || goal.chapterName}
                             </h3>
-                            <div style={{ display: 'flex', gap: '12px', fontSize: '12px', color: '#605e5c', flexWrap: 'wrap' }}>
-                              <div style={{ 
-                                display: 'inline-flex', 
-                                alignItems: 'center', 
-                                gap: '4px',
-                                padding: '2px 8px',
-                                borderRadius: '2px',
-                                backgroundColor: '#f3f2f1'
-                              }}>
-                                <span style={{
-                                  display: 'inline-block',
-                                  width: '8px',
-                                  height: '8px',
-                                  borderRadius: '50%',
-                                  backgroundColor: getProficiencyColor(goal.targetProficiency)
-                                }}></span>
-                                {goal.targetProficiency}
-                              </div>
-                              <div style={{ 
-                                display: 'inline-flex', 
-                                alignItems: 'center', 
-                                gap: '4px',
-                                padding: '2px 8px',
-                                borderRadius: '2px',
-                                backgroundColor: '#f3f2f1'
-                              }}>
-                                <span style={{
-                                  display: 'inline-block',
-                                  width: '8px',
-                                  height: '8px',
-                                  borderRadius: '50%',
-                                  backgroundColor: getPriorityColor(goal.priority)
-                                }}></span>
-                                {goal.priority}
-                              </div>
+                            {goal.metric && (
+                              <p style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#718096', lineHeight: '1.5' }}>
+                                📊 {goal.metric}
+                              </p>
+                            )}
+                            <div style={{ display: 'flex', gap: '8px', fontSize: '12px', color: '#718096', flexWrap: 'wrap' }}>
+                              {goal.targetProficiency && (
+                                <div style={{ 
+                                  display: 'inline-flex', 
+                                  alignItems: 'center', 
+                                  gap: '4px',
+                                  padding: '4px 10px',
+                                  borderRadius: '6px',
+                                  backgroundColor: '#f3f4f6'
+                                }}>
+                                  <span style={{
+                                    display: 'inline-block',
+                                    width: '6px',
+                                    height: '6px',
+                                    borderRadius: '50%',
+                                    backgroundColor: getProficiencyColor(goal.targetProficiency)
+                                  }}></span>
+                                  {goal.targetProficiency}
+                                </div>
+                              )}
+                              {goal.priority && (
+                                <div style={{ 
+                                  display: 'inline-flex', 
+                                  alignItems: 'center', 
+                                  gap: '4px',
+                                  padding: '4px 10px',
+                                  borderRadius: '6px',
+                                  backgroundColor: '#f3f4f6'
+                                }}>
+                                  <span style={{
+                                    display: 'inline-block',
+                                    width: '6px',
+                                    height: '6px',
+                                    borderRadius: '50%',
+                                    backgroundColor: getPriorityColor(goal.priority)
+                                  }}></span>
+                                  {goal.priority}
+                                </div>
+                              )}
                             </div>
                           </div>
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                             <input
                               type="checkbox"
                               checked={goal.completed}
-                              onChange={() => toggleGoalCompletion(goalKey)}
+                              onChange={(e) => {
+                                e.stopPropagation()
+                                toggleGoalCompletion(goalKey)
+                              }}
                               style={{ 
                                 cursor: 'pointer', 
-                                width: '18px', 
-                                height: '18px', 
-                                accentColor: '#0078d4'
+                                width: '20px', 
+                                height: '20px', 
+                                accentColor: '#10b981'
                               }}
                             />
                             <button
-                              onClick={() => deleteGoal(goalKey)}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                deleteGoal(goalKey)
+                              }}
                               style={{
-                                padding: '4px 12px',
-                                borderRadius: '2px',
-                                border: '1px solid #d13438',
+                                padding: '6px 14px',
+                                borderRadius: '8px',
+                                border: '1px solid #ef4444',
                                 backgroundColor: 'white',
-                                color: '#d13438',
+                                color: '#ef4444',
                                 cursor: 'pointer',
                                 fontSize: '12px',
-                                fontWeight: '400',
+                                fontWeight: '500',
                                 transition: 'all 0.2s ease'
                               }}
                               onMouseOver={(e) => {
-                                e.target.style.backgroundColor = '#d13438'
+                                e.target.style.backgroundColor = '#ef4444'
                                 e.target.style.color = 'white'
                               }}
                               onMouseOut={(e) => {
                                 e.target.style.backgroundColor = 'white'
-                                e.target.style.color = '#d13438'
+                                e.target.style.color = '#ef4444'
                               }}
                             >
                               Delete
@@ -501,69 +571,87 @@ export default function GoalsPage() {
                           </div>
                         </div>
 
-                        {/* Timeline - MS Planner Style */}
-                        <div style={{ 
-                          marginTop: '12px', 
-                          padding: '10px 12px', 
-                          backgroundColor: isOverdue ? '#fde7e9' : isUrgent ? '#fff4ce' : '#dff6dd', 
-                          borderLeft: `3px solid ${isOverdue ? '#d13438' : isUrgent ? '#ffaa44' : '#107c10'}`,
-                          borderRadius: '2px' 
-                        }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '12px', fontWeight: '400', color: isOverdue ? '#a4262c' : isUrgent ? '#8a6200' : '#0b6a0b' }}>
-                              📅 {new Date(goal.targetDate).toLocaleDateString()}
-                            </span>
-                            <span style={{ fontSize: '12px', fontWeight: '600', color: isOverdue ? '#a4262c' : isUrgent ? '#8a6200' : '#0b6a0b' }}>
-                              {isOverdue ? `⏰ ${Math.abs(daysLeft)} days overdue` : `📌 ${daysLeft} days left`}
-                            </span>
+                        {/* Timeline - Modern Style */}
+                        {goal.targetDate && (
+                          <div style={{ 
+                            marginTop: '16px', 
+                            padding: '12px 16px', 
+                            backgroundColor: isOverdue ? '#fef2f2' : isUrgent ? '#fefce8' : '#f0fdf4', 
+                            borderRadius: '10px',
+                            border: `1px solid ${isOverdue ? '#fecaca' : isUrgent ? '#fde047' : '#bbf7d0'}`
+                          }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <span style={{ fontSize: '13px', fontWeight: '500', color: isOverdue ? '#991b1b' : isUrgent ? '#854d0e' : '#166534' }}>
+                                📅 {new Date(goal.targetDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </span>
+                              <span style={{ fontSize: '13px', fontWeight: '600', color: isOverdue ? '#991b1b' : isUrgent ? '#854d0e' : '#166534' }}>
+                                {isOverdue ? `⏰ ${Math.abs(daysLeft)}d overdue` : `${daysLeft}d remaining`}
+                              </span>
+                            </div>
                           </div>
-                        </div>
+                        )}
 
-                        {/* Achievement Progress - MS Planner Style */}
+                        {/* Achievement Progress - Modern Style */}
                         <div style={{ 
-                          marginTop: '12px', 
-                          padding: '12px', 
-                          backgroundColor: '#fef7da', 
-                          borderLeft: '3px solid #ffaa44',
-                          borderRadius: '2px'
+                          marginTop: '16px', 
+                          padding: '16px', 
+                          backgroundColor: '#fafaf9', 
+                          borderRadius: '12px',
+                          border: '1px solid #e7e5e4'
                         }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                            <span style={{ fontSize: '12px', fontWeight: '600', color: '#323130' }}>⭐ Progress Stars</span>
-                            <span style={{ fontSize: '12px', fontWeight: '600', color: '#8a6200' }}>{goal.currentStars || 0} / {goal.stars ? Math.max(...goal.stars.map(s => s.count)) : 5}</span>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                            <span style={{ fontSize: '13px', fontWeight: '600', color: '#1a202c' }}>⭐ Progress Stars</span>
+                            <span style={{ fontSize: '13px', fontWeight: '600', color: '#6366f1' }}>{goal.currentStars || 0} / {goal.stars ? Math.max(...goal.stars.map(s => s.count)) : 5}</span>
                           </div>
-                          <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '8px' }}>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '12px' }}>
                             {[1, 2, 3, 4, 5].map(star => (
                               <button
                                 key={star}
-                                onClick={() => updateGoalStars(goalKey, star)}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  updateGoalStars(goalKey, star)
+                                }}
                                 style={{
-                                  padding: '6px 10px',
-                                  borderRadius: '2px',
-                                  border: '1px solid #d9d9d9',
-                                  backgroundColor: (goal.currentStars || 0) >= star ? '#ffaa44' : 'white',
-                                  color: (goal.currentStars || 0) >= star ? 'white' : '#323130',
+                                  flex: 1,
+                                  padding: '10px',
+                                  borderRadius: '8px',
+                                  border: 'none',
+                                  backgroundColor: (goal.currentStars || 0) >= star ? '#fbbf24' : '#f3f4f6',
+                                  color: (goal.currentStars || 0) >= star ? 'white' : '#9ca3af',
                                   cursor: 'pointer',
-                                  fontWeight: '600',
-                                  fontSize: '12px',
-                                  transition: 'all 0.2s ease'
+                                  fontWeight: '700',
+                                  fontSize: '16px',
+                                  transition: 'all 0.2s ease',
+                                  boxShadow: (goal.currentStars || 0) >= star ? '0 2px 8px rgba(251, 191, 36, 0.3)' : 'none'
                                 }}
                                 onMouseOver={(e) => {
                                   if ((goal.currentStars || 0) < star) {
-                                    e.target.style.backgroundColor = '#f3f2f1'
+                                    e.target.style.backgroundColor = '#e5e7eb'
+                                    e.target.style.transform = 'scale(1.05)'
                                   }
                                 }}
                                 onMouseOut={(e) => {
                                   if ((goal.currentStars || 0) < star) {
-                                    e.target.style.backgroundColor = 'white'
+                                    e.target.style.backgroundColor = '#f3f4f6'
+                                    e.target.style.transform = 'scale(1)'
                                   }
                                 }}
                               >
-                                {star}
+                                ⭐
                               </button>
                             ))}
                           </div>
-                          <div style={{ fontSize: '11px', color: '#605e5c' }}>
-                            💰 {(goal.currentStars || 0) * 10} star points + {Math.floor((goal.currentStars || 0) / 5) * 100} badge points
+                          {goal.stars && goal.stars.length > 0 && (
+                            <div style={{ fontSize: '11px', color: '#718096', marginBottom: '8px' }}>
+                              {goal.stars.map((s, i) => (
+                                <div key={i} style={{ marginBottom: '2px' }}>
+                                  {'⭐'.repeat(s.count)} = {s.range}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          <div style={{ fontSize: '12px', color: '#6366f1', fontWeight: '600', paddingTop: '8px', borderTop: '1px solid #e7e5e4' }}>
+                            💰 {(goal.currentStars || 0) * 10} star pts + {Math.floor((goal.currentStars || 0) / 5) * 100} badge pts
                           </div>
                         </div>
                       </div>
@@ -573,55 +661,52 @@ export default function GoalsPage() {
               )}
             </div>
 
-            {/* Sidebar - Glassmorphism Panel */}
+            {/* Sidebar - Modern Panel */}
             <div style={{
-              background: 'rgba(255, 255, 255, 0.25)',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              borderRadius: '12px',
-              padding: '16px',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              backgroundColor: 'white',
+              borderRadius: '16px',
+              padding: '24px',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
               height: 'fit-content',
               position: 'sticky',
               top: '24px'
             }}>
-              <h3 style={{ margin: '0 0 16px 0', fontSize: '15px', fontWeight: '600', color: '#323130' }}>
+              <h3 style={{ margin: '0 0 20px 0', fontSize: '18px', fontWeight: '700', color: '#1a202c' }}>
                 {showAddGoal ? '📝 Add New Goal' : '📊 Quick Stats'}
               </h3>
 
               {!showAddGoal ? (
                 <>
-                  <div style={{ marginBottom: '20px' }}>
-                    <div style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #edebe9' }}>
-                      <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#605e5c', fontWeight: '400' }}>Total Goals</p>
-                      <p style={{ margin: '0', fontSize: '28px', fontWeight: '600', color: '#0078d4' }}>{subjectGoals.length}</p>
+                  <div style={{ marginBottom: '24px' }}>
+                    <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '2px solid #f3f4f6' }}>
+                      <p style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#718096', fontWeight: '500' }}>Total Goals</p>
+                      <p style={{ margin: '0', fontSize: '32px', fontWeight: '700', color: '#6366f1' }}>{subjectGoals.length}</p>
                     </div>
-                    <div style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #edebe9' }}>
-                      <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#605e5c', fontWeight: '400' }}>Completed</p>
-                      <p style={{ margin: '0', fontSize: '28px', fontWeight: '600', color: '#107c10' }}>
+                    <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '2px solid #f3f4f6' }}>
+                      <p style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#718096', fontWeight: '500' }}>Completed</p>
+                      <p style={{ margin: '0', fontSize: '32px', fontWeight: '700', color: '#10b981' }}>
                         {subjectGoals.filter(([_, g]) => g.completed).length}
                       </p>
                     </div>
                     <div>
-                      <p style={{ margin: '0 0 8px 0', fontSize: '12px', color: '#605e5c', fontWeight: '400' }}>Completion Rate</p>
+                      <p style={{ margin: '0 0 12px 0', fontSize: '13px', color: '#718096', fontWeight: '500' }}>Completion Rate</p>
                       <div style={{
                         width: '100%',
-                        height: '6px',
-                        backgroundColor: '#edebe9',
-                        borderRadius: '3px',
+                        height: '8px',
+                        backgroundColor: '#f3f4f6',
+                        borderRadius: '10px',
                         overflow: 'hidden'
                       }}>
                         <div
                           style={{
                             width: `${subjectGoals.length > 0 ? (subjectGoals.filter(([_, g]) => g.completed).length / subjectGoals.length) * 100 : 0}%`,
                             height: '100%',
-                            backgroundColor: '#107c10',
+                            background: 'linear-gradient(90deg, #10b981 0%, #34d399 100%)',
                             transition: 'width 0.3s ease'
                           }}
                         ></div>
                       </div>
-                      <p style={{ margin: '6px 0 0 0', fontSize: '14px', fontWeight: '600', color: '#323130' }}>
+                      <p style={{ margin: '10px 0 0 0', fontSize: '16px', fontWeight: '700', color: '#1a202c' }}>
                         {subjectGoals.length > 0 ? Math.round((subjectGoals.filter(([_, g]) => g.completed).length / subjectGoals.length) * 100) : 0}%
                       </p>
                     </div>
@@ -631,37 +716,48 @@ export default function GoalsPage() {
                     onClick={() => setShowAddGoal(true)}
                     style={{
                       width: '100%',
-                      padding: '8px 16px',
-                      borderRadius: '2px',
+                      padding: '12px 16px',
+                      borderRadius: '10px',
                       border: 'none',
-                      backgroundColor: '#0078d4',
+                      backgroundColor: '#6366f1',
                       color: 'white',
                       fontWeight: '600',
                       cursor: 'pointer',
-                      fontSize: '14px',
-                      transition: 'background-color 0.2s ease'
+                      fontSize: '15px',
+                      transition: 'all 0.2s ease',
+                      boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
                     }}
-                    onMouseOver={(e) => e.target.style.backgroundColor = '#106ebe'}
-                    onMouseOut={(e) => e.target.style.backgroundColor = '#0078d4'}
+                    onMouseOver={(e) => {
+                      e.target.style.backgroundColor = '#4f46e5'
+                      e.target.style.transform = 'translateY(-2px)'
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.backgroundColor = '#6366f1'
+                      e.target.style.transform = 'translateY(0)'
+                    }}
                   >
                     + Add Goal
                   </button>
                 </>
               ) : (
                 <>
-                  <div style={{ marginBottom: '15px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: '500', color: '#6b7280', display: 'block', marginBottom: '5px' }}>Chapter</label>
+                  <div style={{ marginBottom: '18px' }}>
+                    <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '8px' }}>Chapter</label>
                     <select
                       value={formData.chapterName}
                       onChange={(e) => setFormData({ ...formData, chapterName: e.target.value })}
                       style={{
                         width: '100%',
-                        padding: '8px',
-                        borderRadius: '4px',
-                        border: '1px solid #e5e7eb',
-                        fontSize: '13px',
-                        fontFamily: 'inherit'
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        border: '2px solid #e5e7eb',
+                        fontSize: '14px',
+                        fontFamily: 'inherit',
+                        backgroundColor: '#f9fafb',
+                        transition: 'all 0.2s ease'
                       }}
+                      onFocus={(e) => e.target.style.borderColor = '#6366f1'}
+                      onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                     >
                       <option value="">Select Chapter</option>
                       {getChapterChaptersForSubject().map(ch => (
@@ -670,19 +766,23 @@ export default function GoalsPage() {
                     </select>
                   </div>
 
-                  <div style={{ marginBottom: '15px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: '500', color: '#6b7280', display: 'block', marginBottom: '5px' }}>Target Proficiency</label>
+                  <div style={{ marginBottom: '18px' }}>
+                    <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '8px' }}>Target Proficiency</label>
                     <select
                       value={formData.targetProficiency}
                       onChange={(e) => setFormData({ ...formData, targetProficiency: e.target.value })}
                       style={{
                         width: '100%',
-                        padding: '8px',
-                        borderRadius: '4px',
-                        border: '1px solid #e5e7eb',
-                        fontSize: '13px',
-                        fontFamily: 'inherit'
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        border: '2px solid #e5e7eb',
+                        fontSize: '14px',
+                        fontFamily: 'inherit',
+                        backgroundColor: '#f9fafb',
+                        transition: 'all 0.2s ease'
                       }}
+                      onFocus={(e) => e.target.style.borderColor = '#6366f1'}
+                      onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                     >
                       {proficiencyLevels.map(level => (
                         <option key={level} value={level}>{level}</option>
@@ -690,19 +790,23 @@ export default function GoalsPage() {
                     </select>
                   </div>
 
-                  <div style={{ marginBottom: '15px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: '500', color: '#6b7280', display: 'block', marginBottom: '5px' }}>Priority</label>
+                  <div style={{ marginBottom: '18px' }}>
+                    <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '8px' }}>Priority</label>
                     <select
                       value={formData.priority}
                       onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
                       style={{
                         width: '100%',
-                        padding: '8px',
-                        borderRadius: '4px',
-                        border: '1px solid #e5e7eb',
-                        fontSize: '13px',
-                        fontFamily: 'inherit'
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        border: '2px solid #e5e7eb',
+                        fontSize: '14px',
+                        fontFamily: 'inherit',
+                        backgroundColor: '#f9fafb',
+                        transition: 'all 0.2s ease'
                       }}
+                      onFocus={(e) => e.target.style.borderColor = '#6366f1'}
+                      onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                     >
                       {priorities.map(p => (
                         <option key={p} value={p}>{p}</option>
@@ -710,36 +814,50 @@ export default function GoalsPage() {
                     </select>
                   </div>
 
-                  <div style={{ marginBottom: '15px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: '500', color: '#6b7280', display: 'block', marginBottom: '5px' }}>Target Date</label>
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '8px' }}>Target Date</label>
                     <input
                       type="date"
                       value={formData.targetDate}
                       onChange={(e) => setFormData({ ...formData, targetDate: e.target.value })}
                       style={{
                         width: '100%',
-                        padding: '8px',
-                        borderRadius: '4px',
-                        border: '1px solid #e5e7eb',
-                        fontSize: '13px',
-                        fontFamily: 'inherit'
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        border: '2px solid #e5e7eb',
+                        fontSize: '14px',
+                        fontFamily: 'inherit',
+                        backgroundColor: '#f9fafb',
+                        transition: 'all 0.2s ease'
                       }}
+                      onFocus={(e) => e.target.style.borderColor = '#6366f1'}
+                      onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                     />
                   </div>
 
-                  <div style={{ display: 'flex', gap: '10px' }}>
+                  <div style={{ display: 'flex', gap: '12px' }}>
                     <button
                       onClick={addGoal}
                       style={{
                         flex: 1,
-                        padding: '10px',
-                        borderRadius: '6px',
+                        padding: '12px',
+                        borderRadius: '10px',
                         border: 'none',
                         backgroundColor: '#10b981',
                         color: 'white',
                         fontWeight: '600',
                         cursor: 'pointer',
-                        fontSize: '13px'
+                        fontSize: '14px',
+                        transition: 'all 0.2s ease',
+                        boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)'
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.backgroundColor = '#059669'
+                        e.target.style.transform = 'translateY(-1px)'
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.backgroundColor = '#10b981'
+                        e.target.style.transform = 'translateY(0)'
                       }}
                     >
                       Save Goal
@@ -748,14 +866,21 @@ export default function GoalsPage() {
                       onClick={() => setShowAddGoal(false)}
                       style={{
                         flex: 1,
-                        padding: '10px',
-                        borderRadius: '6px',
-                        border: '1px solid #e5e7eb',
-                        backgroundColor: 'transparent',
+                        padding: '12px',
+                        borderRadius: '10px',
+                        border: '2px solid #e5e7eb',
+                        backgroundColor: 'white',
                         color: '#6b7280',
                         fontWeight: '600',
                         cursor: 'pointer',
-                        fontSize: '13px'
+                        fontSize: '14px',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseOver={(e) => {
+                        e.target.style.backgroundColor = '#f9fafb'
+                      }}
+                      onMouseOut={(e) => {
+                        e.target.style.backgroundColor = 'white'
                       }}
                     >
                       Cancel
@@ -765,101 +890,172 @@ export default function GoalsPage() {
               )}
 
               {/* Star-Based Goal Templates */}
-              <div style={{ marginTop: '20px', borderTop: '2px solid #e5e7eb', paddingTop: '15px' }}>
+              <div style={{ marginTop: '24px', borderTop: '2px solid #e5e7eb', paddingTop: '20px' }}>
                 <button
                   onClick={() => setShowTemplates(!showTemplates)}
                   style={{
                     width: '100%',
-                    padding: '10px',
-                    borderRadius: '6px',
+                    padding: '14px',
+                    borderRadius: '10px',
                     border: 'none',
-                    backgroundColor: showTemplates ? '#8b5cf6' : '#f3f4f6',
+                    background: showTemplates ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' : '#f3f4f6',
                     color: showTemplates ? 'white' : '#374151',
                     fontWeight: '600',
                     cursor: 'pointer',
-                    fontSize: '13px',
-                    marginBottom: '10px'
+                    fontSize: '14px',
+                    marginBottom: '16px',
+                    transition: 'all 0.2s ease',
+                    boxShadow: showTemplates ? '0 4px 12px rgba(139, 92, 246, 0.3)' : 'none'
                   }}
                 >
-                  {showTemplates ? '−' : '+'} [STAR] Goal Templates
+                  {showTemplates ? '▼' : '▶'} ⭐ Goal Templates ({goalTemplates.academic.length + goalTemplates.behavioral.length + goalTemplates.emotional.length})
                 </button>
 
                 {showTemplates && (
-                  <div style={{ display: 'grid', gap: '10px' }}>
+                  <div style={{ display: 'grid', gap: '16px', maxHeight: '400px', overflowY: 'auto' }}>
                     <div>
-                      <p style={{ margin: '0 0 8px 0', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>[BOOK] Academic</p>
-                      <div style={{ display: 'grid', gap: '6px' }}>
+                      <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '8px',
+                        marginBottom: '10px',
+                        padding: '8px 12px',
+                        backgroundColor: '#eff6ff',
+                        borderRadius: '8px',
+                        border: '1px solid #bfdbfe'
+                      }}>
+                        <span style={{ fontSize: '16px' }}>📚</span>
+                        <p style={{ margin: '0', fontSize: '13px', fontWeight: '700', color: '#1e40af' }}>Academic Goals</p>
+                      </div>
+                      <div style={{ display: 'grid', gap: '8px' }}>
                         {goalTemplates.academic.map((t, i) => (
                           <button
                             key={i}
                             onClick={() => addTemplateGoal(t)}
                             title={t.metric}
                             style={{
-                              padding: '6px 8px',
-                              borderRadius: '4px',
+                              padding: '10px 12px',
+                              borderRadius: '8px',
                               border: '1px solid #e5e7eb',
                               backgroundColor: 'white',
-                              color: '#374151',
+                              color: '#1f2937',
                               cursor: 'pointer',
-                              fontSize: '11px',
+                              fontSize: '12px',
                               textAlign: 'left',
                               fontWeight: '500',
-                              whiteSpace: 'normal'
+                              lineHeight: '1.4',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseOver={(e) => {
+                              e.target.style.backgroundColor = '#eff6ff'
+                              e.target.style.borderColor = '#3b82f6'
+                              e.target.style.transform = 'translateX(4px)'
+                            }}
+                            onMouseOut={(e) => {
+                              e.target.style.backgroundColor = 'white'
+                              e.target.style.borderColor = '#e5e7eb'
+                              e.target.style.transform = 'translateX(0)'
                             }}
                           >
-                            {t.phrase.substring(0, 35)}...
+                            {t.phrase}
                           </button>
                         ))}
                       </div>
                     </div>
                     <div>
-                      <p style={{ margin: '8px 0 8px 0', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>[BRAIN] Behavioral</p>
-                      <div style={{ display: 'grid', gap: '6px' }}>
+                      <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '8px',
+                        marginBottom: '10px',
+                        padding: '8px 12px',
+                        backgroundColor: '#fef3c7',
+                        borderRadius: '8px',
+                        border: '1px solid #fde047'
+                      }}>
+                        <span style={{ fontSize: '16px' }}>🎯</span>
+                        <p style={{ margin: '0', fontSize: '13px', fontWeight: '700', color: '#92400e' }}>Behavioral Goals</p>
+                      </div>
+                      <div style={{ display: 'grid', gap: '8px' }}>
                         {goalTemplates.behavioral.map((t, i) => (
                           <button
                             key={i}
                             onClick={() => addTemplateGoal(t)}
                             title={t.metric}
                             style={{
-                              padding: '6px 8px',
-                              borderRadius: '4px',
+                              padding: '10px 12px',
+                              borderRadius: '8px',
                               border: '1px solid #e5e7eb',
                               backgroundColor: 'white',
-                              color: '#374151',
+                              color: '#1f2937',
                               cursor: 'pointer',
-                              fontSize: '11px',
+                              fontSize: '12px',
                               textAlign: 'left',
                               fontWeight: '500',
-                              whiteSpace: 'normal'
+                              lineHeight: '1.4',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseOver={(e) => {
+                              e.target.style.backgroundColor = '#fef3c7'
+                              e.target.style.borderColor = '#f59e0b'
+                              e.target.style.transform = 'translateX(4px)'
+                            }}
+                            onMouseOut={(e) => {
+                              e.target.style.backgroundColor = 'white'
+                              e.target.style.borderColor = '#e5e7eb'
+                              e.target.style.transform = 'translateX(0)'
                             }}
                           >
-                            {t.phrase.substring(0, 35)}...
+                            {t.phrase}
                           </button>
                         ))}
                       </div>
                     </div>
                     <div>
-                      <p style={{ margin: '8px 0 8px 0', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>[COMMENT] Emotional</p>
-                      <div style={{ display: 'grid', gap: '6px' }}>
+                      <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '8px',
+                        marginBottom: '10px',
+                        padding: '8px 12px',
+                        backgroundColor: '#fce7f3',
+                        borderRadius: '8px',
+                        border: '1px solid #fbcfe8'
+                      }}>
+                        <span style={{ fontSize: '16px' }}>💝</span>
+                        <p style={{ margin: '0', fontSize: '13px', fontWeight: '700', color: '#831843' }}>Emotional Goals</p>
+                      </div>
+                      <div style={{ display: 'grid', gap: '8px' }}>
                         {goalTemplates.emotional.map((t, i) => (
                           <button
                             key={i}
                             onClick={() => addTemplateGoal(t)}
                             title={t.metric}
                             style={{
-                              padding: '6px 8px',
-                              borderRadius: '4px',
+                              padding: '10px 12px',
+                              borderRadius: '8px',
                               border: '1px solid #e5e7eb',
                               backgroundColor: 'white',
-                              color: '#374151',
+                              color: '#1f2937',
                               cursor: 'pointer',
-                              fontSize: '11px',
+                              fontSize: '12px',
                               textAlign: 'left',
                               fontWeight: '500',
-                              whiteSpace: 'normal'
+                              lineHeight: '1.4',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseOver={(e) => {
+                              e.target.style.backgroundColor = '#fce7f3'
+                              e.target.style.borderColor = '#ec4899'
+                              e.target.style.transform = 'translateX(4px)'
+                            }}
+                            onMouseOut={(e) => {
+                              e.target.style.backgroundColor = 'white'
+                              e.target.style.borderColor = '#e5e7eb'
+                              e.target.style.transform = 'translateX(0)'
                             }}
                           >
-                            {t.phrase.substring(0, 35)}...
+                            {t.phrase}
                           </button>
                         ))}
                       </div>

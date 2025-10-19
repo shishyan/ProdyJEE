@@ -1,0 +1,55 @@
+[33mdea3989[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31mProdyJEE/master[m[33m, [m[1;31mProdyJEE/HEAD[m[33m)[m Claude v1i
+[33m49ebb07[m Claude v1h
+[33mfa913ad[m feat: complete modern redesign - glassmorphism, Gmail sidebar, 33 backgrounds, custom upload
+[33m502d503[m Claude v1g
+[33m91dae91[m feat: redesign Kanban board with Group By and horizontal Backlog
+[33m06ef5d6[m docs: add database test script and implementation summary
+[33mc7b6a21[m feat: add SQLite goals database with 29 sample JEE aspirant goals
+[33mb9c9ba8[m feat: major redesign - huge calendar, nature backgrounds, neumorphism settings, remove duplicate nav
+[33m10f61f9[m feat: apply glassmorphism design and fix routing across all pages
+[33m75a3727[m feat: modernize Timer page with MS Planner design
+[33mdcc79e5[m feat: modernize Schedule page with MS Planner design
+[33m5ca63ae[m feat: complete Dashboard/Analytics modernization with MS Planner design
+[33me6fe315[m feat: modernize Goals page with MS Planner design language
+[33m361bf16[m feat: add version with commit SHA, fix sidebar navigation, remove study plan grid view for simplicity
+[33mffa8e94[m chore: remove emojis, implement star points system, add 16 new goals, integrate profile points, fix prisma build
+[33m1b528d4[m Add star-based goal tracker to Goals page with 13 pre-configured templates across Academic, Behavioral, and Emotional categories
+[33m7820e3c[m Phase 3: Add proficiency badges to cards, compact topic layout with percentage progress and quick action buttons
+[33m147d470[m Claude v1f
+[33mc42a696[m Claude It
+[33mf88f258[m Add documentation for Kanban chapters fix
+[33me3f452d[m Load ALL chapters from database - 235 records, 53 chapters!
+[33me43f110[m Add debug panel and improve chapter filtering in Kanban board
+[33mcb303d1[m Fix syntax error: Remove orphaned catch block in onEditStudyPlan function
+[33m6c0869a[m Fix static deployment: Replace API calls with localStorage operations
+[33m8ca532d[m Fix deployment errors: Add missing icons and remove API calls
+[33m06a54a1[m Update service worker for improved PWA caching and offline functionality
+[33mda1527d[m Update service worker for PWA functionality
+[33m6c06854[m Add Schedule, Timer, and Dashboard views with navigation
+[33m7ede809[m Fix static export build issues and confirm chapter-based card implementation
+[33mad4b5fa[m Update demo data to use real CSV study plans (214 entries across Physics, Chemistry, Mathematics)
+[33m737cc3b[m Add comprehensive demo data for GitHub Pages - Physics, Chemistry, and Mathematics chapters with various progress states
+[33m343a888[m Add attribution text to sidebar, fix modal UI issues, configure for GitHub Pages deployment with demo data fallback
+[33mb75d9f1[m Fix UI issues: backlog column padding, remove empty space above board, fix topic progress updates propagating to chapter progress
+[33mac19129[m Excelent v1e
+[33m7ebba2e[m Excelent v1d
+[33m7d9a2a8[m Backlog cards grey header, adjusted spacing
+[33m1d35daa[m Card header single rectangle, increased spacing, backlog cards simplified
+[33mce06685[m Excellent Work v1d
+[33mf96e808[m Excellent Work
+[33m977a786[m fix: Make breadcrumb bar consistent with top navbar styling
+[33m74099bd[m fix: Configure separate ports for dev and prod environments
+[33mb3b06eb[m fix: Handle null target_date in study plan creation
+[33mfa92ddb[m fix: Handle null target_date in study plan creation
+[33me128ac1[m fix: Generate unique_id for user-created study plans
+[33m1ba4c8e[m feat: Update kanban card styling and seed database with JEE curriculum
+[33m987c26f[m Redesign navigation layout with connected components
+[33ma5b1fa0[m Center kanban card popup form and prioritize sub-topics tracking
+[33mf80baf1[m Add collapsible sidebar with navigation icons
+[33m728076f[m Add collapsible sidebar with navigation icons
+[33m91605d2[m OK OK 2
+[33md759703[m feat: Improve Kanban UX and implement chapter-specific subtopics
+[33m2443eb6[m fix: Resolve drag-and-drop card reset issue
+[33m57f86a2[m feat: Complete Kanban board redesign with modern drag-and-drop
+[33mb955e61[m ok ok
+[33m56f8bf3[m[33m ([m[1;33mtag: [m[1;33mv1a[m[33m)[m v1a: Initial JEE preparation Kanban board with @dnd-kit drag-and-drop
