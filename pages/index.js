@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import packageJson from '../package.json'
 import BackgroundSettings from '../components/BackgroundSettings'
+import EnhancedSchedule from '../components/EnhancedSchedule'
 import {
   DndContext,
   DragOverlay,
@@ -244,6 +245,18 @@ const LayoutIcon = () => (
 const NavigationIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+  </svg>
+)
+
+const CollapseIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+  </svg>
+)
+
+const ExpandIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
   </svg>
 )
 
@@ -658,14 +671,30 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
           {chapter.aggregatedStatus === 'In Queue' ? (
             <>
               <div className="detail-row">
-                <span className="detail-label">Status:</span>
+                <span className="detail-label">Stage:</span>
                 <span
                   className="status-badge"
                   style={{
-                    color: getStatusColor(chapter.aggregatedStatus)
+                    color: '#8b5cf6',
+                    fontSize: '11px'
                   }}
                 >
-                  {chapter.aggregatedStatus}
+                  {chapter.aggregatedStage}
+                </span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Proficiency:</span>
+                <span
+                  className="status-badge"
+                  style={{
+                    color: getProficiencyColor(chapter.aggregatedProficiency),
+                    fontSize: '11px'
+                  }}
+                >
+                  {chapter.aggregatedProficiency === 25 ? 'Novice' : 
+                   chapter.aggregatedProficiency === 50 ? 'Competent' : 
+                   chapter.aggregatedProficiency === 75 ? 'Expert' : 
+                   chapter.aggregatedProficiency === 100 ? 'Master' : 'Novice'}
                 </span>
               </div>
               {earliestTargetDate && (
@@ -683,27 +712,12 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
           ) : (
             <>
               <div className="detail-row">
-                <span className="detail-label">Status:</span>
-                <span
-                  className="status-badge"
-                  style={{
-                    color: getStatusColor(chapter.aggregatedStatus),
-                    fontSize: '11px'
-                  }}
-                >
-                  {chapter.aggregatedStatus}
-                </span>
-              </div>
-              <div className="detail-row">
                 <span className="detail-label">Stage:</span>
                 <span
                   className="status-badge"
                   style={{
                     color: '#8b5cf6',
-                    fontSize: '10px',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis'
+                    fontSize: '11px'
                   }}
                 >
                   {chapter.aggregatedStage}
@@ -715,7 +729,7 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
                   className="status-badge"
                   style={{
                     color: getProficiencyColor(chapter.aggregatedProficiency),
-                    fontSize: '10px'
+                    fontSize: '11px'
                   }}
                 >
                   {chapter.aggregatedProficiency === 25 ? 'Novice' : 
@@ -1338,13 +1352,18 @@ function ScheduleView() {
   const [events, setEvents] = useState([])
   const [showAddForm, setShowAddForm] = useState(false)
   const [selectedDate, setSelectedDate] = useState(new Date())
+  const [viewMode, setViewMode] = useState('monthly') // 'daily' or 'monthly'
+  const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [importingHolidays, setImportingHolidays] = useState(false)
   const [newEvent, setNewEvent] = useState({
     title: '',
     type: 'school',
     date: new Date(),
+    time: '09:00',
     description: '',
     recurring: false,
-    recurringType: 'monthly'
+    recurringType: 'none', // 'none', 'daily', 'weekly', 'monthly', 'yearly'
+    recurringEndDate: null
   })
 
   // Load events from localStorage on component mount
@@ -1396,12 +1415,106 @@ function ScheduleView() {
     localStorage.setItem('schedule-events', JSON.stringify(events))
   }, [events])
 
+  // Import Indian holidays for 2025
+  const importIndianHolidays = async () => {
+    setImportingHolidays(true)
+    try {
+      // Indian holidays for 2025
+      const indianHolidays = [
+        { title: 'Republic Day', date: new Date(2025, 0, 26), description: 'Republic Day of India' },
+        { title: 'Holi', date: new Date(2025, 2, 14), description: 'Festival of Colors' },
+        { title: 'Ram Navami', date: new Date(2025, 3, 6), description: 'Birth of Lord Rama' },
+        { title: 'Good Friday', date: new Date(2025, 3, 18), description: 'Good Friday' },
+        { title: 'Eid ul-Fitr', date: new Date(2025, 3, 31), description: 'End of Ramadan' },
+        { title: 'Independence Day', date: new Date(2025, 7, 15), description: 'Independence Day of India' },
+        { title: 'Raksha Bandhan', date: new Date(2025, 7, 9), description: 'Festival of siblings' },
+        { title: 'Janmashtami', date: new Date(2025, 7, 26), description: 'Birth of Lord Krishna' },
+        { title: 'Ganesh Chaturthi', date: new Date(2025, 8, 27), description: 'Festival of Lord Ganesha' },
+        { title: 'Gandhi Jayanti', date: new Date(2025, 9, 2), description: 'Birthday of Mahatma Gandhi' },
+        { title: 'Dussehra', date: new Date(2025, 9, 22), description: 'Victory of good over evil' },
+        { title: 'Diwali', date: new Date(2025, 10, 12), description: 'Festival of Lights' },
+        { title: 'Guru Nanak Jayanti', date: new Date(2025, 10, 15), description: 'Birth of Guru Nanak' },
+        { title: 'Christmas', date: new Date(2025, 11, 25), description: 'Christmas Day' }
+      ]
+
+      const newHolidays = indianHolidays.map(holiday => ({
+        id: Date.now() + Math.random(),
+        ...holiday,
+        type: 'holiday',
+        recurring: true,
+        recurringType: 'yearly'
+      }))
+
+      setEvents(prev => [...prev, ...newHolidays])
+      alert('✅ Successfully imported ' + indianHolidays.length + ' Indian holidays for 2025!')
+    } catch (error) {
+      alert('❌ Failed to import holidays: ' + error.message)
+    } finally {
+      setImportingHolidays(false)
+    }
+  }
+
+  // Generate recurring event instances
+  const generateRecurringEvents = (event, startDate, endDate) => {
+    const instances = []
+    if (!event.recurring || event.recurringType === 'none') {
+      return [event]
+    }
+
+    let currentDate = new Date(event.date)
+    const end = endDate || new Date(startDate.getFullYear() + 1, startDate.getMonth(), startDate.getDate())
+
+    while (currentDate <= end) {
+      if (currentDate >= startDate) {
+        instances.push({
+          ...event,
+          date: new Date(currentDate),
+          isRecurringInstance: true
+        })
+      }
+
+      switch (event.recurringType) {
+        case 'daily':
+          currentDate.setDate(currentDate.getDate() + 1)
+          break
+        case 'weekly':
+          currentDate.setDate(currentDate.getDate() + 7)
+          break
+        case 'monthly':
+          currentDate.setMonth(currentDate.getMonth() + 1)
+          break
+        case 'yearly':
+          currentDate.setFullYear(currentDate.getFullYear() + 1)
+          break
+        default:
+          return instances
+      }
+    }
+
+    return instances
+  }
+
+  // Get all events including recurring instances for a date range
+  const getAllEventsInRange = (startDate, endDate) => {
+    const allEvents = []
+    events.forEach(event => {
+      const instances = generateRecurringEvents(event, startDate, endDate)
+      allEvents.push(...instances)
+    })
+    return allEvents.sort((a, b) => a.date - b.date)
+  }
+
   const addEvent = () => {
     if (!newEvent.title.trim()) return
 
+    const eventDate = new Date(newEvent.date)
+    const [hours, minutes] = newEvent.time.split(':')
+    eventDate.setHours(parseInt(hours), parseInt(minutes))
+
     const event = {
       id: Date.now(),
-      ...newEvent
+      ...newEvent,
+      date: eventDate
     }
 
     setEvents(prev => [...prev, event])
@@ -1409,11 +1522,46 @@ function ScheduleView() {
       title: '',
       type: 'school',
       date: new Date(),
+      time: '09:00',
       description: '',
       recurring: false,
-      recurringType: 'monthly'
+      recurringType: 'none',
+      recurringEndDate: null
     })
     setShowAddForm(false)
+  }
+
+  // Calendar helper functions
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear()
+    const month = date.getMonth()
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    const daysInMonth = lastDay.getDate()
+    const startingDayOfWeek = firstDay.getDay()
+    
+    return { daysInMonth, startingDayOfWeek, firstDay, lastDay }
+  }
+
+  const getEventsForDay = (date) => {
+    const dayStart = new Date(date)
+    dayStart.setHours(0, 0, 0, 0)
+    const dayEnd = new Date(date)
+    dayEnd.setHours(23, 59, 59, 999)
+    
+    const allEvents = getAllEventsInRange(dayStart, dayEnd)
+    return allEvents.filter(event => {
+      const eventDate = new Date(event.date)
+      return eventDate >= dayStart && eventDate <= dayEnd
+    })
+  }
+
+  const changeMonth = (offset) => {
+    setCurrentMonth(prev => {
+      const newDate = new Date(prev)
+      newDate.setMonth(newDate.getMonth() + offset)
+      return newDate
+    })
   }
 
   const deleteEvent = (id) => {
@@ -1474,7 +1622,7 @@ function ScheduleView() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-pink-50 shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
@@ -1499,7 +1647,7 @@ function ScheduleView() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Calendar Section */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-sm border p-6">
+            <div className="bg-pink-50 rounded-xl shadow-sm border p-6">
               <h2 className="text-xl font-semibold mb-4">Calendar</h2>
               <div className="calendar-container">
                 <DatePicker
@@ -1552,7 +1700,7 @@ function ScheduleView() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Upcoming Events */}
-            <div className="bg-white rounded-xl shadow-sm border p-6">
+            <div className="bg-pink-50 rounded-xl shadow-sm border p-6">
               <h3 className="text-lg font-semibold mb-4">Upcoming Events</h3>
               <div className="space-y-3">
                 {getUpcomingEvents().map(event => (
@@ -1574,7 +1722,7 @@ function ScheduleView() {
             </div>
 
             {/* Event Types */}
-            <div className="bg-white rounded-xl shadow-sm border p-6">
+            <div className="bg-pink-50 rounded-xl shadow-sm border p-6">
               <h3 className="text-lg font-semibold mb-4">Event Types</h3>
               <div className="space-y-2">
                 {[
@@ -1600,7 +1748,7 @@ function ScheduleView() {
       {/* Add Event Modal */}
       {showAddForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+          <div className="bg-pink-50 rounded-xl p-6 w-full max-w-md mx-4">
             <h2 className="text-xl font-semibold mb-4">Add New Event</h2>
             <div className="space-y-4">
               <div>
@@ -1890,7 +2038,7 @@ function TimerView() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-pink-50 shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
@@ -1907,7 +2055,7 @@ function TimerView() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {timers.map(timer => (
-            <div key={timer.id} className={`rounded-xl border-2 p-6 transition-all duration-300 ${timer.isRunning ? 'border-green-500 bg-green-50' : timer.timeLeft === 0 ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-white'}`}>
+            <div key={timer.id} className={`rounded-xl border-2 p-6 transition-all duration-300 ${timer.isRunning ? 'border-green-500 bg-green-50' : timer.timeLeft === 0 ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-pink-50'}`}>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-gray-100 rounded-lg">
@@ -2036,7 +2184,7 @@ function TimerView() {
         </div>
 
         {/* Instructions */}
-        <div className="mt-12 bg-white rounded-xl shadow-sm border p-6">
+        <div className="mt-12 bg-pink-50 rounded-xl shadow-sm border p-6">
           <h2 className="text-xl font-semibold mb-4">How to Use</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -2152,7 +2300,7 @@ function DashboardView() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-pink-50 shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
@@ -2229,7 +2377,7 @@ function DashboardView() {
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <div className="bg-white p-6 rounded-xl shadow-sm border">
+          <div className="bg-pink-50 p-6 rounded-xl shadow-sm border">
             <h3 className="text-lg font-semibold mb-4">Weekly Study Progress</h3>
             <div className="flex items-end justify-between h-32 gap-2">
               {weeklyProgressData.map((item, index) => (
@@ -2245,7 +2393,7 @@ function DashboardView() {
           </div>
 
           {subjectProgressData.length > 0 && (
-            <div className="bg-white p-6 rounded-xl shadow-sm border">
+            <div className="bg-pink-50 p-6 rounded-xl shadow-sm border">
               <h3 className="text-lg font-semibold mb-4">Subject-wise Progress</h3>
               <div className="flex items-end justify-between h-32 gap-2">
                 {subjectProgressData.map((item, index) => (
@@ -2264,7 +2412,7 @@ function DashboardView() {
 
         {/* Progress Bars Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <div className="bg-white p-6 rounded-xl shadow-sm border">
+          <div className="bg-pink-50 p-6 rounded-xl shadow-sm border">
             <h3 className="text-lg font-semibold mb-4">Study Topics Progress</h3>
             <div className="space-y-4">
               <div className="w-full">
@@ -2308,7 +2456,7 @@ function DashboardView() {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-xl shadow-sm border">
+          <div className="bg-pink-50 p-6 rounded-xl shadow-sm border">
             <h3 className="text-lg font-semibold mb-4">Subject Breakdown</h3>
             <div className="space-y-4">
               {Object.entries(studyData.subjectStats).map(([subject, stats]) => (
@@ -2332,7 +2480,7 @@ function DashboardView() {
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
+        <div className="bg-pink-50 p-6 rounded-xl shadow-sm border">
           <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
           <div className="space-y-4">
             <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
@@ -2387,7 +2535,8 @@ export default function Home() {
   const [filterPriority, setFilterPriority] = useState('All')
   const [filterLabel, setFilterLabel] = useState('All')
   const [selectedDueDate, setSelectedDueDate] = useState(null)
-  const [backgroundTheme, setBackgroundTheme] = useState('mountains')
+  const [backgroundTheme, setBackgroundTheme] = useState('nature') // Changed from 'transparent' to 'nature'
+  const [colorTheme, setColorTheme] = useState('dark') // 'light', 'dark', 'transparent'
   const [navbarBackground, setNavbarBackground] = useState('default')
   const [viewMode, setViewMode] = useState('kanban') // Only Kanban view - simplified
   const [groupBy, setGroupBy] = useState('status') // status, stage, proficiency
@@ -2415,6 +2564,7 @@ export default function Home() {
   const [showFooter, setShowFooter] = useState(true)
   const [showSettingsPanel, setShowSettingsPanel] = useState(false)
   const [showNavigationHint, setShowNavigationHint] = useState(false)
+  const [activeSettingsTab, setActiveSettingsTab] = useState('visibility')
   
   // New MS Planner features
   const [searchQuery, setSearchQuery] = useState('')
@@ -2547,9 +2697,9 @@ export default function Home() {
   }, [selectedClass, selectedCurriculum, allStudyPlans])
 
   useEffect(() => {
-    // Apply background theme to body
-    document.body.className = `bg-${backgroundTheme}`
-  }, [backgroundTheme])
+    // Apply background theme and color theme to body
+    document.body.className = `bg-${backgroundTheme} theme-${colorTheme}`
+  }, [backgroundTheme, colorTheme])
 
   // Zen Rhythms Auto-Play Effect
   useEffect(() => {
@@ -3204,19 +3354,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Search + Navigation Section - Combined */}
+          {/* Center Navigation Section - Subject Tabs Only */}
           <div className="header-nav-section">
-            {/* Search Bar */}
-            <div className="header-search">
-              <input
-                type="text"
-                placeholder="Search chapters, subjects, goals..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input"
-              />
-            </div>
-
             {/* Subject Filter Tabs */}
             <div className="header-nav-tabs">
               {subjects.slice(0, 3).map(subject => (
@@ -3230,6 +3369,20 @@ export default function Home() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Actions Section - Right Side */}
+          <div className="header-actions">
+            {/* Search Bar - Moved to Right */}
+            <div className="header-search" style={{ maxWidth: '300px' }}>
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input"
+              />
+            </div>
 
             {/* Group By Dropdown */}
             {selectedSubject && viewMode === 'kanban' && (
@@ -3237,37 +3390,37 @@ export default function Home() {
                 value={groupBy}
                 onChange={(e) => setGroupBy(e.target.value)}
                 className="header-select"
+                style={{ fontSize: '12px', padding: '6px 10px' }}
               >
                 <option value="status">Group by Status</option>
                 <option value="stage">Group by Stage</option>
                 <option value="proficiency">Group by Proficiency</option>
               </select>
             )}
-          </div>
 
-          {/* Actions Section */}
-          <div className="header-actions">
-            <button
-              className={`header-action-btn ${weatherEffect ? 'active' : ''}`}
-              onClick={() => setWeatherEffect(!weatherEffect)}
-              title={weatherEffect ? 'Disable Weather Effects' : 'Enable Weather Effects'}
-            >
-              <CloudIcon />
-            </button>
+            {/* Red Recorder Button - AI Assistant */}
             <button
               className="header-action-btn"
-              onClick={() => setShowBackgroundSettings(true)}
-              title="Background Settings (Themes)"
+              onClick={() => {
+                alert('Voice Assistant AI - Coming Soon!\nCapture notes, to-dos, and voice commands.')
+              }}
+              title="AI Voice Assistant"
+              style={{ backgroundColor: '#ef4444', color: 'white', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
-              <PaletteIcon />
+              <MicrophoneIcon />
             </button>
-            <button
-              className={`header-action-btn ${showSettingsPanel ? 'active' : ''}`}
-              onClick={() => setShowSettingsPanel(!showSettingsPanel)}
-              title="Settings"
-            >
-              <SettingsIcon />
-            </button>
+
+            {/* Settings Dropdown Menu */}
+            <div style={{ position: 'relative' }}>
+              <button
+                className={`header-action-btn ${showSettingsPanel ? 'active' : ''}`}
+                onClick={() => setShowSettingsPanel(!showSettingsPanel)}
+                title="Settings"
+              >
+                <SettingsIcon />
+              </button>
+            </div>
+
             <a
               href="/login"
               className="header-action-btn user-profile"
@@ -3301,7 +3454,7 @@ export default function Home() {
                 }}
                 title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
               >
-                {sidebarCollapsed ? '☰' : '✕'}
+                {sidebarCollapsed ? <ExpandIcon /> : <CollapseIcon />}
               </button>
             </div>            <div className="sidebar-content" onClick={(e) => e.stopPropagation()}>
               {/* Main Navigation Menu */}
@@ -3309,47 +3462,48 @@ export default function Home() {
                 <button
                   className={`sidebar-nav-item ${currentPage === 'kanban' ? 'active' : ''}`}
                   onClick={() => setCurrentPage('kanban')}
+                  data-icon="dashboard"
                 >
-                  <HomeIcon />
+                  <span className="icon-wrapper"><HomeIcon /></span>
                   {!sidebarCollapsed && <span>Dashboard</span>}
                 </button>
-                <a
-                  href="/ProdyJEE/dashboard"
-                  className="sidebar-nav-item"
+                <button
+                  className={`sidebar-nav-item ${currentPage === 'dashboard' ? 'active' : ''}`}
+                  onClick={() => setCurrentPage('dashboard')}
+                  data-icon="analytics"
                 >
-                  <BarChartIcon />
+                  <span className="icon-wrapper"><BarChartIcon /></span>
                   {!sidebarCollapsed && <span>Analytics</span>}
-                </a>
-                <a
-                  href="/ProdyJEE/schedule"
-                  className="sidebar-nav-item"
+                </button>
+                <button
+                  className={`sidebar-nav-item ${currentPage === 'schedule' ? 'active' : ''}`}
+                  onClick={() => setCurrentPage('schedule')}
+                  data-icon="schedule"
                 >
-                  <CalendarIcon />
+                  <span className="icon-wrapper"><CalendarIcon /></span>
                   {!sidebarCollapsed && <span>Tasks</span>}
-                </a>
-                <a
-                  href="/ProdyJEE/timer"
-                  className="sidebar-nav-item"
+                </button>
+                <button
+                  className={`sidebar-nav-item ${currentPage === 'timer' ? 'active' : ''}`}
+                  onClick={() => setCurrentPage('timer')}
+                  data-icon="timer"
                 >
-                  <TimerIcon />
+                  <span className="icon-wrapper"><TimerIcon /></span>
                   {!sidebarCollapsed && <span>Timer</span>}
-                </a>
-                <a
-                  href="/ProdyJEE/goals"
-                  className="sidebar-nav-item"
+                </button>
+                <button
+                  className={`sidebar-nav-item ${currentPage === 'goals' ? 'active' : ''}`}
+                  onClick={() => setCurrentPage('goals')}
+                  data-icon="goals"
                 >
-                  <MeditationIcon />
+                  <span className="icon-wrapper"><MeditationIcon /></span>
                   {!sidebarCollapsed && <span>Goals</span>}
-                </a>
+                </button>
               </div>
             </div>
             
             <div className="sidebar-footer">
-              {!sidebarCollapsed && (
-                <div className="sidebar-attribution">
-                  by Sasha Nagarajan, 11th Grade, Peepal Prodigy School, Madukkarai, Coimbatore
-                </div>
-              )}
+              {/* Empty - attribution moved to main footer */}
             </div>
           </aside>
         )}
@@ -3461,7 +3615,7 @@ export default function Home() {
         )}
 
         {currentPage === 'schedule' && (
-          <ScheduleView />
+          <EnhancedSchedule />
         )}
 
         {currentPage === 'timer' && (
@@ -3470,6 +3624,103 @@ export default function Home() {
 
         {currentPage === 'dashboard' && (
           <DashboardView />
+        )}
+
+        {currentPage === 'goals' && (
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%',
+            gap: '24px',
+            padding: '60px 40px'
+          }}>
+            <div style={{
+              width: '80px',
+              height: '80px',
+              background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '40px',
+              boxShadow: '0 8px 24px rgba(251, 191, 36, 0.3)'
+            }}>
+              ⭐
+            </div>
+            <h2 style={{ 
+              color: 'white', 
+              fontSize: '2.5rem', 
+              marginBottom: '0',
+              fontWeight: '700',
+              textAlign: 'center'
+            }}>
+              Star-Based Goals System
+            </h2>
+            <p style={{ 
+              color: 'rgba(255,255,255,0.9)', 
+              textAlign: 'center', 
+              maxWidth: '700px',
+              fontSize: '1.1rem',
+              lineHeight: '1.8'
+            }}>
+              Track your academic, behavioral, and emotional goals with a star-based reward system. 
+              Set targets, earn stars, and unlock achievements as you progress toward your JEE dreams! 🎯
+            </p>
+            <div style={{ 
+              display: 'flex', 
+              gap: '16px', 
+              flexWrap: 'wrap', 
+              justifyContent: 'center',
+              marginTop: '20px'
+            }}>
+              <a href="/ProdyJEE/goals" style={{
+                padding: '14px 32px',
+                background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                border: 'none',
+                borderRadius: '12px',
+                color: 'white',
+                textDecoration: 'none',
+                fontWeight: '600',
+                fontSize: '1rem',
+                boxShadow: '0 4px 16px rgba(59, 130, 246, 0.4)',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <span>Launch Goals Dashboard</span>
+                <span>→</span>
+              </a>
+            </div>
+            <div style={{
+              marginTop: '40px',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '16px',
+              width: '100%',
+              maxWidth: '800px'
+            }}>
+              {[
+                { icon: '📚', title: 'Academic Goals', desc: 'Master topics & ace tests' },
+                { icon: '🎯', title: 'Behavioral Goals', desc: 'Build study discipline' },
+                { icon: '💪', title: 'Emotional Goals', desc: 'Stay motivated & confident' }
+              ].map((item, idx) => (
+                <div key={idx} style={{
+                  padding: '20px',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '12px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ fontSize: '2rem', marginBottom: '8px' }}>{item.icon}</div>
+                  <div style={{ color: 'white', fontWeight: '600', marginBottom: '4px' }}>{item.title}</div>
+                  <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.9rem' }}>{item.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
         </main>
         {/* End of MAIN CONTENT CONTAINER */}
@@ -3523,22 +3774,6 @@ export default function Home() {
               )}
               <span className="footer-text">© 2024 ProdyJEE - Peepal Prodigy School</span>
             </div>
-
-            {/* Right - Voice Assistant */}
-            <div className="footer-assistant">
-              <button
-                className="voice-assistant-btn"
-                onClick={() => {
-                  // Voice assistant logic - future implementation
-                  alert('Voice Assistant AI - Coming Soon!\nCapture notes, to-dos, and voice commands.')
-                }}
-                title="Voice Assistant - Click to activate"
-              >
-                <div className="voice-icon"><MicrophoneIcon /></div>
-                <div className="voice-pulse"></div>
-                <span className="voice-label">AI Assistant</span>
-              </button>
-            </div>
           </div>
         </footer>
       )}
@@ -3560,8 +3795,31 @@ export default function Home() {
               </button>
             </div>
             
+            {/* Settings Tabs */}
+            <div className="settings-tabs">
+              <button 
+                className={`settings-tab ${activeSettingsTab === 'visibility' ? 'active' : ''}`}
+                onClick={() => setActiveSettingsTab('visibility')}
+              >
+                Visibility
+              </button>
+              <button 
+                className={`settings-tab ${activeSettingsTab === 'appearance' ? 'active' : ''}`}
+                onClick={() => setActiveSettingsTab('appearance')}
+              >
+                Appearance
+              </button>
+              <button 
+                className={`settings-tab ${activeSettingsTab === 'audio' ? 'active' : ''}`}
+                onClick={() => setActiveSettingsTab('audio')}
+              >
+                Audio
+              </button>
+            </div>
+            
             <div className="settings-panel-content">
               {/* Container Visibility Section */}
+              {activeSettingsTab === 'visibility' && (
               <div className="settings-section">
                 <h4 className="settings-section-title">Container Visibility</h4>
                 <p className="settings-section-description">
@@ -3660,8 +3918,10 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+              )}
 
               {/* Zen Music Section */}
+              {activeSettingsTab === 'audio' && (
               <div className="settings-section">
                 <h4 className="settings-section-title">Zen Music</h4>
                 <p className="settings-section-description">
@@ -3711,6 +3971,111 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+              )}
+
+              {/* Background & Theme Section */}
+              {activeSettingsTab === 'appearance' && (
+              <div className="settings-section">
+                <h4 className="settings-section-title">Background & Theme</h4>
+                <p className="settings-section-description">
+                  Customize background and color theme
+                </p>
+                
+                <div className="settings-toggle-group">
+                  <div className="settings-form-group">
+                    <label className="settings-form-label">
+                      <LayoutIcon />
+                      <span>Color Theme</span>
+                    </label>
+                    <div className="theme-buttons-group" style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
+                      {[
+                        { value: 'light', label: 'Light', icon: '☀️' },
+                        { value: 'dark', label: 'Dark', icon: '🌙' },
+                        { value: 'transparent', label: 'Transparent', icon: '✨' }
+                      ].map(theme => (
+                        <button
+                          key={theme.value}
+                          className={`theme-btn ${colorTheme === theme.value ? 'active' : ''}`}
+                          onClick={() => setColorTheme(theme.value)}
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: '8px',
+                            border: colorTheme === theme.value ? '2px solid #3b82f6' : '1px solid rgba(255,255,255,0.2)',
+                            background: colorTheme === theme.value ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255,255,255,0.1)',
+                            color: 'white',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                          }}
+                        >
+                          <span>{theme.icon}</span>
+                          <span>{theme.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="settings-form-group" style={{ marginTop: '16px' }}>
+                    <label className="settings-form-label">
+                      <LayoutIcon />
+                      <span>Background Theme</span>
+                    </label>
+                    <div className="theme-buttons-group" style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
+                      {['nature', 'sunset', 'mountains', 'ocean', 'forest', 'space'].map(theme => (
+                        <button
+                          key={theme}
+                          className={`theme-btn ${backgroundTheme === theme ? 'active' : ''}`}
+                          onClick={() => setBackgroundTheme(theme)}
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: '8px',
+                            border: backgroundTheme === theme ? '2px solid #3b82f6' : '1px solid rgba(255,255,255,0.2)',
+                            background: backgroundTheme === theme ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255,255,255,0.1)',
+                            color: 'white',
+                            cursor: 'pointer',
+                            textTransform: 'capitalize',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          {theme}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="settings-form-group" style={{ marginTop: '16px' }}>
+                    <button
+                      className="settings-action-btn"
+                      onClick={() => {
+                        setShowBackgroundSettings(true)
+                        setShowSettingsPanel(false)
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        background: 'rgba(59, 130, 246, 0.2)',
+                        color: 'white',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <LayoutIcon />
+                      Advanced Background Settings
+                    </button>
+                  </div>
+                </div>
+              </div>
+              )}
 
               <div className="settings-panel-footer">
                 <button 

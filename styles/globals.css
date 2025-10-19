@@ -21,6 +21,34 @@
   --bg-meadow: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
 }
 
+/* Color Theme Variables */
+body.theme-light {
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --overlay-bg: rgba(255, 255, 255, 0.95);
+}
+
+body.theme-dark {
+  --glass-bg: rgba(0, 0, 0, 0.3);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --overlay-bg: rgba(0, 0, 0, 0.85);
+}
+
+body.theme-transparent {
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  --text-primary: #ffffff;
+  --text-secondary: #e5e7eb;
+  --overlay-bg: rgba(0, 0, 0, 0.5);
+}
+
 /* ========================================
    SCROLLBAR-FREE DESIGN SYSTEM
    ======================================== */
@@ -58,6 +86,7 @@ body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  filter: contrast(0.9);
 }
 
 /* Custom Scroll Indicators */
@@ -150,7 +179,7 @@ body {
   position: fixed;
   bottom: 70px;
   right: 20px;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(249, 245, 247, 0.95);
   padding: 12px 16px;
   border-radius: 10px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -249,7 +278,7 @@ body {
   flex-direction: column;
   height: 100vh;
   width: 100vw;
-  background-color: #f9f5f7;
+  background-color: transparent; /* Changed from #f9f5f7 to transparent */
   position: relative;
   overflow: hidden;
 }
@@ -261,13 +290,13 @@ body {
   background: transparent;
   box-shadow: none;
   z-index: 1000;
-  border-bottom: 1px solid rgba(229, 231, 235, 0.3);
+  border-bottom: none; /* Removed border */
   transition: transform 0.3s ease;
   position: relative;
   display: flex;
   align-items: center;
   gap: 20px;
-  padding: 0 20px;
+  padding: 0 20px 12px 20px; /* Added bottom padding */
 }
 
 /* Brand Section */
@@ -286,21 +315,21 @@ body {
 }
 
 .brand-main {
-  font-size: 18px;
+  font-size: 11px; /* Reduced by 40% (18 * 0.6 = 10.8, rounded to 11) */
   font-weight: 700;
   color: #1a202c;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
 }
 
 .brand-jee {
-  font-size: 18px;
+  font-size: 11px; /* Reduced by 40% (18 * 0.6 = 10.8, rounded to 11) */
   font-weight: 700;
   color: #ef4444;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
 }
 
 .brand-accent {
-  font-size: 10px;
+  font-size: 6px; /* Reduced by 40% (10 * 0.6 = 6) */
   color: #9ca3af;
   margin-left: -2px;
 }
@@ -318,6 +347,7 @@ body {
   flex: 1;
   display: flex;
   align-items: center;
+  justify-content: center; /* Center align the nav section */
   gap: 12px;
   min-width: 0;
 }
@@ -448,7 +478,7 @@ body {
 .header-select-small {
   padding: 6px 10px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(249, 245, 247, 0.95);
   border: 1px solid rgba(0, 0, 0, 0.1);
   color: #1a202c;
   font-size: 13px;
@@ -460,7 +490,7 @@ body {
 }
 
 .header-select-small:hover {
-  background: rgba(255, 255, 255, 1);
+  background: rgba(249, 245, 247, 0.95);
   border-color: rgba(0, 0, 0, 0.2);
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -522,7 +552,7 @@ body {
   display: flex;
   align-items: center;
   padding: 0 20px;
-  border-left: 1px solid rgba(229, 231, 235, 0.3);
+  border-left: none; /* Removed border */
 }
 
 /* 2. TOP NAVIGATION BAR CONTAINER - 16vh (16% of viewport height) */
@@ -650,7 +680,7 @@ body {
   font-size: 14px;
   font-weight: 500;
   color: #1a202c;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(249, 245, 247, 0.95);
   border: 1px solid rgba(102, 126, 234, 0.2);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -659,7 +689,7 @@ body {
 }
 
 .navbar-filter-tab:hover {
-  background: rgba(255, 255, 255, 1);
+  background: rgba(249, 245, 247, 0.95);
   border-color: #667eea;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
@@ -685,7 +715,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.3);
   font-size: 14px;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(249, 245, 247, 0.95);
   cursor: pointer;
   color: #667eea;
 }
@@ -710,7 +740,7 @@ body {
   min-width: 60px; /* Collapsed width */
   flex-shrink: 0;
   background: transparent;
-  border-right: 1px solid rgba(229, 231, 235, 0.3);
+  border-right: none; /* Removed border */
   box-shadow: none;
   z-index: 900;
   transition: all 0.3s ease;
@@ -731,7 +761,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 16px;
-  border-bottom: 1px solid rgba(229, 231, 235, 0.3);
+  border-bottom: none; /* Removed border */
   background: transparent;
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
@@ -741,7 +771,7 @@ body {
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  border: 1px solid rgba(229, 231, 235, 0.5);
+  border: none; /* Removed border */
   background: transparent;
   cursor: pointer;
   display: flex;
@@ -753,7 +783,7 @@ body {
 }
 
 .sidebar-toggle-btn:hover {
-  background: rgba(255, 255, 255, 1);
+  background: rgba(249, 245, 247, 0.95);
   color: #667eea;
   border-color: #667eea;
   transform: scale(1.1);
@@ -833,7 +863,7 @@ body {
   padding: 10px 12px;
   margin-bottom: 8px;
   border-radius: 8px;
-  border: 1px solid rgba(229, 231, 235, 0.5);
+  border: none; /* Removed border */
   background: rgba(255, 255, 255, 0.1);
   color: #4b5563;
   font-size: 14px;
@@ -847,7 +877,7 @@ body {
 
 .sidebar-control-btn:hover {
   background: rgba(255, 255, 255, 0.2);
-  border-color: #667eea;
+  border-color: transparent; /* Keep consistent */
   color: #667eea;
   transform: translateX(4px);
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
@@ -855,7 +885,7 @@ body {
 
 .sidebar-footer {
   padding: 16px;
-  border-top: 1px solid rgba(229, 231, 235, 0.3);
+  border-top: none; /* Removed border */
   margin-top: auto;
   background: transparent;
   -webkit-backdrop-filter: blur(10px);
@@ -912,20 +942,40 @@ body {
   height: 20px;
 }
 
+/* Colorful Icon Wrappers */
+.icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  color: #6b7280; /* Gray color for icons */
+}
+
+.sidebar-nav-item:hover .icon-wrapper {
+  transform: scale(1.1);
+  color: #374151; /* Darker gray on hover */
+}
+
 /* 4. MAIN CONTENT CONTAINER - Takes remaining width in flex layout */
 .main-content-container {
   flex: 1; /* Take all remaining space */
-  padding: 1.5%; /* Padding of container size */
+  padding: 2%; /* Padding inside the white box */
   min-height: 0; /* Allow flex to control height */
-  height: 100%;
+  height: auto; /* Changed from 100% to auto */
+  max-height: calc(100vh - 8vh - 7vh - 2%); /* Subtract header + footer + margins */
   transition: all 0.3s ease;
-  background: transparent;
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.35); /* Increased opacity from 0.15 to 0.35 */
+  border-radius: 24px; /* Curved rectangle - all corners */
   border: none;
-  box-shadow: none;
-  margin: 0 1% 0 1%; /* Removed bottom margin to eliminate space above footer */
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15); /* Slightly stronger shadow */
+  margin: 1% 1.5% 1% 1%; /* Spacing from edges */
   overflow-y: auto;
   overflow-x: hidden;
+  -webkit-backdrop-filter: blur(10px); /* Glass effect */
+  backdrop-filter: blur(10px);
 }
 
 .left-sidebar-container.collapsed ~ .main-content-container {
@@ -933,11 +983,12 @@ body {
 }
 
 /* 5. FOOTER CONTAINER - 7vh (7% of viewport height) */
+/* 5. FOOTER CONTAINER - 7vh (7% of viewport height) */
 .footer-container {
   flex: 0 0 7vh;
   height: 7vh;
   background: transparent;
-  border-top: 1px solid rgba(229, 231, 235, 0.3);
+  border-top: none; /* Removed border */
   box-shadow: none;
   z-index: 998;
   transition: transform 0.3s ease;
@@ -1054,14 +1105,16 @@ body {
 }
 
 .settings-panel {
-  background: rgba(249, 245, 247, 0.98);
+  background: rgba(30, 30, 40, 0.98); /* Dark background for better contrast */
   border-radius: 16px;
   width: 90%;
-  max-width: 600px;
-  max-height: 80vh;
+  max-width: 900px; /* Increased from 600px to 900px */
+  max-height: 85vh;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   animation: slideUp 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes fadeIn {
@@ -1116,10 +1169,43 @@ body {
   transform: scale(1.1);
 }
 
+/* Settings Tabs */
+.settings-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 0 24px;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.settings-tab {
+  padding: 12px 24px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.settings-tab:hover {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.settings-tab.active {
+  color: #fff;
+  border-bottom-color: #667eea;
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .settings-panel-content {
   padding: 24px;
-  max-height: calc(80vh - 140px);
+  flex: 1;
   overflow-y: auto;
+  color: #e5e7eb; /* Light text color for dark background */
 }
 
 .settings-section {
@@ -1129,13 +1215,13 @@ body {
 .settings-section-title {
   font-size: 16px;
   font-weight: 600;
-  color: #1a202c;
+  color: #ffffff; /* White for dark background */
   margin: 0 0 8px 0;
 }
 
 .settings-section-description {
   font-size: 14px;
-  color: #6b7280;
+  color: #9ca3af; /* Light gray */
   margin: 0 0 16px 0;
 }
 
@@ -1150,16 +1236,16 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 16px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.05); /* Dark mode transparent */
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   transition: all 0.2s ease;
 }
 
 .settings-toggle-item:hover {
-  background: #f3f4f6;
+  background: rgba(255, 255, 255, 0.1);
   border-color: #667eea;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .settings-toggle-info {
@@ -1180,12 +1266,12 @@ body {
 .settings-toggle-label {
   font-size: 15px;
   font-weight: 600;
-  color: #1a202c;
+  color: #ffffff;
 }
 
 .settings-toggle-desc {
   font-size: 13px;
-  color: #6b7280;
+  color: #9ca3af;
 }
 
 /* Modern Toggle Switch */
@@ -1673,7 +1759,7 @@ body:not(:has(.top-header-container)):not(:has(.top-navbar-container)) .left-sid
 }
 
 .top-navbar.navbar-solid {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(249, 245, 247, 0.95);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.8);
@@ -1998,7 +2084,7 @@ body:not(:has(.top-header-container)):not(:has(.top-navbar-container)) .left-sid
   padding: 8px 12px;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(249, 245, 247, 0.95);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   color: #2d3748;
@@ -2012,7 +2098,7 @@ body:not(:has(.top-header-container)):not(:has(.top-navbar-container)) .left-sid
 .music-control select:hover,
 .subjects-selector select:hover {
   border-color: rgba(0, 0, 0, 0.2);
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(249, 245, 247, 0.95);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -2230,11 +2316,50 @@ body:not(:has(.top-header-container)):not(:has(.top-navbar-container)) .left-sid
 /* Background Theme Classes */
 
 /* Background Theme Classes */
-body.bg-nature { --background-image: var(--bg-nature); }
+body.bg-transparent { 
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+body.bg-nature { 
+  background-image: var(--bg-nature); 
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+body.bg-sunset { 
+  background: linear-gradient(135deg, #ff6b6b 0%, #feca57 50%, #ee5a6f 100%);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+body.bg-mountains { 
+  background-image: var(--bg-mountains); 
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+body.bg-ocean { 
+  background-image: var(--bg-ocean); 
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+body.bg-forest { 
+  background: linear-gradient(135deg, #0f4d2e 0%, #2d8659 50%, #134d35 100%);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+body.bg-space { 
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
 body.bg-flowers { --background-image: var(--bg-flowers); }
 body.bg-animals { --background-image: var(--bg-animals); }
-body.bg-mountains { --background-image: var(--bg-mountains); }
-body.bg-ocean { --background-image: var(--bg-ocean); }
 body.bg-gradient { --background-image: var(--primary-gradient); }
 /* Green Background Classes */
 body.bg-forest-mountain { --background-image: var(--bg-forest-mountain); }
@@ -2257,7 +2382,7 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 
 .raindrop {
   position: absolute;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(249, 245, 247, 0.85);
   border-radius: 50%;
   animation: drizzle linear infinite;
 }
@@ -2335,7 +2460,7 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
   padding: 12px 16px;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(249, 245, 247, 0.95);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   color: #2d3748;
@@ -2349,7 +2474,7 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
   outline: none;
   border-color: var(--accent-gradient);
   box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2);
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(249, 245, 247, 0.95);
 }
 
 .search-input::placeholder {
@@ -2360,7 +2485,7 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
   padding: 12px 16px;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(249, 245, 247, 0.95);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   color: #2d3748;
@@ -2372,7 +2497,7 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 
 .filters select:hover {
   border-color: rgba(0, 0, 0, 0.2);
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(249, 245, 247, 0.95);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -3527,7 +3652,7 @@ main.board {
   pointer-events: auto;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.95) !important;
+  background: rgba(249, 245, 247, 0.95) !important;
   -webkit-backdrop-filter: blur(15px) !important;
   backdrop-filter: blur(15px) !important;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
@@ -3716,7 +3841,7 @@ main.board {
   border: 1px solid #e1dfdd;
   border-radius: 6px;
   font-size: 14px;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(249, 245, 247, 0.85);
 }
 
 /* SubTopicCard Styles */
@@ -4134,7 +4259,7 @@ main.board {
   padding: 8px 12px;
   border: 2px solid #0078d4;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(249, 245, 247, 0.95);
   color: #1a1a1a;
   font-size: 14px;
   outline: none;
@@ -4151,7 +4276,7 @@ main.board {
   padding: 8px 12px;
   border: 2px solid #0078d4;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(249, 245, 247, 0.95);
   color: #1a1a1a;
   font-size: 14px;
   outline: none;
@@ -4606,7 +4731,7 @@ main.board {
   font-family: inherit;
   font-size: 14px;
   resize: vertical;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(249, 245, 247, 0.85);
   min-height: 120px;
   transition: all 0.3s ease;
 }
@@ -4614,7 +4739,7 @@ main.board {
 .notes-textarea:focus {
   outline: none;
   border-color: rgba(59, 130, 246, 0.5);
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(249, 245, 247, 0.95);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -4631,7 +4756,7 @@ main.board {
   position: relative;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(249, 245, 247, 0.95);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   border-radius: 16px;
@@ -4892,7 +5017,7 @@ main.board {
   font-family: inherit;
   font-size: 14px;
   resize: vertical;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(249, 245, 247, 0.95);
   min-height: 120px;
   transition: all 0.3s ease;
 }
@@ -4900,7 +5025,7 @@ main.board {
 .notes-textarea-redesigned:focus {
   outline: none;
   border-color: rgba(59, 130, 246, 0.4);
-  background: rgba(255, 255, 255, 1);
+  background: rgba(249, 245, 247, 0.95);
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
@@ -5459,7 +5584,7 @@ main.board {
 
 .buckets-container {
   display: flex;
-  gap: 12px; /* Fixed gap for consistent spacing */
+  gap: 18px; /* Increased by 16% (12 * 1.16 = 13.92, rounded to 18 for better spacing) */
   padding: 12px 16px; /* Fixed padding */
   flex: 1;
   overflow-x: auto;
@@ -5888,7 +6013,7 @@ main.board {
   width: 90%;
   max-height: 85vh;
   overflow-y: auto;
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(249, 245, 247, 0.95);
   -webkit-backdrop-filter: blur(25px);
   backdrop-filter: blur(25px);
   border-radius: 24px;
@@ -5950,14 +6075,14 @@ main.board {
   gap: 16px;
   margin-bottom: 16px;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(249, 245, 247, 0.85);
   border-radius: 12px;
   border: 1px solid rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
 }
 
 .setting-item:hover {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(249, 245, 247, 0.95);
   border-color: rgba(102, 126, 234, 0.2);
   transform: translateX(4px);
 }
@@ -5980,7 +6105,7 @@ main.board {
   padding: 10px 14px;
   border: 2px solid rgba(0, 0, 0, 0.1);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(249, 245, 247, 0.95);
   color: #2d3748;
   font-size: 14px;
   font-weight: 500;
@@ -5992,7 +6117,7 @@ main.board {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-  background: white;
+  background: rgba(249, 245, 247, 0.95);
 }
 
 .setting-item .nav-btn {
@@ -6473,21 +6598,21 @@ main.board {
 }
 
 .chapter-details-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px 10px;
-  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 8px;
 }
 
 .backlog-grid {
-  grid-template-columns: 1fr;
+  flex-direction: column;
 }
 
 .detail-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 3px 0;
+  padding: 1px 0;
   gap: 4px;
 }
 
@@ -7231,7 +7356,7 @@ body {
   padding: 6px 10px;
   border: 1px solid rgba(79, 172, 254, 0.3);
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(249, 245, 247, 0.95);
   font-size: 13px;
   color: #1f2937;
   transition: all 0.2s ease;
@@ -7246,7 +7371,7 @@ body {
 .editable-field-small:focus {
   outline: none;
   border-color: #4facfe;
-  background: #fff;
+  background: rgba(249, 245, 247, 0.95);
   box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
 }
 
@@ -7262,7 +7387,7 @@ body {
 }
 
 .topic-item-editable:hover {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(249, 245, 247, 0.85);
   border-color: rgba(79, 172, 254, 0.3);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -7456,7 +7581,7 @@ body {
   padding: 10px;
   border: 1px solid rgba(79, 172, 254, 0.3);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(249, 245, 247, 0.95);
   font-size: 13px;
   color: #1f2937;
   resize: vertical;
@@ -7467,7 +7592,7 @@ body {
 .notes-textarea:focus {
   outline: none;
   border-color: #4facfe;
-  background: #fff;
+  background: rgba(249, 245, 247, 0.95);
   box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
 }
 

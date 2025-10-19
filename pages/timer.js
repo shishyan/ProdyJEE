@@ -527,13 +527,14 @@ export default function Timer() {
   }, [])
 
   return (
-    <div style={{ minHeight: '100vh', backgroundImage: 'url(https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}>
+    <div className="app-container">
+      <div className="main-content-container" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}>
       {/* MS Planner Navbar */}
       <div style={{ 
-        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.45) 50%, rgba(255, 255, 255, 0.5) 100%)',
+        background: 'linear-gradient(135deg, rgba(249, 245, 247, 0.5) 0%, rgba(249, 245, 247, 0.45) 50%, rgba(249, 245, 247, 0.5) 100%)',
         backdropFilter: 'blur(30px)',
         WebkitBackdropFilter: 'blur(30px)', 
-        color: 'white',
+        color: '#1a202c',
         padding: '12px 24px',
         display: 'flex',
         alignItems: 'center',
@@ -618,6 +619,7 @@ export default function Timer() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   )

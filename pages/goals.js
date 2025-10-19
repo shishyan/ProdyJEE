@@ -235,9 +235,8 @@ export default function GoalsPage() {
         <link rel="stylesheet" href="/ProdyJEE/styles/globals.css" />
       </Head>
 
-      <div className="planner">
-        {/* Main Content - Integrated with Layout */}
-        <div style={{ padding: '32px', backgroundColor: '#f5f7fa', minHeight: '100vh' }}>
+      <div className="app-container">
+        <div className="main-content-container" style={{ padding: '32px' }}>
           {/* Page Header */}
           <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
