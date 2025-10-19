@@ -3,6 +3,7 @@ import packageJson from '../package.json'
 import BackgroundSettings from '../components/BackgroundSettings'
 import {
   DndContext,
+  DragOverlay,
   KeyboardSensor,
   PointerSensor,
   useSensor,
@@ -595,7 +596,7 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
   const style = {
     transform: CSS.Translate.toString(transform),
     transition: isDragging ? 'none' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    zIndex: isDragging ? 1000 : 'auto'
+    opacity: isDragging ? 0.5 : 1  // Make original card semi-transparent when dragging
   }
 
   const progressPercentage = Math.round((chapter.completedTopics / chapter.totalTopics) * 100)
@@ -617,11 +618,12 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
       ref={setNodeRef}
       style={{
         ...style,
-        border: isSelected ? '2px solid #8b5cf6' : 'none',
+        border: isSelected ? '2px solid #8b5cf6' : undefined,
         backgroundColor: isSelected ? 'rgba(139, 92, 246, 0.1)' : 'rgba(255, 255, 255, 0.3)',
         boxShadow: isSelected ? 'inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(139, 92, 246, 0.3)' : 'inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1)'
       }}
-      className={`chapter-card ${isDragging ? 'dragging' : ''} ${chapter.aggregatedStatus === 'In Queue' ? 'backlog-card' : ''}`}
+      className={`chapter-card ${isDragging ? 'dragging' : ''}`}
+      data-status={chapter.aggregatedStatus}
       onClick={(e) => onEdit(chapter, e)}
     >
       {/* ID and Subject above header */}
@@ -2368,6 +2370,7 @@ export default function Home() {
   const [editingTopicId, setEditingTopicId] = useState(null) // Track which topic is being edited
   const [editingTask, setEditingTask] = useState(null)
   const [addingTaskToBucket, setAddingTaskToBucket] = useState(null)
+  const [activeChapterId, setActiveChapterId] = useState(null) // Track dragged chapter for DragOverlay
   const [comments, setComments] = useState([])
   const [subtasks, setSubtasks] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
@@ -2835,8 +2838,19 @@ export default function Home() {
     }
   }
 
+  const handleChapterDragStart = (event) => {
+    const { active } = event
+    if (active.id.startsWith('chapter-')) {
+      const chapterId = active.id.replace('chapter-', '')
+      setActiveChapterId(chapterId)
+    }
+  }
+
   const handleChapterDragEnd = async (event) => {
     const { active, over } = event
+
+    // Clear active drag state
+    setActiveChapterId(null)
 
     if (!over) return
 
@@ -3086,43 +3100,20 @@ export default function Home() {
 
   return (
     <div className="app-container">
-      {/* 1. TOP HEADER CONTAINER - Fixed at top */}
+      {/* SINGLE TOP HEADER CONTAINER - Brand + Search + Navigation + Actions */}
       {showTopHeader && (
-        <header className="top-header-container">
-          {/* Left Section - Brand & Actions (Max 16% width) */}
-          <div className="header-content">
-            {/* App Logo, Title */}
-            <div className="header-brand">
-              <div className="brand-logo">
-                <span className="brand-main">Prody</span>
-                <span className="brand-jee">JEE</span>
-                <span className="brand-accent">™</span>
-              </div>
-              <div className="brand-subtitle">
-                <span>Peepal Prodigy School</span>
-              </div>
+        <header className="unified-header-container">
+          {/* Brand Section */}
+          <div className="header-brand">
+            <div className="brand-logo">
+              <span className="brand-main">Prody</span>
+              <span className="brand-jee">JEE</span>
+              <span className="brand-accent">™</span>
             </div>
-
-            {/* Settings Actions */}
-            <div className="header-actions">
-              <button
-                className={`header-action-btn ${showSettingsPanel ? 'active' : ''}`}
-                onClick={() => setShowSettingsPanel(!showSettingsPanel)}
-                title="Settings"
-              >
-                <SettingsIcon />
-              </button>
-              <a
-                href="/login"
-                className="header-action-btn user-profile"
-                title="User Profile"
-              >
-                <UserIcon />
-              </a>
-            </div>
+            <div className="brand-subtitle">Peepal Prodigy School</div>
           </div>
 
-          {/* Right Section - Navigation (Takes remaining space) */}
+          {/* Search + Navigation Section - Combined */}
           <div className="header-nav-section">
             {/* Search Bar */}
             <div className="header-search">
@@ -3134,55 +3125,13 @@ export default function Home() {
                 className="search-input"
               />
             </div>
-          </div>
-        </header>
-      )}
-
-      {/* 2. TOP NAVIGATION BAR CONTAINER - Filters and Controls Only */}
-      {showNavBar && (
-        <nav className="top-navbar-container">
-          <div className="navbar-wrapper">
-            {/* Breadcrumb Navigation */}
-            <div className="navbar-breadcrumb">
-              <button 
-                className="breadcrumb-item clickable"
-                onClick={() => setCurrentPage('kanban')}
-              >
-                <HomeIcon />
-                <span>Home</span>
-              </button>
-              <span className="breadcrumb-separator">/</span>
-              <button 
-                className={`breadcrumb-item ${!selectedSubject ? 'active' : 'clickable'}`}
-                onClick={() => {
-                  setSelectedSubject(null)
-                  setCurrentPage('kanban')
-                }}
-              >
-                Study Plans
-              </button>
-              {selectedSubject && (
-                <>
-                  <span className="breadcrumb-separator">/</span>
-                  <button 
-                    className="breadcrumb-item active clickable"
-                    onClick={() => {
-                      // Keep subject selected, just reset to top of page
-                      setCurrentPage('kanban')
-                    }}
-                  >
-                    {selectedSubject.name}
-                  </button>
-                </>
-              )}
-            </div>
 
             {/* Subject Filter Tabs */}
-            <div className="navbar-filters">
-              {subjects.slice(0, 4).map(subject => (
+            <div className="header-nav-tabs">
+              {subjects.slice(0, 3).map(subject => (
                 <button
                   key={subject.subject_id}
-                  className={`navbar-filter-tab ${selectedSubject?.subject_id === subject.subject_id ? 'active' : ''}`}
+                  className={`nav-tab ${selectedSubject?.subject_id === subject.subject_id ? 'active' : ''}`}
                   onClick={() => setSelectedSubject(subject)}
                 >
                   <BookOpenIcon />
@@ -3191,22 +3140,52 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Group By Controls */}
+            {/* Group By Dropdown */}
             {selectedSubject && viewMode === 'kanban' && (
-              <div className="navbar-controls">
-                <select
-                  value={groupBy}
-                  onChange={(e) => setGroupBy(e.target.value)}
-                  className="navbar-select"
-                >
-                  <option value="status">Group by Status</option>
-                  <option value="stage">Group by Stage</option>
-                  <option value="proficiency">Group by Proficiency</option>
-                </select>
-              </div>
+              <select
+                value={groupBy}
+                onChange={(e) => setGroupBy(e.target.value)}
+                className="header-select"
+              >
+                <option value="status">Group by Status</option>
+                <option value="stage">Group by Stage</option>
+                <option value="proficiency">Group by Proficiency</option>
+              </select>
             )}
           </div>
-        </nav>
+
+          {/* Actions Section */}
+          <div className="header-actions">
+            <button
+              className={`header-action-btn ${weatherEffect ? 'active' : ''}`}
+              onClick={() => setWeatherEffect(!weatherEffect)}
+              title={weatherEffect ? 'Disable Weather Effects' : 'Enable Weather Effects'}
+            >
+              <CloudIcon />
+            </button>
+            <button
+              className="header-action-btn"
+              onClick={() => setShowBackgroundSettings(true)}
+              title="Background Settings (Themes)"
+            >
+              <PaletteIcon />
+            </button>
+            <button
+              className={`header-action-btn ${showSettingsPanel ? 'active' : ''}`}
+              onClick={() => setShowSettingsPanel(!showSettingsPanel)}
+              title="Settings"
+            >
+              <SettingsIcon />
+            </button>
+            <a
+              href="/login"
+              className="header-action-btn user-profile"
+              title="User Profile"
+            >
+              <UserIcon />
+            </a>
+          </div>
+        </header>
       )}
 
       {/* Content Wrapper - Contains Sidebar + Main Content */}
@@ -3296,6 +3275,7 @@ export default function Home() {
                 <DndContext
                   sensors={sensors}
                   collisionDetection={closestCorners}
+                  onDragStart={handleChapterDragStart}
                   onDragEnd={handleChapterDragEnd}
                 >
                   <div className="kanban-board">
@@ -3342,6 +3322,33 @@ export default function Home() {
                       </div>
                     )}
                   </div>
+
+                  {/* DragOverlay - Renders dragged card in a portal OUTSIDE normal DOM */}
+                  <DragOverlay>
+                    {activeChapterId ? (() => {
+                      const allChapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+                      const draggedChapter = allChapters.find(ch => ch.chapter_id === activeChapterId)
+                      return draggedChapter ? (
+                        <div className="chapter-card dragging" data-status={draggedChapter.aggregatedStatus} style={{ cursor: 'grabbing' }}>
+                          <div className="chapter-meta-top">
+                            <span className="meta-id">{draggedChapter.chapter_id}</span>
+                            <span className="meta-subject">{draggedChapter.subject}</span>
+                          </div>
+                          <div className="chapter-header" style={{ cursor: 'grabbing', background: draggedChapter.aggregatedStatus === 'In Queue' ? '#f3f4f6' : `linear-gradient(135deg, ${getStatusColor(draggedChapter.aggregatedStatus)}20, ${getStatusColor(draggedChapter.aggregatedStatus)}60)` }}>
+                            <h4 className="chapter-title">{draggedChapter.chapter_name}</h4>
+                          </div>
+                          <div className="chapter-body">
+                            <div className="chapter-stats">
+                              <div className="stat-row">
+                                <span className="stat-label">Status:</span>
+                                <span className="stat-value">{draggedChapter.aggregatedStatus}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : null
+                    })() : null}
+                  </DragOverlay>
                 </DndContext>
               </>
             )}

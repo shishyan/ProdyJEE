@@ -252,10 +252,10 @@ body {
   overflow: hidden;
 }
 
-/* 1. TOP HEADER CONTAINER - 8vh (8% of viewport height) */
-.top-header-container {
-  flex: 0 0 8vh;
+/* UNIFIED HEADER CONTAINER - Single parent with all elements */
+.unified-header-container {
   height: 8vh;
+  min-height: 60px;
   background: transparent;
   box-shadow: none;
   z-index: 1000;
@@ -263,31 +263,67 @@ body {
   transition: transform 0.3s ease;
   position: relative;
   display: flex;
-}
-
-.header-content {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
-  height: 100%;
-  width: 16vw;
-  max-width: 16%;
-  padding: 0 16px;
-  border-right: 1px solid rgba(229, 231, 235, 0.3);
-  flex-shrink: 0;
+  gap: 20px;
+  padding: 0 20px;
 }
 
-.header-brand {
+/* Brand Section */
+.unified-header-container .header-brand {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  flex-shrink: 0;
+  min-width: 180px;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.brand-main {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a202c;
+  letter-spacing: -0.5px;
+}
+
+.brand-jee {
+  font-size: 22px;
+  font-weight: 700;
+  color: #ef4444;
+  letter-spacing: -0.5px;
+}
+
+.brand-accent {
+  font-size: 10px;
+  color: #9ca3af;
+  margin-left: -2px;
+}
+
+.brand-subtitle {
+  font-size: 11px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-weight: 500;
+}
+
+/* Navigation Section - Search + Tabs + Dropdown */
+.header-nav-section {
   flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   min-width: 0;
 }
 
 .header-search {
   flex: 1;
-  max-width: 500px;
+  max-width: 400px;
+  min-width: 200px;
 }
 
 .search-input {
@@ -314,10 +350,80 @@ body {
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
+/* Subject Navigation Tabs */
+.header-nav-tabs {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #1a202c;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.nav-tab:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.nav-tab.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.nav-tab svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Group By Dropdown */
+.header-select {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #1a202c;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  flex-shrink: 0;
+}
+
+.header-select:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.header-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Actions Section */
 .header-actions {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
 }
 
 .header-action-btn {
@@ -356,13 +462,22 @@ body {
   border: none;
 }
 
-/* Header Navigation Section - Takes remaining space */
-.header-nav-section {
+/* SECOND CHILD CONTAINER - Navigation Menus (flexible, takes remaining space) */
+.header-navigation-container {
   flex: 1;
   display: flex;
   align-items: center;
-  height: 100%;
-  padding: 0 16px;
+  padding: 0 20px;
+  min-width: 0;
+}
+
+/* THIRD CHILD CONTAINER - Settings, Themes, User Profile (flexible) */
+.header-actions-container {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  border-left: 1px solid rgba(229, 231, 235, 0.3);
 }
 
 /* 2. TOP NAVIGATION BAR CONTAINER - 10vh (10% of viewport height) */
@@ -531,7 +646,7 @@ body {
 }
 
 /* Content Wrapper - Contains Sidebar + Main Content */
-/* CONTENT WRAPPER - Takes remaining space with flex: 1 (fills between navbar and footer) */
+/* CONTENT WRAPPER - Takes remaining space below unified header */
 .content-wrapper {
   display: flex;
   flex: 1;
@@ -539,6 +654,7 @@ body {
   position: relative;
   gap: 0;
   overflow: hidden;
+  margin-top: 8vh; /* Below unified header */
 }
 
 /* 3. LEFT SIDEBAR CONTAINER - Max 16% of screen width */
@@ -4680,6 +4796,9 @@ main.board {
   flex-direction: column;
   scroll-snap-align: start;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 0; /* Base z-index for columns */
+  overflow: visible; /* Allow cards to slide OVER adjacent columns */
 }
 
 .bucket:hover {
@@ -4703,7 +4822,7 @@ main.board {
 .bucket > div:last-child {
   flex: 1;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: visible; /* Allow horizontal overflow for dragging */
   scroll-snap-type: y proximity;
   scroll-behavior: smooth;
   padding-right: 4px;
@@ -5471,32 +5590,57 @@ main.board {
   }
 }
 
-/* Chapter Card Styles */
+/* Chapter Card Styles - Containerized with breathing space */
 .chapter-card {
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   border-radius: 16px;
   padding: 16px;
+  margin: 12px 8px; /* Breathing space - padding on top, bottom, and sides */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
   cursor: pointer;
+  position: relative;
+  z-index: 1; /* Base z-index for all cards */
+  border: 3px dashed transparent; /* Default transparent border */
 }
 
-.backlog-card {
-  border: 3px dashed #9ca3af !important; /* Strong dashed grey border for backlog cards */
+/* Strong dashed borders with column-themed colors */
+.chapter-card[data-status="In Queue"],
+.chapter-card[data-status="Backlog"] {
+  border: 3px dashed #9ca3af !important; /* Grey for Backlog */
+}
+
+.chapter-card[data-status="To Do"] {
+  border: 3px dashed #3b82f6 !important; /* Blue for To Do */
+}
+
+.chapter-card[data-status="In Progress"] {
+  border: 3px dashed #f97316 !important; /* Orange for In Progress */
+}
+
+.chapter-card[data-status="Done"] {
+  border: 3px dashed #22c55e !important; /* Green for Done */
+}
+
+.chapter-card[data-status="Closed"] {
+  border: 3px dashed #8b5cf6 !important; /* Violet for Closed */
 }
 
 .chapter-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 10; /* Elevated on hover */
 }
 
 .chapter-card.dragging {
-  opacity: 0.9;
+  opacity: 0.95;
   transform: rotate(2deg) scale(1.05);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  z-index: 9999 !important;
-  position: relative;
+  z-index: 9999 !important; /* Slides OVER everything when dragging */
+  position: fixed !important; /* CRITICAL: Fixed positioning for proper scroll tracking */
+  pointer-events: none; /* Prevent accidental interactions during drag */
+  cursor: grabbing !important;
 }
 
 .chapter-meta-top {
