@@ -12,9 +12,9 @@
       "target_date": "",
       "learning_status": "In Queue",
       "learning_stage": "Skimmed",
-      "proficiency_percentage": 25,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Novice"
     },
     {
       "unique_id": "JEE-11-PHY-1.2",
@@ -28,9 +28,9 @@
       "target_date": "",
       "learning_status": "To Do",
       "learning_stage": "Grasped",
-      "proficiency_percentage": 50,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Competent"
     },
     {
       "unique_id": "JEE-11-PHY-2.1",
@@ -44,9 +44,9 @@
       "target_date": "",
       "learning_status": "In Progress",
       "learning_stage": "Practiced",
-      "proficiency_percentage": 75,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Expert"
     },
     {
       "unique_id": "JEE-11-PHY-2.2",
@@ -60,9 +60,9 @@
       "target_date": "",
       "learning_status": "Done",
       "learning_stage": "Revised",
-      "proficiency_percentage": 100,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Master"
     },
     {
       "unique_id": "JEE-11-PHY-3.1",
@@ -76,9 +76,9 @@
       "target_date": "",
       "learning_status": "In Queue",
       "learning_stage": "Skimmed",
-      "proficiency_percentage": 25,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Novice"
     },
     {
       "unique_id": "JEE-11-PHY-3.2",
@@ -92,9 +92,9 @@
       "target_date": "",
       "learning_status": "To Do",
       "learning_stage": "Grasped",
-      "proficiency_percentage": 50,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Competent"
     },
     {
       "unique_id": "JEE-11-PHY-4.1",
@@ -108,9 +108,9 @@
       "target_date": "",
       "learning_status": "In Progress",
       "learning_stage": "Practiced",
-      "proficiency_percentage": 75,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Expert"
     },
     {
       "unique_id": "JEE-11-PHY-4.2",
@@ -124,9 +124,9 @@
       "target_date": "",
       "learning_status": "Done",
       "learning_stage": "Revised",
-      "proficiency_percentage": 100,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Master"
     },
     {
       "unique_id": "JEE-11-PHY-5.1",
@@ -140,9 +140,9 @@
       "target_date": "",
       "learning_status": "In Queue",
       "learning_stage": "Skimmed",
-      "proficiency_percentage": 25,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Novice"
     },
     {
       "unique_id": "JEE-11-PHY-6.1",
@@ -156,9 +156,9 @@
       "target_date": "",
       "learning_status": "To Do",
       "learning_stage": "Grasped",
-      "proficiency_percentage": 50,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Competent"
     },
     {
       "unique_id": "JEE-11-PHY-7.1",
@@ -172,9 +172,9 @@
       "target_date": "",
       "learning_status": "In Progress",
       "learning_stage": "Practiced",
-      "proficiency_percentage": 75,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Expert"
     },
     {
       "unique_id": "JEE-11-PHY-8.1",
@@ -188,9 +188,9 @@
       "target_date": "",
       "learning_status": "Done",
       "learning_stage": "Revised",
-      "proficiency_percentage": 100,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Master"
     },
     {
       "unique_id": "JEE-11-PHY-9.1",
@@ -204,9 +204,9 @@
       "target_date": "",
       "learning_status": "In Queue",
       "learning_stage": "Skimmed",
-      "proficiency_percentage": 25,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Novice"
     },
     {
       "unique_id": "JEE-11-PHY-10.1",
@@ -220,9 +220,9 @@
       "target_date": "",
       "learning_status": "To Do",
       "learning_stage": "Grasped",
-      "proficiency_percentage": 50,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Competent"
     },
     {
       "unique_id": "JEE-11-CHM-1.1",
@@ -236,9 +236,9 @@
       "target_date": "",
       "learning_status": "In Queue",
       "learning_stage": "Skimmed",
-      "proficiency_percentage": 25,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Novice"
     },
     {
       "unique_id": "JEE-11-CHM-1.2",
@@ -252,9 +252,9 @@
       "target_date": "",
       "learning_status": "To Do",
       "learning_stage": "Grasped",
-      "proficiency_percentage": 50,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Competent"
     },
     {
       "unique_id": "JEE-11-CHM-2.1",
@@ -268,9 +268,9 @@
       "target_date": "",
       "learning_status": "In Progress",
       "learning_stage": "Practiced",
-      "proficiency_percentage": 75,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Expert"
     },
     {
       "unique_id": "JEE-11-CHM-2.2",
@@ -284,9 +284,9 @@
       "target_date": "",
       "learning_status": "Done",
       "learning_stage": "Revised",
-      "proficiency_percentage": 100,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Master"
     },
     {
       "unique_id": "JEE-11-CHM-3.1",
@@ -300,9 +300,9 @@
       "target_date": "",
       "learning_status": "In Queue",
       "learning_stage": "Skimmed",
-      "proficiency_percentage": 25,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Novice"
     },
     {
       "unique_id": "JEE-11-CHM-4.1",
@@ -316,9 +316,9 @@
       "target_date": "",
       "learning_status": "To Do",
       "learning_stage": "Grasped",
-      "proficiency_percentage": 50,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Competent"
     },
     {
       "unique_id": "JEE-11-CHM-4.2",
@@ -332,9 +332,9 @@
       "target_date": "",
       "learning_status": "In Progress",
       "learning_stage": "Practiced",
-      "proficiency_percentage": 75,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Expert"
     },
     {
       "unique_id": "JEE-11-CHM-5.1",
@@ -348,9 +348,9 @@
       "target_date": "",
       "learning_status": "Done",
       "learning_stage": "Revised",
-      "proficiency_percentage": 100,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Master"
     },
     {
       "unique_id": "JEE-11-CHM-6.1",
@@ -364,9 +364,9 @@
       "target_date": "",
       "learning_status": "In Queue",
       "learning_stage": "Skimmed",
-      "proficiency_percentage": 25,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Novice"
     },
     {
       "unique_id": "JEE-11-CHM-7.1",
@@ -380,9 +380,9 @@
       "target_date": "",
       "learning_status": "To Do",
       "learning_stage": "Grasped",
-      "proficiency_percentage": 50,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Competent"
     },
     {
       "unique_id": "JEE-11-CHM-7.2",
@@ -396,9 +396,9 @@
       "target_date": "",
       "learning_status": "In Progress",
       "learning_stage": "Practiced",
-      "proficiency_percentage": 75,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Expert"
     },
     {
       "unique_id": "JEE-11-CHM-8.1",
@@ -412,9 +412,9 @@
       "target_date": "",
       "learning_status": "Done",
       "learning_stage": "Revised",
-      "proficiency_percentage": 100,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Master"
     },
     {
       "unique_id": "JEE-11-CHM-9.1",
@@ -428,9 +428,9 @@
       "target_date": "",
       "learning_status": "In Queue",
       "learning_stage": "Skimmed",
-      "proficiency_percentage": 25,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Novice"
     },
     {
       "unique_id": "JEE-11-CHM-10.1",
@@ -444,9 +444,9 @@
       "target_date": "",
       "learning_status": "To Do",
       "learning_stage": "Grasped",
-      "proficiency_percentage": 50,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Competent"
     },
     {
       "unique_id": "JEE-11-CHM-11.1",
@@ -460,9 +460,9 @@
       "target_date": "",
       "learning_status": "In Progress",
       "learning_stage": "Practiced",
-      "proficiency_percentage": 75,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Expert"
     },
     {
       "unique_id": "JEE-11-CHM-12.1",
@@ -476,9 +476,9 @@
       "target_date": "",
       "learning_status": "Done",
       "learning_stage": "Revised",
-      "proficiency_percentage": 100,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Master"
     },
     {
       "unique_id": "JEE-11-CHM-13.1",
@@ -492,9 +492,9 @@
       "target_date": "",
       "learning_status": "In Queue",
       "learning_stage": "Skimmed",
-      "proficiency_percentage": 25,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Novice"
     },
     {
       "unique_id": "JEE-11-CHM-14.1",
@@ -508,9 +508,9 @@
       "target_date": "",
       "learning_status": "To Do",
       "learning_stage": "Grasped",
-      "proficiency_percentage": 50,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Competent"
     },
     {
       "unique_id": "JEE-11-MTH-1.1",
@@ -524,9 +524,9 @@
       "target_date": "",
       "learning_status": "In Queue",
       "learning_stage": "Skimmed",
-      "proficiency_percentage": 25,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Novice"
     },
     {
       "unique_id": "JEE-11-MTH-2.1",
@@ -540,9 +540,9 @@
       "target_date": "",
       "learning_status": "To Do",
       "learning_stage": "Grasped",
-      "proficiency_percentage": 50,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Competent"
     },
     {
       "unique_id": "JEE-11-MTH-3.1",
@@ -556,9 +556,9 @@
       "target_date": "",
       "learning_status": "In Progress",
       "learning_stage": "Practiced",
-      "proficiency_percentage": 75,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Expert"
     },
     {
       "unique_id": "JEE-11-MTH-4.1",
@@ -572,9 +572,9 @@
       "target_date": "",
       "learning_status": "Done",
       "learning_stage": "Revised",
-      "proficiency_percentage": 100,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Master"
     },
     {
       "unique_id": "JEE-11-MTH-5.1",
@@ -588,9 +588,9 @@
       "target_date": "",
       "learning_status": "In Queue",
       "learning_stage": "Skimmed",
-      "proficiency_percentage": 25,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Novice"
     },
     {
       "unique_id": "JEE-11-MTH-6.1",
@@ -604,9 +604,9 @@
       "target_date": "",
       "learning_status": "To Do",
       "learning_stage": "Grasped",
-      "proficiency_percentage": 50,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Competent"
     },
     {
       "unique_id": "JEE-11-MTH-7.1",
@@ -620,9 +620,9 @@
       "target_date": "",
       "learning_status": "In Progress",
       "learning_stage": "Practiced",
-      "proficiency_percentage": 75,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Expert"
     },
     {
       "unique_id": "JEE-11-MTH-8.1",
@@ -636,9 +636,9 @@
       "target_date": "",
       "learning_status": "Done",
       "learning_stage": "Revised",
-      "proficiency_percentage": 100,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Master"
     },
     {
       "unique_id": "JEE-11-MTH-9.1",
@@ -652,9 +652,9 @@
       "target_date": "",
       "learning_status": "In Queue",
       "learning_stage": "Skimmed",
-      "proficiency_percentage": 25,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Novice"
     },
     {
       "unique_id": "JEE-11-MTH-10.1",
@@ -668,9 +668,9 @@
       "target_date": "",
       "learning_status": "To Do",
       "learning_stage": "Grasped",
-      "proficiency_percentage": 50,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Competent"
     },
     {
       "unique_id": "JEE-11-MTH-11.1",
@@ -684,9 +684,9 @@
       "target_date": "",
       "learning_status": "In Progress",
       "learning_stage": "Practiced",
-      "proficiency_percentage": 75,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Expert"
     },
     {
       "unique_id": "JEE-11-MTH-12.1",
@@ -700,9 +700,9 @@
       "target_date": "",
       "learning_status": "Done",
       "learning_stage": "Revised",
-      "proficiency_percentage": 100,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Master"
     },
     {
       "unique_id": "JEE-11-MTH-13.1",
@@ -716,9 +716,9 @@
       "target_date": "",
       "learning_status": "In Queue",
       "learning_stage": "Skimmed",
-      "proficiency_percentage": 25,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Novice"
     },
     {
       "unique_id": "JEE-11-MTH-14.1",
@@ -732,9 +732,9 @@
       "target_date": "",
       "learning_status": "To Do",
       "learning_stage": "Grasped",
-      "proficiency_percentage": 50,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Competent"
     },
     {
       "unique_id": "JEE-11-MTH-15.1",
@@ -748,9 +748,9 @@
       "target_date": "",
       "learning_status": "In Progress",
       "learning_stage": "Practiced",
-      "proficiency_percentage": 75,
       "progress_percentage": 0,
-      "notes": ""
+      "notes": "",
+      "learning_proficiency": "Expert"
     }
   ],
   "exportDate": "2025-10-19T11:56:10.421Z",

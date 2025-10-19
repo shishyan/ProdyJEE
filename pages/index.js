@@ -559,8 +559,12 @@ const groupStudyPlansByChapter = (studyPlans) => {
     chapter.aggregatedStage = maxStage
 
     // Calculate aggregated proficiency (average of all topic proficiencies)
-    const totalProficiency = plans.reduce((sum, plan) => sum + (plan.learning_proficiency || 0), 0)
-    chapter.aggregatedProficiency = Math.round(totalProficiency / plans.length)
+    const proficiencyValues = { 'Novice': 25, 'Competent': 50, 'Expert': 75, 'Master': 100 };
+    const totalProficiency = plans.reduce((sum, plan) => {
+      const profValue = proficiencyValues[plan.learning_proficiency] || 0;
+      return sum + profValue;
+    }, 0);
+    chapter.aggregatedProficiency = Math.round(totalProficiency / plans.length);
   })
 
   return Object.values(chapterGroups)
@@ -2388,7 +2392,7 @@ export default function Home() {
   const [viewMode, setViewMode] = useState('kanban') // Only Kanban view - simplified
   const [groupBy, setGroupBy] = useState('status') // status, stage, proficiency
   const [studyPlans, setStudyPlans] = useState([])
-  const [weatherEffect, setWeatherEffect] = useState(false)
+  const [weatherEffect, setWeatherEffect] = useState(true)
   const [showBackgroundSettings, setShowBackgroundSettings] = useState(false)
   const [backgroundMusic, setBackgroundMusic] = useState('zen-mixed')
   const [musicVolume, setMusicVolume] = useState(0.2)
@@ -2483,10 +2487,10 @@ export default function Home() {
       ]
     } else if (groupBy === 'proficiency') {
       return [
-        { id: 'novice', name: 'Novice', status: 'Novice', field: 'aggregatedProficiency' },
-        { id: 'competent', name: 'Competent', status: 'Competent', field: 'aggregatedProficiency' },
-        { id: 'expert', name: 'Expert', status: 'Expert', field: 'aggregatedProficiency' },
-        { id: 'master', name: 'Master', status: 'Master', field: 'aggregatedProficiency' }
+        { id: 'novice', name: 'Novice', status: 25, field: 'aggregatedProficiency', minValue: 0, maxValue: 37 },
+        { id: 'competent', name: 'Competent', status: 50, field: 'aggregatedProficiency', minValue: 38, maxValue: 62 },
+        { id: 'expert', name: 'Expert', status: 75, field: 'aggregatedProficiency', minValue: 63, maxValue: 87 },
+        { id: 'master', name: 'Master', status: 100, field: 'aggregatedProficiency', minValue: 88, maxValue: 100 }
       ]
     }
   }
@@ -3368,7 +3372,15 @@ export default function Home() {
                         const allChapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
                         const filtered = filterChapters(allChapters)
                         const sorted = sortChapters(filtered)
-                        const bucketChapters = sorted.filter(chapter => chapter[bucket.field] === bucket.status)
+                        
+                        // Filter by bucket - handle proficiency ranges
+                        const bucketChapters = sorted.filter(chapter => {
+                          if (groupBy === 'proficiency' && bucket.minValue !== undefined) {
+                            const profValue = chapter[bucket.field] || 0;
+                            return profValue >= bucket.minValue && profValue <= bucket.maxValue;
+                          }
+                          return chapter[bucket.field] === bucket.status;
+                        });
                         
                         return (
                           <Bucket
@@ -4015,7 +4027,7 @@ export default function Home() {
                         onClick={() => {
                           const updatedPlans = studyPlans.map(plan => 
                             plan.chapter_id === editingChapter.chapter_id 
-                              ? {...plan, proficiency_percentage: prof.value}
+                              ? {...plan, learning_proficiency: prof.label}
                               : plan
                           );
                           setStudyPlans(updatedPlans);
@@ -4035,26 +4047,6 @@ export default function Home() {
                       </button>
                     ))}
                   </div>
-                </div>
-              </div>
-              
-              {/* Topics Overview Row */}
-              <div className="topics-overview-row">
-                <h3 className="topics-overview-title">📚 Topics Overview ({editingChapter.totalTopics} total, {editingChapter.completedTopics} completed)</h3>
-                <div className="topics-pills-container">
-                  {editingChapter.studyPlans.slice(0, 10).map((studyPlan, index) => (
-                    <span key={studyPlan.unique_id} className="topic-pill-compact" style={{
-                      backgroundColor: studyPlan.progress_percentage === 100 ? '#10b981' : studyPlan.progress_percentage >= 50 ? '#3b82f6' : studyPlan.progress_percentage >= 20 ? '#f59e0b' : '#e5e7eb',
-                      color: studyPlan.progress_percentage >= 20 ? 'white' : '#6b7280'
-                    }}>
-                      {index + 1}. {studyPlan.topic.length > 25 ? studyPlan.topic.substring(0, 25) + '...' : studyPlan.topic}
-                    </span>
-                  ))}
-                  {editingChapter.studyPlans.length > 10 && (
-                    <span className="topic-pill-compact more-indicator" style={{ backgroundColor: '#6b7280', color: 'white' }}>
-                      +{editingChapter.studyPlans.length - 10} more
-                    </span>
-                  )}
                 </div>
               </div>
             </div>
