@@ -247,13 +247,13 @@ body {
   position: relative;
 }
 
-/* 1. TOP HEADER CONTAINER - Fixed at top */
+/* 1. TOP HEADER CONTAINER - 8% of viewport height */
 .top-header-container {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 70px;
+  height: 8vh;
   background: transparent;
   box-shadow: none;
   z-index: 1000;
@@ -349,10 +349,10 @@ body {
   border: none;
 }
 
-/* 2. TOP NAVIGATION BAR CONTAINER - Full width hero style */
+/* 2. TOP NAVIGATION BAR CONTAINER - 10% of viewport height */
 .top-navbar-container {
   position: fixed;
-  top: 70px;
+  top: 8vh;
   left: 0;
   right: 0;
   background: transparent;
@@ -360,7 +360,7 @@ body {
   z-index: 950;
   transition: transform 0.3s ease;
   pointer-events: auto;
-  height: 80px; /* Fixed height to prevent overlap */
+  height: 10vh;
 }
 
 .navbar-wrapper {
@@ -517,21 +517,22 @@ body {
 }
 
 /* Content Wrapper - Contains Sidebar + Main Content */
+/* CONTENT WRAPPER - Takes remaining 76% height (100vh - 8vh header - 10vh nav - 6vh footer) */
 .content-wrapper {
   display: flex;
-  margin-top: 150px; /* Header (70px) + Navbar (80px) - adjusted for actual navbar height */
-  min-height: calc(100vh - 200px);
+  margin-top: 18vh; /* Header 8vh + Navbar 10vh */
+  min-height: 76vh; /* Remaining viewport height */
   position: relative;
+  gap: 0;
 }
 
-/* 3. LEFT SIDEBAR CONTAINER */
+/* 3. LEFT SIDEBAR CONTAINER - 20% of viewport width */
 .left-sidebar-container {
-  position: sticky; /* Changed from fixed to sticky for flex layout */
-  left: 0;
-  top: 150px; /* Positioned below header (70px) + navbar (80px) */
-  height: calc(100vh - 200px); /* Full height minus header/navbar/footer */
-  width: 280px;
-  flex-shrink: 0; /* Prevent sidebar from shrinking */
+  position: relative;
+  width: 20vw;
+  min-width: 200px; /* Minimum width for usability */
+  max-width: 280px; /* Maximum width to prevent too wide */
+  flex-shrink: 0;
   background: transparent;
   border-right: 1px solid rgba(229, 231, 235, 0.3);
   box-shadow: none;
@@ -540,11 +541,14 @@ body {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  align-self: flex-start; /* Align to top */
+  align-self: flex-start;
+  height: 76vh; /* Match content wrapper height */
+  max-height: 76vh;
 }
 
 .left-sidebar-container.collapsed {
   width: 60px;
+  min-width: 60px;
 }
 
 .sidebar-header {
@@ -733,33 +737,32 @@ body {
   height: 20px;
 }
 
-/* 4. MAIN CONTENT CONTAINER */
+/* 4. MAIN CONTENT CONTAINER - Takes remaining width (100vw - sidebar width) */
 .main-content-container {
-  flex: 1;
-  margin-left: 0; /* Removed - flex handles spacing */
-  padding: 16px; /* Reduced from 32px for more space */
-  min-height: calc(100vh - 180px);
+  flex: 1; /* Take all remaining space */
+  padding: 2%; /* 2% padding of container size */
+  min-height: 76vh;
   transition: all 0.3s ease;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.95) 100%);
   border-radius: 20px;
   border: 1px solid rgba(229, 231, 235, 0.5);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  margin-right: 16px;
-  margin-bottom: 16px;
-  overflow: hidden; /* Prevent content from escaping rounded borders */
+  margin-right: 1%; /* 1% margin from right edge */
+  margin-bottom: 1%;
+  overflow: hidden;
 }
 
 .left-sidebar-container.collapsed ~ .main-content-container {
-  margin-left: 0; /* Removed - flex handles spacing */
+  margin-left: 0;
 }
 
-/* 5. FOOTER CONTAINER */
+/* 5. FOOTER CONTAINER - 6% of viewport height */
 .footer-container {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 50px;
+  height: 6vh;
   background: transparent;
   border-top: 1px solid rgba(229, 231, 235, 0.3);
   box-shadow: none;
@@ -772,8 +775,8 @@ body {
   align-items: center;
   justify-content: space-between;
   height: 100%;
-  padding: 0 24px;
-  gap: 24px;
+  padding: 0 2%; /* 2% horizontal padding */
+  gap: 2%;
 }
 
 .footer-overview {
@@ -4622,8 +4625,8 @@ main.board {
 
 .buckets-container {
   display: flex;
-  gap: 16px; /* Reduced from 20px */
-  padding: 12px 16px; /* Reduced padding for more space */
+  gap: 1%; /* 1% gap between buckets */
+  padding: 1% 2%; /* 1% vertical, 2% horizontal padding */
   flex: 1;
   overflow-x: auto;
   overflow-y: hidden;
@@ -4642,12 +4645,12 @@ main.board {
 .bucket {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 12px;
-  padding: 12px; /* Reduced from 16px */
+  padding: 1.5%; /* 1.5% padding */
   border: 1px solid #e5e7eb;
   transition: all 0.3s ease;
-  min-width: 280px; /* Reduced from 320px for better fit */
-  max-width: 320px; /* Reduced from 380px */
-  width: 100%;
+  min-width: 18vw; /* 18% of viewport width minimum */
+  max-width: 22vw; /* 22% of viewport width maximum */
+  width: 20vw; /* Default 20% of viewport */
   flex-shrink: 0;
   height: 100%;
   display: flex;
