@@ -696,7 +696,10 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
                   className="status-badge"
                   style={{
                     color: '#8b5cf6',
-                    fontSize: '11px'
+                    fontSize: '10px',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
                   }}
                 >
                   {chapter.aggregatedStage}
@@ -708,10 +711,13 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
                   className="status-badge"
                   style={{
                     color: getProficiencyColor(chapter.aggregatedProficiency),
-                    fontSize: '11px'
+                    fontSize: '10px'
                   }}
                 >
-                  {chapter.aggregatedProficiency}%
+                  {chapter.aggregatedProficiency === 25 ? 'Novice' : 
+                   chapter.aggregatedProficiency === 50 ? 'Competent' : 
+                   chapter.aggregatedProficiency === 75 ? 'Expert' : 
+                   chapter.aggregatedProficiency === 100 ? 'Master' : 'Novice'}
                 </span>
               </div>
             </>
@@ -821,7 +827,7 @@ function Bucket({ bucket, chapters, onEditChapter, onUpdateProgress, onUpdateCha
       className={`bucket bg-gray-50 rounded-lg p-4 min-h-[500px] flex flex-col ${isOver || isDragOver ? 'ring-2 ring-blue-500 bg-blue-50' : ''} ${getStatusClass(bucket.status)}`}
     >
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">{bucket.name} ({filteredChapters.length})</h3>
+        <h3 className="text-lg font-semibold" style={{ color: getStatusColor(bucket.status) }}>{bucket.name} ({filteredChapters.length})</h3>
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -2412,6 +2418,11 @@ export default function Home() {
   const [selectedChapters, setSelectedChapters] = useState(new Set())
   const [filterStatus, setFilterStatus] = useState('all') // 'all', 'Done', 'In Progress', 'To Do', 'In Queue'
   const [showBulkActions, setShowBulkActions] = useState(false)
+  
+  // Class and Curriculum filters
+  const [selectedClass, setSelectedClass] = useState('11') // '6' or '11'
+  const [selectedCurriculum, setSelectedCurriculum] = useState('JEE') // 'CBSE' or 'JEE'
+  const [allStudyPlans, setAllStudyPlans] = useState([]) // Unfiltered data
 
   // Utility functions for colors
   const getStatusColor = (status) => {
@@ -2426,13 +2437,24 @@ export default function Home() {
   }
 
   const getProficiencyColor = (proficiency) => {
+    // Map numeric values to proficiency levels
+    const numericToLevel = {
+      25: 'Novice',
+      50: 'Competent',
+      75: 'Expert',
+      100: 'Master'
+    }
+    
     const colors = {
       'Novice': '#ef4444',
       'Competent': '#f59e0b',
       'Expert': '#3b82f6',
       'Master': '#10b981'
     }
-    return colors[proficiency] || '#6b7280'
+    
+    // Handle both numeric and string proficiency values
+    const level = typeof proficiency === 'number' ? numericToLevel[proficiency] : proficiency
+    return colors[level] || '#6b7280'
   }
 
   const sensors = useSensors(
@@ -2493,6 +2515,32 @@ export default function Home() {
   useEffect(() => {
     fetchData()
   }, [])
+
+  // Re-filter when class or curriculum selection changes
+  useEffect(() => {
+    if (allStudyPlans.length > 0) {
+      const filteredByGradeAndCurriculum = allStudyPlans.filter(plan => 
+        String(plan.grade) === String(selectedClass) && 
+        plan.curriculum === selectedCurriculum
+      )
+      
+      // Extract unique subjects from filtered data
+      const uniqueSubjects = [...new Set(filteredByGradeAndCurriculum.map(plan => plan.subject))]
+      const subjectsData = uniqueSubjects.map((subject, index) => ({
+        subject_id: index + 1,
+        name: subject,
+        Chapters: []
+      }))
+      
+      setSubjects(subjectsData)
+      setStudyPlans(filteredByGradeAndCurriculum)
+      
+      // Update selected subject if current one is no longer available
+      if (subjectsData.length > 0 && !subjectsData.find(s => s.name === selectedSubject?.name)) {
+        setSelectedSubject(subjectsData[0])
+      }
+    }
+  }, [selectedClass, selectedCurriculum, allStudyPlans])
 
   useEffect(() => {
     // Apply background theme to body
@@ -2779,9 +2827,18 @@ export default function Home() {
       Chapters: [] // Empty chapters array since we're not using the old structure
     }))
 
+    // Store all unfiltered data
+    setAllStudyPlans(finalStudyPlansData)
+    
+    // Apply grade and curriculum filters
+    const filteredByGradeAndCurriculum = finalStudyPlansData.filter(plan => 
+      String(plan.grade) === String(selectedClass) && 
+      plan.curriculum === selectedCurriculum
+    )
+
     setPlans([]) // Clear plans since we're not using them
     setSubjects(subjectsData)
-    setStudyPlans(finalStudyPlansData)
+    setStudyPlans(filteredByGradeAndCurriculum)
     if (subjectsData.length > 0) setSelectedSubject(subjectsData[0])
     setLoading(false)
   }
@@ -3103,14 +3160,44 @@ export default function Home() {
       {/* SINGLE TOP HEADER CONTAINER - Brand + Search + Navigation + Actions */}
       {showTopHeader && (
         <header className="unified-header-container">
-          {/* Brand Section */}
+          {/* Brand Section with Class/Curriculum Selectors */}
           <div className="header-brand">
-            <div className="brand-logo">
-              <span className="brand-main">Prody</span>
-              <span className="brand-jee">JEE</span>
-              <span className="brand-accent">™</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div>
+                <div className="brand-logo">
+                  <span className="brand-main">Prody</span>
+                  <span className="brand-jee">JEE</span>
+                  <span className="brand-accent">™</span>
+                </div>
+                <div className="brand-subtitle">Peepal Prodigy School</div>
+              </div>
+              
+              {/* Class Selector */}
+              <div className="header-selector-group">
+                <label className="selector-label">Class</label>
+                <select
+                  value={selectedClass}
+                  onChange={(e) => setSelectedClass(e.target.value)}
+                  className="header-select-small"
+                >
+                  <option value="6">6th Grade</option>
+                  <option value="11">11th Grade</option>
+                </select>
+              </div>
+
+              {/* Curriculum Selector */}
+              <div className="header-selector-group">
+                <label className="selector-label">Curriculum</label>
+                <select
+                  value={selectedCurriculum}
+                  onChange={(e) => setSelectedCurriculum(e.target.value)}
+                  className="header-select-small"
+                >
+                  <option value="CBSE">CBSE</option>
+                  <option value="JEE">JEE</option>
+                </select>
+              </div>
             </div>
-            <div className="brand-subtitle">Peepal Prodigy School</div>
           </div>
 
           {/* Search + Navigation Section - Combined */}
@@ -3210,50 +3297,47 @@ export default function Home() {
                 }}
                 title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
               >
-                {sidebarCollapsed ? <MenuIcon /> : <XIcon />}
+                {sidebarCollapsed ? '☰' : '✕'}
               </button>
             </div>            <div className="sidebar-content" onClick={(e) => e.stopPropagation()}>
               {/* Main Navigation Menu */}
-              {!sidebarCollapsed && (
-                <div className="sidebar-section">
-                  <h4 className="sidebar-section-title">Navigation</h4>
-                  <button
-                    className={`sidebar-nav-item ${currentPage === 'kanban' ? 'active' : ''}`}
-                    onClick={() => setCurrentPage('kanban')}
-                  >
-                    <HomeIcon />
-                    <span>Dashboard</span>
-                  </button>
-                  <a
-                    href="/ProdyJEE/dashboard"
-                    className="sidebar-nav-item"
-                  >
-                    <BarChartIcon />
-                    <span>Analytics</span>
-                  </a>
-                  <a
-                    href="/ProdyJEE/schedule"
-                    className="sidebar-nav-item"
-                  >
-                    <CalendarIcon />
-                    <span>Schedule</span>
-                  </a>
-                  <a
-                    href="/ProdyJEE/timer"
-                    className="sidebar-nav-item"
-                  >
-                    <TimerIcon />
-                    <span>Timer</span>
-                  </a>
-                  <a
-                    href="/ProdyJEE/goals"
-                    className="sidebar-nav-item"
-                  >
-                    <MeditationIcon />
-                    <span>Goals</span>
-                  </a>
-                </div>
-              )}
+              <div className="sidebar-section">
+                <button
+                  className={`sidebar-nav-item ${currentPage === 'kanban' ? 'active' : ''}`}
+                  onClick={() => setCurrentPage('kanban')}
+                >
+                  <HomeIcon />
+                  {!sidebarCollapsed && <span>Dashboard</span>}
+                </button>
+                <a
+                  href="/ProdyJEE/dashboard"
+                  className="sidebar-nav-item"
+                >
+                  <BarChartIcon />
+                  {!sidebarCollapsed && <span>Analytics</span>}
+                </a>
+                <a
+                  href="/ProdyJEE/schedule"
+                  className="sidebar-nav-item"
+                >
+                  <CalendarIcon />
+                  {!sidebarCollapsed && <span>Tasks</span>}
+                </a>
+                <a
+                  href="/ProdyJEE/timer"
+                  className="sidebar-nav-item"
+                >
+                  <TimerIcon />
+                  {!sidebarCollapsed && <span>Timer</span>}
+                </a>
+                <a
+                  href="/ProdyJEE/goals"
+                  className="sidebar-nav-item"
+                >
+                  <MeditationIcon />
+                  {!sidebarCollapsed && <span>Goals</span>}
+                </a>
+              </div>
             </div>
             
             <div className="sidebar-footer">
@@ -3802,7 +3886,7 @@ export default function Home() {
               borderLeft: `3px dashed ${getStatusColor(editingChapter.aggregatedStatus)}`
             }}
           >
-            {/* Modal Header - Two Column Layout */}
+            {/* Modal Header - Four Column Layout */}
             <div className="modal-header-compact">
               <div className="header-title-row">
                 <h2 className="modal-chapter-title">{editingChapter.chapter_name}</h2>
@@ -3812,9 +3896,10 @@ export default function Home() {
                 }}>×</button>
               </div>
               
-              <div className="header-two-columns">
-                {/* Left Column - Overview Details */}
-                <div className="overview-column">
+              <div className="header-four-columns">
+                {/* Column 1: Overview */}
+                <div className="header-column overview-column">
+                  <h3 className="column-header">Overview</h3>
                   <div className="overview-item">
                     <span className="overview-label">Subject:</span>
                     <span className="overview-value">{editingChapter.subject}</span>
@@ -3833,134 +3918,151 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Right Column - Status, Stage, Proficiency */}
-                <div className="controls-column">
-                  {/* Status */}
-                  <div className="control-group-compact">
-                    <label className="control-label-compact">Status:</label>
-                    <div className="control-chips-compact">
-                      {['In Queue', 'To Do', 'In Progress', 'Done', 'Closed'].map(status => (
-                        <button
-                          key={status}
-                          className={`chip-compact ${editingChapter.aggregatedStatus === status ? 'active' : ''}`}
-                          style={{
-                            backgroundColor: editingChapter.aggregatedStatus === status ? getStatusColor(status) : 'transparent',
-                            color: editingChapter.aggregatedStatus === status ? 'white' : '#6b7280',
-                            borderColor: getStatusColor(status)
-                          }}
-                          onClick={() => {
-                            const updatedPlans = studyPlans.map(plan => 
-                              plan.chapter_id === editingChapter.chapter_id 
-                                ? {...plan, learning_status: status}
-                                : plan
-                            );
-                            setStudyPlans(updatedPlans);
-                            localStorage.setItem('studyPlans', JSON.stringify(updatedPlans));
-                            const allChapters = [
-                              ...groupStudyPlansByChapter(updatedPlans, 'In Queue'),
-                              ...groupStudyPlansByChapter(updatedPlans, 'To Do'),
-                              ...groupStudyPlansByChapter(updatedPlans, 'In Progress'),
-                              ...groupStudyPlansByChapter(updatedPlans, 'Done'),
-                              ...groupStudyPlansByChapter(updatedPlans, 'Closed')
-                            ];
-                            const updatedChapter = allChapters.find(ch => ch.chapter_id === editingChapter.chapter_id);
-                            if (updatedChapter) setEditingChapter(updatedChapter);
-                          }}
-                        >
-                          {status}
-                        </button>
-                      ))}
-                    </div>
+                {/* Column 2: Status */}
+                <div className="header-column status-column">
+                  <h3 className="column-header">Status</h3>
+                  <div className="control-chips-vertical">
+                    {['In Queue', 'To Do', 'In Progress', 'Done', 'Closed'].map(status => (
+                      <button
+                        key={status}
+                        className={`chip-compact ${editingChapter.aggregatedStatus === status ? 'active' : ''}`}
+                        style={{
+                          backgroundColor: editingChapter.aggregatedStatus === status ? getStatusColor(status) : 'transparent',
+                          color: editingChapter.aggregatedStatus === status ? 'white' : '#6b7280',
+                          borderColor: getStatusColor(status)
+                        }}
+                        onClick={() => {
+                          const updatedPlans = studyPlans.map(plan => 
+                            plan.chapter_id === editingChapter.chapter_id 
+                              ? {...plan, learning_status: status}
+                              : plan
+                          );
+                          setStudyPlans(updatedPlans);
+                          localStorage.setItem('studyPlans', JSON.stringify(updatedPlans));
+                          const allChapters = [
+                            ...groupStudyPlansByChapter(updatedPlans, 'In Queue'),
+                            ...groupStudyPlansByChapter(updatedPlans, 'To Do'),
+                            ...groupStudyPlansByChapter(updatedPlans, 'In Progress'),
+                            ...groupStudyPlansByChapter(updatedPlans, 'Done'),
+                            ...groupStudyPlansByChapter(updatedPlans, 'Closed')
+                          ];
+                          const updatedChapter = allChapters.find(ch => ch.chapter_id === editingChapter.chapter_id);
+                          if (updatedChapter) setEditingChapter(updatedChapter);
+                        }}
+                      >
+                        {status}
+                      </button>
+                    ))}
                   </div>
+                </div>
 
-                  {/* Stage */}
-                  <div className="control-group-compact">
-                    <label className="control-label-compact">Stage:</label>
-                    <div className="control-chips-compact">
-                      {['Initiated', 'Skimmed', 'Grasped', 'Practiced', 'Revised', 'Mastered'].map(stage => (
-                        <button
-                          key={stage}
-                          className={`chip-compact ${editingChapter.aggregatedStage === stage ? 'active' : ''}`}
-                          style={{
-                            backgroundColor: editingChapter.aggregatedStage === stage ? '#6366f1' : 'transparent',
-                            color: editingChapter.aggregatedStage === stage ? 'white' : '#6b7280',
-                            borderColor: '#6366f1'
-                          }}
-                          onClick={() => {
-                            const updatedPlans = studyPlans.map(plan => 
-                              plan.chapter_id === editingChapter.chapter_id 
-                                ? {...plan, learning_stage: stage}
-                                : plan
-                            );
-                            setStudyPlans(updatedPlans);
-                            localStorage.setItem('studyPlans', JSON.stringify(updatedPlans));
-                            const allChapters = [
-                              ...groupStudyPlansByChapter(updatedPlans, 'In Queue'),
-                              ...groupStudyPlansByChapter(updatedPlans, 'To Do'),
-                              ...groupStudyPlansByChapter(updatedPlans, 'In Progress'),
-                              ...groupStudyPlansByChapter(updatedPlans, 'Done'),
-                              ...groupStudyPlansByChapter(updatedPlans, 'Closed')
-                            ];
-                            const updatedChapter = allChapters.find(ch => ch.chapter_id === editingChapter.chapter_id);
-                            if (updatedChapter) setEditingChapter(updatedChapter);
-                          }}
-                        >
-                          {stage}
-                        </button>
-                      ))}
-                    </div>
+                {/* Column 3: Stage */}
+                <div className="header-column stage-column">
+                  <h3 className="column-header">Stage</h3>
+                  <div className="control-chips-vertical">
+                    {['Initiated', 'Skimmed', 'Grasped', 'Practiced', 'Revised', 'Mastered'].map(stage => (
+                      <button
+                        key={stage}
+                        className={`chip-compact ${editingChapter.aggregatedStage === stage ? 'active' : ''}`}
+                        style={{
+                          backgroundColor: editingChapter.aggregatedStage === stage ? '#6366f1' : 'transparent',
+                          color: editingChapter.aggregatedStage === stage ? 'white' : '#6b7280',
+                          borderColor: '#6366f1'
+                        }}
+                        onClick={() => {
+                          const updatedPlans = studyPlans.map(plan => 
+                            plan.chapter_id === editingChapter.chapter_id 
+                              ? {...plan, learning_stage: stage}
+                              : plan
+                          );
+                          setStudyPlans(updatedPlans);
+                          localStorage.setItem('studyPlans', JSON.stringify(updatedPlans));
+                          const allChapters = [
+                            ...groupStudyPlansByChapter(updatedPlans, 'In Queue'),
+                            ...groupStudyPlansByChapter(updatedPlans, 'To Do'),
+                            ...groupStudyPlansByChapter(updatedPlans, 'In Progress'),
+                            ...groupStudyPlansByChapter(updatedPlans, 'Done'),
+                            ...groupStudyPlansByChapter(updatedPlans, 'Closed')
+                          ];
+                          const updatedChapter = allChapters.find(ch => ch.chapter_id === editingChapter.chapter_id);
+                          if (updatedChapter) setEditingChapter(updatedChapter);
+                        }}
+                      >
+                        {stage}
+                      </button>
+                    ))}
                   </div>
+                </div>
 
-                  {/* Proficiency - Changed to Novice/Competent/Expert/Master */}
-                  <div className="control-group-compact">
-                    <label className="control-label-compact">Proficiency:</label>
-                    <div className="control-chips-compact">
-                      {[
-                        { label: 'Novice', value: 25 },
-                        { label: 'Competent', value: 50 },
-                        { label: 'Expert', value: 75 },
-                        { label: 'Master', value: 100 }
-                      ].map(prof => (
-                        <button
-                          key={prof.label}
-                          className={`chip-compact ${editingChapter.aggregatedProficiency === prof.value ? 'active' : ''}`}
-                          style={{
-                            backgroundColor: editingChapter.aggregatedProficiency === prof.value ? getProficiencyColor(prof.value) : 'transparent',
-                            color: editingChapter.aggregatedProficiency === prof.value ? 'white' : '#6b7280',
-                            borderColor: getProficiencyColor(prof.value)
-                          }}
-                          onClick={() => {
-                            const updatedPlans = studyPlans.map(plan => 
-                              plan.chapter_id === editingChapter.chapter_id 
-                                ? {...plan, proficiency_percentage: prof.value}
-                                : plan
-                            );
-                            setStudyPlans(updatedPlans);
-                            localStorage.setItem('studyPlans', JSON.stringify(updatedPlans));
-                            const allChapters = [
-                              ...groupStudyPlansByChapter(updatedPlans, 'In Queue'),
-                              ...groupStudyPlansByChapter(updatedPlans, 'To Do'),
-                              ...groupStudyPlansByChapter(updatedPlans, 'In Progress'),
-                              ...groupStudyPlansByChapter(updatedPlans, 'Done'),
-                              ...groupStudyPlansByChapter(updatedPlans, 'Closed')
-                            ];
-                            const updatedChapter = allChapters.find(ch => ch.chapter_id === editingChapter.chapter_id);
-                            if (updatedChapter) setEditingChapter(updatedChapter);
-                          }}
-                        >
-                          {prof.label}
-                        </button>
-                      ))}
-                    </div>
+                {/* Column 4: Proficiency */}
+                <div className="header-column proficiency-column">
+                  <h3 className="column-header">Proficiency</h3>
+                  <div className="control-chips-vertical">
+                    {[
+                      { label: 'Novice', value: 25 },
+                      { label: 'Competent', value: 50 },
+                      { label: 'Expert', value: 75 },
+                      { label: 'Master', value: 100 }
+                    ].map(prof => (
+                      <button
+                        key={prof.label}
+                        className={`chip-compact ${editingChapter.aggregatedProficiency === prof.value ? 'active' : ''}`}
+                        style={{
+                          backgroundColor: editingChapter.aggregatedProficiency === prof.value ? getProficiencyColor(prof.value) : 'transparent',
+                          color: editingChapter.aggregatedProficiency === prof.value ? 'white' : '#6b7280',
+                          borderColor: getProficiencyColor(prof.value)
+                        }}
+                        onClick={() => {
+                          const updatedPlans = studyPlans.map(plan => 
+                            plan.chapter_id === editingChapter.chapter_id 
+                              ? {...plan, proficiency_percentage: prof.value}
+                              : plan
+                          );
+                          setStudyPlans(updatedPlans);
+                          localStorage.setItem('studyPlans', JSON.stringify(updatedPlans));
+                          const allChapters = [
+                            ...groupStudyPlansByChapter(updatedPlans, 'In Queue'),
+                            ...groupStudyPlansByChapter(updatedPlans, 'To Do'),
+                            ...groupStudyPlansByChapter(updatedPlans, 'In Progress'),
+                            ...groupStudyPlansByChapter(updatedPlans, 'Done'),
+                            ...groupStudyPlansByChapter(updatedPlans, 'Closed')
+                          ];
+                          const updatedChapter = allChapters.find(ch => ch.chapter_id === editingChapter.chapter_id);
+                          if (updatedChapter) setEditingChapter(updatedChapter);
+                        }}
+                      >
+                        {prof.label}
+                      </button>
+                    ))}
                   </div>
+                </div>
+              </div>
+              
+              {/* Topics Overview Row */}
+              <div className="topics-overview-row">
+                <h3 className="topics-overview-title">📚 Topics Overview ({editingChapter.totalTopics} total, {editingChapter.completedTopics} completed)</h3>
+                <div className="topics-pills-container">
+                  {editingChapter.studyPlans.slice(0, 10).map((studyPlan, index) => (
+                    <span key={studyPlan.unique_id} className="topic-pill-compact" style={{
+                      backgroundColor: studyPlan.progress_percentage === 100 ? '#10b981' : studyPlan.progress_percentage >= 50 ? '#3b82f6' : studyPlan.progress_percentage >= 20 ? '#f59e0b' : '#e5e7eb',
+                      color: studyPlan.progress_percentage >= 20 ? 'white' : '#6b7280'
+                    }}>
+                      {index + 1}. {studyPlan.topic.length > 25 ? studyPlan.topic.substring(0, 25) + '...' : studyPlan.topic}
+                    </span>
+                  ))}
+                  {editingChapter.studyPlans.length > 10 && (
+                    <span className="topic-pill-compact more-indicator" style={{ backgroundColor: '#6b7280', color: 'white' }}>
+                      +{editingChapter.studyPlans.length - 10} more
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
 
             <div className="modal-body-scrollable">
-              {/* Topics Section - Redesigned with 3-Checkbox System */}
+              {/* Topics Section - Detailed Progress Tracking */}
               <div className="modal-section-compact">
-                <h3 className="section-title-compact">📚 Topics</h3>
+                <h3 className="section-title-compact">� Detailed Topic Progress</h3>
                 <div className="topics-list-redesigned">
                   {editingChapter.studyPlans.map((studyPlan, index) => {
                     // Calculate checkbox states from progress

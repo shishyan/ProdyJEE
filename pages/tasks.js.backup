@@ -1,0 +1,1202 @@
+import { useState, useEffect } from 'react'
+import { DndContext, DragOverlay, closestCorners, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+
+export default function TasksPage() {
+  const [tasks, setTasks] = useState([])
+  const [reminders, setReminders] = useState([])
+  const [activeTaskId, setActiveTaskId] = useState(null)
+  const [isRecording, setIsRecording] = useState(false)
+  const [currentMonth, setCurrentMonth] = useState(new Date())
+
+  // Load tasks and reminders from localStorage or initialize with sample data
+  useEffect(() => {
+    const savedTasks = localStorage.getItem('tasks')
+    const savedReminders = localStorage.getItem('reminders')
+    
+    if (savedTasks) {
+      setTasks(JSON.parse(savedTasks))
+    } else {
+      // Load sample tasks
+      const sampleTasks = generateSampleTasks()
+      setTasks(sampleTasks)
+      localStorage.setItem('tasks', JSON.stringify(sampleTasks))
+    }
+    
+    if (savedReminders) {
+      setReminders(JSON.parse(savedReminders))
+    } else {
+      // Load sample reminders
+      const sampleReminders = generateSampleReminders()
+      setReminders(sampleReminders)
+      localStorage.setItem('reminders', JSON.stringify(sampleReminders))
+    }
+  }, [])
+
+  // Generate 30 days for current month
+  const getDaysInMonth = () => {
+    const year = currentMonth.getFullYear()
+    const month = currentMonth.getMonth()
+    const daysCount = new Date(year, month + 1, 0).getDate()
+    
+    return Array.from({ length: daysCount }, (_, i) => {
+      const date = new Date(year, month, i + 1)
+      return {
+        date: date,
+        dayNum: i + 1,
+        dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
+        isToday: date.toDateString() === new Date().toDateString()
+      }
+    })
+  }
+
+  const days = getDaysInMonth()
+
+  // Group tasks by date
+  const tasksByDate = tasks.reduce((acc, task) => {
+    const dateKey = new Date(task.date).toDateString()
+    if (!acc[dateKey]) acc[dateKey] = []
+    acc[dateKey].push(task)
+    return acc
+  }, {})
+
+  // Group reminders for today (24-hour view)
+  const todayReminders = reminders.filter(r => {
+    const reminderDate = new Date(r.targetDate)
+    const today = new Date()
+    return reminderDate.toDateString() === today.toDateString()
+  }).sort((a, b) => new Date(a.targetDate) - new Date(b.targetDate))
+
+  // Group future reminders by category
+  const futureReminders = reminders.filter(r => {
+    const reminderDate = new Date(r.targetDate)
+    const today = new Date()
+    return reminderDate.toDateString() !== today.toDateString() || r.recurring
+  })
+
+  const groupedFutureReminders = {
+    recurring: futureReminders.filter(r => r.recurring),
+    thisWeek: futureReminders.filter(r => !r.recurring && isThisWeek(r.targetDate)),
+    thisMonth: futureReminders.filter(r => !r.recurring && !isThisWeek(r.targetDate) && isThisMonth(r.targetDate)),
+    later: futureReminders.filter(r => !r.recurring && !isThisMonth(r.targetDate))
+  }
+
+  // DnD Kit sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    })
+  )
+
+  // Handle drag start
+  const handleDragStart = (event) => {
+    setActiveTaskId(event.active.id)
+  }
+
+  // Handle drag end
+  const handleDragEnd = (event) => {
+    const { active, over } = event
+    setActiveTaskId(null)
+
+    if (!over) return
+
+    const activeTask = tasks.find(t => t.id === active.id)
+    const overDate = over.id // Date string
+
+    if (activeTask && overDate) {
+      const updatedTasks = tasks.map(task =>
+        task.id === active.id ? { ...task, date: overDate } : task
+      )
+      setTasks(updatedTasks)
+      localStorage.setItem('tasks', JSON.stringify(updatedTasks))
+    }
+  }
+
+  // Toggle task completion
+  const toggleTaskCompletion = (taskId) => {
+    const updatedTasks = tasks.map(task =>
+      task.id === taskId ? { ...task, completed: !task.completed } : task
+    )
+    setTasks(updatedTasks)
+    localStorage.setItem('tasks', JSON.stringify(updatedTasks))
+  }
+
+  // Move task to next day (postpone)
+  const postponeTask = (taskId) => {
+    const task = tasks.find(t => t.id === taskId)
+    if (!task) return
+
+    const currentDate = new Date(task.date)
+    const nextDate = new Date(currentDate)
+    nextDate.setDate(nextDate.getDate() + 1)
+
+    const updatedTasks = tasks.map(t =>
+      t.id === taskId ? { ...t, date: nextDate.toISOString() } : t
+    )
+    setTasks(updatedTasks)
+    localStorage.setItem('tasks', JSON.stringify(updatedTasks))
+  }
+
+  // Toggle reminder completion
+  const toggleReminder = (id) => {
+    const updatedReminders = reminders.map(r =>
+      r.id === id ? { ...r, completed: !r.completed } : r
+    )
+    setReminders(updatedReminders)
+    localStorage.setItem('reminders', JSON.stringify(updatedReminders))
+  }
+
+  // Voice Recognition Handler
+  const startVoiceRecording = () => {
+    if (!('webkitSpeechRecognition' in window)) {
+      alert('Voice recognition not supported. Please use Chrome.')
+      return
+    }
+
+    const recognition = new window.webkitSpeechRecognition()
+    recognition.lang = 'en-US'
+    recognition.continuous = false
+    recognition.interimResults = false
+
+    setIsRecording(true)
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript
+      console.log('Voice input:', transcript)
+
+      // Simple AI parsing
+      if (transcript.toLowerCase().includes('remind') || transcript.toLowerCase().includes('reminder')) {
+        const reminderText = transcript.replace(/remind me to|reminder to|reminder|remind/gi, '').trim()
+        addReminder({ text: reminderText })
+      } else {
+        addTask({ title: transcript })
+      }
+
+      setIsRecording(false)
+    }
+
+    recognition.onerror = (event) => {
+      console.error('Voice recognition error:', event.error)
+      setIsRecording(false)
+    }
+
+    recognition.onend = () => {
+      setIsRecording(false)
+    }
+
+    recognition.start()
+  }
+
+  // Add new task
+  const addTask = (taskData) => {
+    const newTask = {
+      id: Date.now().toString(),
+      title: taskData.title || 'Untitled Task',
+      description: taskData.description || '',
+      date: taskData.date || new Date().toISOString(),
+      completed: false,
+      recurring: taskData.recurring || false,
+      tags: taskData.tags || [],
+      mood: taskData.mood || '😐',
+      energy: taskData.energy || 'Medium',
+      subject: taskData.subject || '',
+      reflection: taskData.reflection || ''
+    }
+    const updatedTasks = [...tasks, newTask]
+    setTasks(updatedTasks)
+    localStorage.setItem('tasks', JSON.stringify(updatedTasks))
+  }
+
+  // Add new reminder
+  const addReminder = (reminderData) => {
+    const newReminder = {
+      id: Date.now().toString(),
+      text: reminderData.text || 'New Reminder',
+      targetDate: reminderData.targetDate || new Date().toISOString(),
+      completed: false,
+      recurring: reminderData.recurring || false,
+      recurringType: reminderData.recurringType || 'daily'
+    }
+    const updatedReminders = [...reminders, newReminder]
+    setReminders(updatedReminders)
+    localStorage.setItem('reminders', JSON.stringify(updatedReminders))
+  }
+
+  return (
+    <div className="tasks-page-container">
+      {/* Header */}
+      <div className="tasks-header">
+        <div className="header-left">
+          <h1 className="tasks-page-title">� Daily Planner - {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h1>
+        </div>
+        <button
+          className={`ai-voice-button ${isRecording ? 'recording' : ''}`}
+          onClick={startVoiceRecording}
+          title="AI Voice Assistant"
+        >
+          {isRecording ? '🔴 Listening...' : '🎙️ Voice Assistant'}
+        </button>
+      </div>
+
+      {/* Main Layout: Kanban Board (top/main) + Reminders (bottom) */}
+      <div className="tasks-main-layout">
+        {/* Daily Planner Kanban Board - 30 Columns */}
+        <div className="kanban-section">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <div className="daily-columns-container">
+              {days.map(day => (
+                <DayColumn
+                  key={day.date.toDateString()}
+                  day={day}
+                  tasks={tasksByDate[day.date.toDateString()] || []}
+                  onToggleComplete={toggleTaskCompletion}
+                  onPostpone={postponeTask}
+                />
+              ))}
+            </div>
+
+            <DragOverlay>
+              {activeTaskId ? (
+                <TaskCard
+                  task={tasks.find(t => t.id === activeTaskId)}
+                  isDragging
+                />
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+        </div>
+
+        {/* Reminders Section - Two Columns */}
+        <div className="reminders-section">
+          {/* Today's 24-Hour View */}
+          <div className="reminders-column today-column">
+            <h2 className="reminders-title">🔔 Today's Reminders</h2>
+            <div className="time-blocks-container">
+              {generateTimeBlocks(todayReminders)}
+            </div>
+          </div>
+
+          {/* Future & Recurring Reminders */}
+          <div className="reminders-column future-column">
+            <h2 className="reminders-title">📆 Upcoming & Recurring</h2>
+            <div className="future-reminders-container">
+              {Object.entries(groupedFutureReminders).map(([category, items]) => (
+                items.length > 0 && (
+                  <div key={category} className="reminder-group">
+                    <h3 className="reminder-group-title">
+                      {category === 'recurring' && '🔄 Recurring'}
+                      {category === 'thisWeek' && '📅 This Week'}
+                      {category === 'thisMonth' && '📆 This Month'}
+                      {category === 'later' && '⏳ Later'}
+                    </h3>
+                    <div className="reminder-checklist">
+                      {items.map(reminder => (
+                        <ReminderChecklistItem
+                          key={reminder.id}
+                          reminder={reminder}
+                          onToggle={toggleReminder}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        .tasks-page-container {
+          min-height: 100vh;
+          background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+          padding: 20px;
+        }
+
+        .tasks-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 24px;
+          background: rgba(255, 255, 255, 0.9);
+          padding: 20px 24px;
+          border-radius: 12px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .tasks-page-title {
+          margin: 0;
+          font-size: 2rem;
+          font-weight: 700;
+          color: #1f2937;
+        }
+
+        .ai-voice-button {
+          background: linear-gradient(135deg, #6366f1, #4f46e5);
+          color: white;
+          border: none;
+          padding: 12px 24px;
+          border-radius: 8px;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s;
+          box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .ai-voice-button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+        }
+
+        .ai-voice-button.recording {
+          background: linear-gradient(135deg, #ef4444, #dc2626);
+          animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.7; }
+        }
+
+        .tasks-main-layout {
+          display: grid;
+          grid-template-columns: 70% 30%;
+          gap: 20px;
+          height: calc(100vh - 140px);
+        }
+
+        .kanban-container {
+          background: rgba(255, 255, 255, 0.95);
+          border-radius: 12px;
+          padding: 20px;
+          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+          overflow: hidden;
+        }
+
+        .kanban-columns {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 16px;
+          height: 100%;
+        }
+
+        .reminders-container {
+          background: rgba(255, 255, 255, 0.95);
+          border-radius: 12px;
+          padding: 20px;
+          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+          display: flex;
+          flex-direction: column;
+        }
+
+        .reminders-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 16px;
+          padding-bottom: 12px;
+          border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .reminders-title {
+          margin: 0;
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #1f2937;
+        }
+
+        .add-reminder-btn {
+          background: #10b981;
+          color: white;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 6px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .add-reminder-btn:hover {
+          background: #059669;
+          transform: translateY(-1px);
+        }
+
+        .reminders-list {
+          flex: 1;
+          overflow-y: auto;
+        }
+
+        .empty-state {
+          text-align: center;
+          color: #9ca3af;
+          font-size: 14px;
+          margin-top: 40px;
+        }
+
+        @media (max-width: 1024px) {
+          .tasks-main-layout {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto auto;
+          }
+        }
+      `}</style>
+    </div>
+  )
+}
+
+// Helper Functions
+function isThisWeek(dateString) {
+  const date = new Date(dateString)
+  const today = new Date()
+  const weekFromNow = new Date(today)
+  weekFromNow.setDate(today.getDate() + 7)
+  return date > today && date <= weekFromNow
+}
+
+function isThisMonth(dateString) {
+  const date = new Date(dateString)
+  const today = new Date()
+  return date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear()
+}
+
+function generateTimeBlocks(reminders) {
+  const hours = Array.from({ length: 24 }, (_, i) => i)
+  
+  return (
+    <div className="time-blocks">
+      {hours.map(hour => {
+        const hourReminders = reminders.filter(r => {
+          const reminderHour = new Date(r.targetDate).getHours()
+          return reminderHour === hour
+        })
+
+        return (
+          <div key={hour} className="time-block">
+            <div className="time-label">
+              {hour.toString().padStart(2, '0')}:00
+            </div>
+            <div className="time-reminders">
+              {hourReminders.map(reminder => (
+                <div key={reminder.id} className="time-reminder-item">
+                  <span className="reminder-time">
+                    {new Date(reminder.targetDate).toLocaleTimeString('en-US', { 
+                      hour: '2-digit', 
+                      minute: '2-digit' 
+                    })}
+                  </span>
+                  <span className="reminder-text">{reminder.text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })}
+      <style jsx>{`
+        .time-blocks {
+          display: flex;
+          flex-direction: column;
+          gap: 1px;
+          background: #e5e7eb;
+          border-radius: 8px;
+          overflow: hidden;
+        }
+        .time-block {
+          display: grid;
+          grid-template-columns: 60px 1fr;
+          background: white;
+          min-height: 40px;
+        }
+        .time-label {
+          background: #f3f4f6;
+          padding: 8px;
+          font-size: 11px;
+          font-weight: 600;
+          color: #6b7280;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-right: 1px solid #e5e7eb;
+        }
+        .time-reminders {
+          padding: 6px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .time-reminder-item {
+          background: linear-gradient(135deg, #fef3c7, #fde68a);
+          border-left: 3px solid #f59e0b;
+          padding: 6px 8px;
+          border-radius: 4px;
+          font-size: 12px;
+          display: flex;
+          gap: 8px;
+          align-items: center;
+        }
+        .reminder-time {
+          font-weight: 600;
+          color: #92400e;
+        }
+        .reminder-text {
+          color: #78350f;
+        }
+      `}</style>
+    </div>
+  )
+}
+
+// Generate Sample Tasks for JEE Preparation
+function generateSampleTasks() {
+  const today = new Date()
+  const tasks = []
+
+  // Morning Tasks (5:30 AM – 9:00 AM)
+  tasks.push({
+    id: 'task-1',
+    title: 'Physics: Read NCERT Ch. 3 – Motion in a Straight Line',
+    description: 'Focus on definitions, graphs, and derivations',
+    date: today.toISOString(),
+    completed: false,
+    recurring: true,
+    tags: ['Queued', 'Grasped'],
+    mood: '😐',
+    energy: 'High Focus',
+    subject: 'Physics',
+    reflection: ''
+  })
+
+  tasks.push({
+    id: 'task-2',
+    title: 'Solve 10 conceptual Physics questions (Kinematics)',
+    description: 'Use coaching material or HC Verma',
+    date: today.toISOString(),
+    completed: false,
+    recurring: true,
+    tags: ['Practiced', 'Revised'],
+    mood: '💪',
+    energy: 'High Focus',
+    subject: 'Physics',
+    reflection: ''
+  })
+
+  // Mid-Morning Tasks (9:00 AM – 12:30 PM)
+  tasks.push({
+    id: 'task-3',
+    title: 'Chemistry: Revise Periodic Table Trends',
+    description: 'Use flashcards or summary notes',
+    date: today.toISOString(),
+    completed: false,
+    recurring: true,
+    tags: ['Grasped', 'Revised'],
+    mood: '😐',
+    energy: 'Medium',
+    subject: 'Chemistry',
+    reflection: ''
+  })
+
+  tasks.push({
+    id: 'task-4',
+    title: 'Solve 15 MCQs on Chemical Bonding',
+    description: 'Track accuracy and time',
+    date: today.toISOString(),
+    completed: false,
+    recurring: false,
+    tags: ['Practiced', 'Mastered'],
+    mood: '😐',
+    energy: 'High Focus',
+    subject: 'Chemistry',
+    reflection: ''
+  })
+
+  // Afternoon Tasks
+  const tomorrow = new Date(today)
+  tomorrow.setDate(today.getDate() + 1)
+
+  tasks.push({
+    id: 'task-5',
+    title: 'Math: Watch video on Quadratic Equations',
+    description: 'Take notes and solve 5 examples',
+    date: tomorrow.toISOString(),
+    completed: false,
+    recurring: false,
+    tags: ['Grasped', 'Practiced'],
+    mood: '😐',
+    energy: 'Medium',
+    subject: 'Mathematics',
+    reflection: ''
+  })
+
+  tasks.push({
+    id: 'task-6',
+    title: 'Solve 20 JEE-level Math problems (Algebra)',
+    description: 'Use Arihant or coaching sheets',
+    date: tomorrow.toISOString(),
+    completed: false,
+    recurring: false,
+    tags: ['Practiced', 'Revised'],
+    mood: '😓',
+    energy: 'High Focus',
+    subject: 'Mathematics',
+    reflection: ''
+  })
+
+  // Late Afternoon Tasks
+  tasks.push({
+    id: 'task-7',
+    title: 'Mixed Subject Mock Test (Set 1)',
+    description: 'Physics + Chemistry, 90 minutes',
+    date: tomorrow.toISOString(),
+    completed: false,
+    recurring: false,
+    tags: ['Practiced', 'Mastered'],
+    mood: '💪',
+    energy: 'High Focus',
+    subject: 'Mixed',
+    reflection: ''
+  })
+
+  tasks.push({
+    id: 'task-8',
+    title: 'Review errors from last mock test',
+    description: 'Log mistakes and corrections',
+    date: tomorrow.toISOString(),
+    completed: false,
+    recurring: true,
+    tags: ['Revised', 'Mastered'],
+    mood: '😐',
+    energy: 'Light Review',
+    subject: 'Mixed',
+    reflection: ''
+  })
+
+  // Evening Tasks
+  const dayAfter = new Date(today)
+  dayAfter.setDate(today.getDate() + 2)
+
+  tasks.push({
+    id: 'task-9',
+    title: 'Organic Chemistry: Nomenclature Drill',
+    description: 'Solve 20 naming problems',
+    date: dayAfter.toISOString(),
+    completed: false,
+    recurring: false,
+    tags: ['Practiced', 'Mastered'],
+    mood: '😐',
+    energy: 'Creative',
+    subject: 'Chemistry',
+    reflection: ''
+  })
+
+  tasks.push({
+    id: 'task-10',
+    title: 'Physics: Revise Graphs and Equations',
+    description: 'Quick recap with formula sheet',
+    date: dayAfter.toISOString(),
+    completed: false,
+    recurring: true,
+    tags: ['Revised', 'Mastered'],
+    mood: '💪',
+    energy: 'Light Review',
+    subject: 'Physics',
+    reflection: ''
+  })
+
+  // More Sample Tasks
+  tasks.push({
+    id: 'task-11',
+    title: 'Finish NCERT Ch. 4: Motion in a Plane',
+    description: 'Read, annotate, and solve 10 concept questions',
+    date: dayAfter.toISOString(),
+    completed: false,
+    recurring: false,
+    tags: ['Queued', 'Grasped', 'Practiced'],
+    mood: '😐',
+    energy: 'High Focus',
+    subject: 'Physics',
+    reflection: ''
+  })
+
+  tasks.push({
+    id: 'task-12',
+    title: 'HC Verma: Projectile Motion Set 1',
+    description: 'Solve 15 questions with time tracking',
+    date: dayAfter.toISOString(),
+    completed: false,
+    recurring: false,
+    tags: ['Practiced', 'Revised'],
+    mood: '💪',
+    energy: 'High Focus',
+    subject: 'Physics',
+    reflection: ''
+  })
+
+  return tasks
+}
+
+// Generate Sample Reminders
+function generateSampleReminders() {
+  const today = new Date()
+  const reminders = []
+
+  // Today's Recurring Reminders with specific times
+  const todayReminders = [
+    { hour: 5, minute: 30, text: 'Wake up and stretch', recurring: true },
+    { hour: 8, minute: 0, text: 'Review yesterday\'s mistakes', recurring: true },
+    { hour: 10, minute: 0, text: 'Take a 10-min walk', recurring: true },
+    { hour: 12, minute: 30, text: 'Eat a light, balanced lunch', recurring: true },
+    { hour: 15, minute: 0, text: 'Take a walk or do light exercise', recurring: true },
+    { hour: 17, minute: 30, text: 'Take a 10-min walk', recurring: true },
+    { hour: 19, minute: 30, text: 'Eat a light dinner', recurring: true },
+    { hour: 21, minute: 30, text: 'Reflect: What confused me today?', recurring: true },
+    { hour: 22, minute: 0, text: 'Sleep by 10:30 PM', recurring: true }
+  ]
+
+  todayReminders.forEach((r, index) => {
+    const reminderDate = new Date(today)
+    reminderDate.setHours(r.hour, r.minute, 0, 0)
+    reminders.push({
+      id: `reminder-today-${index}`,
+      text: r.text,
+      targetDate: reminderDate.toISOString(),
+      completed: false,
+      recurring: r.recurring,
+      recurringType: 'daily'
+    })
+  })
+
+  // Future Reminders
+  const tomorrow = new Date(today)
+  tomorrow.setDate(today.getDate() + 1)
+  tomorrow.setHours(10, 0, 0, 0)
+
+  reminders.push({
+    id: 'reminder-future-1',
+    text: 'Submit Physics assignment',
+    targetDate: tomorrow.toISOString(),
+    completed: false,
+    recurring: false
+  })
+
+  const nextWeek = new Date(today)
+  nextWeek.setDate(today.getDate() + 7)
+  nextWeek.setHours(9, 0, 0, 0)
+
+  reminders.push({
+    id: 'reminder-future-2',
+    text: 'Chemistry mock test',
+    targetDate: nextWeek.toISOString(),
+    completed: false,
+    recurring: false
+  })
+
+  reminders.push({
+    id: 'reminder-future-3',
+    text: 'Review weekly progress',
+    targetDate: nextWeek.toISOString(),
+    completed: false,
+    recurring: true,
+    recurringType: 'weekly'
+  })
+
+  return reminders
+}
+
+// Day Column Component
+function DayColumn({ day, tasks, onToggleComplete, onPostpone }) {
+  const { attributes, listeners, setNodeRef } = useSortable({ 
+    id: day.date.toDateString() 
+  })
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`day-column ${day.isToday ? 'today' : ''}`}
+      {...attributes}
+      {...listeners}
+    >
+      <div className="day-header">
+        <div className="day-name">{day.dayName}</div>
+        <div className="day-number">{day.dayNum}</div>
+      </div>
+
+      <div className="day-tasks">
+        <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+          {tasks.map(task => (
+            <TaskCard
+              key={task.id}
+              task={task}
+              onToggleComplete={onToggleComplete}
+              onPostpone={onPostpone}
+            />
+          ))}
+        </SortableContext>
+
+        {tasks.length === 0 && (
+          <div className="empty-day">No tasks</div>
+        )}
+      </div>
+
+      <style jsx>{`
+        .day-column {
+          min-width: 180px;
+          width: 180px;
+          background: #f9fafb;
+          border-radius: 8px;
+          overflow: hidden;
+          border: 2px solid #e5e7eb;
+          flex-shrink: 0;
+        }
+
+        .day-column.today {
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .day-header {
+          background: linear-gradient(135deg, #3b82f6, #2563eb);
+          color: white;
+          padding: 12px;
+          text-align: center;
+        }
+
+        .day-column.today .day-header {
+          background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .day-name {
+          font-size: 11px;
+          font-weight: 600;
+          text-transform: uppercase;
+          opacity: 0.9;
+        }
+
+        .day-number {
+          font-size: 24px;
+          font-weight: 700;
+          margin-top: 4px;
+        }
+
+        .day-tasks {
+          padding: 8px;
+          min-height: 300px;
+          max-height: 500px;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .empty-day {
+          text-align: center;
+          color: #9ca3af;
+          font-size: 12px;
+          margin-top: 40px;
+        }
+      `}</style>
+    </div>
+  )
+}
+
+// Task Card Component
+function TaskCard({ task, isDragging, onToggleComplete, onPostpone }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging: isSortableDragging,
+  } = useSortable({ id: task.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isSortableDragging ? 0.5 : 1,
+  }
+
+  const getSubjectColor = (subject) => {
+    if (subject === 'Physics') return '#3b82f6'
+    if (subject === 'Chemistry') return '#10b981'
+    if (subject === 'Mathematics') return '#8b5cf6'
+    return '#6b7280'
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={`task-card ${isDragging ? 'dragging' : ''} ${task.completed ? 'completed' : ''}`}
+    >
+      <div className="task-card-header">
+        <input
+          type="checkbox"
+          checked={task.completed}
+          onChange={(e) => {
+            e.stopPropagation()
+            onToggleComplete && onToggleComplete(task.id)
+          }}
+          className="task-checkbox"
+        />
+        <span className="task-mood">{task.mood}</span>
+      </div>
+
+      <div className="task-title">{task.title}</div>
+
+      {task.description && (
+        <div className="task-description">{task.description}</div>
+      )}
+
+      <div className="task-tags">
+        {task.tags.slice(0, 2).map((tag, i) => (
+          <span key={i} className="task-tag">{tag}</span>
+        ))}
+        {task.recurring && <span className="recurring-badge">🔄</span>}
+      </div>
+
+      <div className="task-footer">
+        <span 
+          className="subject-badge"
+          style={{ backgroundColor: getSubjectColor(task.subject) }}
+        >
+          {task.subject}
+        </span>
+        {!task.completed && onPostpone && (
+          <button
+            className="postpone-btn"
+            onClick={(e) => {
+              e.stopPropagation()
+              onPostpone(task.id)
+            }}
+            title="Move to tomorrow"
+          >
+            →
+          </button>
+        )}
+      </div>
+
+      <style jsx>{`
+        .task-card {
+          background: white;
+          border-radius: 6px;
+          padding: 10px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          cursor: grab;
+          transition: all 0.2s;
+          border-left: 3px solid ${getSubjectColor(task.subject)};
+        }
+
+        .task-card:hover {
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          transform: translateY(-1px);
+        }
+
+        .task-card.dragging {
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+          cursor: grabbing;
+        }
+
+        .task-card.completed {
+          opacity: 0.6;
+        }
+
+        .task-card.completed .task-title {
+          text-decoration: line-through;
+          color: #9ca3af;
+        }
+
+        .task-card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+        }
+
+        .task-checkbox {
+          width: 18px;
+          height: 18px;
+          cursor: pointer;
+          accent-color: ${getSubjectColor(task.subject)};
+        }
+
+        .task-mood {
+          font-size: 16px;
+        }
+
+        .task-title {
+          font-size: 13px;
+          font-weight: 600;
+          color: #1f2937;
+          margin-bottom: 6px;
+          line-height: 1.3;
+        }
+
+        .task-description {
+          font-size: 11px;
+          color: #6b7280;
+          margin-bottom: 8px;
+          line-height: 1.3;
+        }
+
+        .task-tags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px;
+          margin-bottom: 8px;
+        }
+
+        .task-tag {
+          font-size: 9px;
+          background: #f3f4f6;
+          color: #4b5563;
+          padding: 2px 6px;
+          border-radius: 3px;
+          font-weight: 500;
+        }
+
+        .recurring-badge {
+          font-size: 10px;
+        }
+
+        .task-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .subject-badge {
+          font-size: 9px;
+          color: white;
+          padding: 3px 8px;
+          border-radius: 4px;
+          font-weight: 600;
+          text-transform: uppercase;
+        }
+
+        .postpone-btn {
+          background: #f59e0b;
+          color: white;
+          border: none;
+          padding: 4px 10px;
+          border-radius: 4px;
+          font-size: 12px;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-weight: 600;
+        }
+
+        .postpone-btn:hover {
+          background: #d97706;
+          transform: scale(1.05);
+        }
+      `}</style>
+    </div>
+  )
+}
+
+// Reminder Checklist Item Component
+function ReminderChecklistItem({ reminder, onToggle }) {
+  const formatDate = (dateString) => {
+    const date = new Date(dateString)
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
+
+  return (
+    <label className={`reminder-checklist-item ${reminder.completed ? 'completed' : ''}`}>
+      <input
+        type="checkbox"
+        checked={reminder.completed}
+        onChange={() => onToggle(reminder.id)}
+        className="reminder-checkbox"
+      />
+      <div className="reminder-info">
+        <span className="reminder-text">{reminder.text}</span>
+        {!reminder.recurring && (
+          <span className="reminder-date">📅 {formatDate(reminder.targetDate)}</span>
+        )}
+        {reminder.recurring && (
+          <span className="recurring-label">🔄 {reminder.recurringType}</span>
+        )}
+      </div>
+
+      <style jsx>{`
+        .reminder-checklist-item {
+          display: flex;
+          align-items: start;
+          gap: 10px;
+          padding: 10px;
+          background: white;
+          border-radius: 6px;
+          margin-bottom: 6px;
+          border-left: 3px solid #6366f1;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .reminder-checklist-item:hover {
+          background: #f9fafb;
+          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .reminder-checklist-item.completed {
+          opacity: 0.5;
+          border-left-color: #9ca3af;
+        }
+
+        .reminder-checkbox {
+          width: 18px;
+          height: 18px;
+          cursor: pointer;
+          accent-color: #6366f1;
+          flex-shrink: 0;
+          margin-top: 2px;
+        }
+
+        .reminder-info {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .reminder-text {
+          font-size: 13px;
+          color: #1f2937;
+          font-weight: 500;
+        }
+
+        .reminder-checklist-item.completed .reminder-text {
+          text-decoration: line-through;
+          color: #9ca3af;
+        }
+
+        .reminder-date,
+        .recurring-label {
+          font-size: 11px;
+          color: #6b7280;
+        }
+
+        .recurring-label {
+          color: #6366f1;
+          font-weight: 600;
+        }
+      `}</style>
+    </label>
+  )
+}
+

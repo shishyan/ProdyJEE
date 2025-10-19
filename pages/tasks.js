@@ -1,688 +1,665 @@
 import { useState, useEffect } from 'react'
-import { DndContext, DragOverlay, closestCorners, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
-import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { useSortable } from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
+import packageJson from '../package.json'
+import Head from 'next/head'
 
-export default function TasksPage() {
-  const [tasks, setTasks] = useState([])
+export default function RemindersPage() {
   const [reminders, setReminders] = useState([])
-  const [activeTaskId, setActiveTaskId] = useState(null)
-  const [isRecording, setIsRecording] = useState(false)
+  const [showAddReminder, setShowAddReminder] = useState(false)
+  const [newReminder, setNewReminder] = useState({
+    text: '',
+    targetDate: new Date(),
+    targetTime: '09:00',
+    recurring: false,
+    recurringType: 'daily'
+  })
 
-  // Load tasks and reminders from localStorage
+  // Load reminders from localStorage
   useEffect(() => {
-    const savedTasks = localStorage.getItem('tasks')
     const savedReminders = localStorage.getItem('reminders')
-    if (savedTasks) setTasks(JSON.parse(savedTasks))
-    if (savedReminders) setReminders(JSON.parse(savedReminders))
+    if (savedReminders) {
+      setReminders(JSON.parse(savedReminders))
+    } else {
+      // Generate sample reminders
+      const sampleReminders = generateSampleReminders()
+      setReminders(sampleReminders)
+      localStorage.setItem('reminders', JSON.stringify(sampleReminders))
+    }
   }, [])
 
-  // Kanban columns configuration
-  const columns = ['To Do', 'In Progress', 'Done']
-
-  // Group tasks by status
-  const tasksByStatus = columns.reduce((acc, status) => {
-    acc[status] = tasks.filter(task => task.status === status)
-    return acc
-  }, {})
-
-  // DnD Kit sensors
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
-  )
-
-  // Handle drag start
-  const handleDragStart = (event) => {
-    setActiveTaskId(event.active.id)
-  }
-
-  // Handle drag end
-  const handleDragEnd = (event) => {
-    const { active, over } = event
-    setActiveTaskId(null)
-
-    if (!over) return
-
-    const activeTask = tasks.find(t => t.id === active.id)
-    const overColumn = over.id
-
-    if (activeTask && columns.includes(overColumn)) {
-      const updatedTasks = tasks.map(task =>
-        task.id === active.id ? { ...task, status: overColumn } : task
-      )
-      setTasks(updatedTasks)
-      localStorage.setItem('tasks', JSON.stringify(updatedTasks))
+  // Save reminders whenever they change
+  useEffect(() => {
+    if (reminders.length > 0) {
+      localStorage.setItem('reminders', JSON.stringify(reminders))
     }
-  }
+  }, [reminders])
 
-  // Add new task
-  const addTask = (taskData) => {
-    const newTask = {
-      id: Date.now().toString(),
-      title: taskData.title || 'Untitled Task',
-      description: taskData.description || '',
-      status: 'To Do',
-      createdAt: new Date().toISOString(),
-      priority: taskData.priority || 'medium'
-    }
-    const updatedTasks = [...tasks, newTask]
-    setTasks(updatedTasks)
-    localStorage.setItem('tasks', JSON.stringify(updatedTasks))
-  }
+  const addReminder = () => {
+    const targetDateTime = new Date(newReminder.targetDate)
+    const [hours, minutes] = newReminder.targetTime.split(':')
+    targetDateTime.setHours(parseInt(hours), parseInt(minutes))
 
-  // Add new reminder
-  const addReminder = (reminderData) => {
-    const newReminder = {
-      id: Date.now().toString(),
-      text: reminderData.text || 'New Reminder',
-      targetDate: reminderData.targetDate || new Date().toISOString(),
+    const reminder = {
+      id: `reminder-${Date.now()}`,
+      text: newReminder.text,
+      targetDate: targetDateTime.toISOString(),
       completed: false,
-      createdAt: new Date().toISOString()
+      recurring: newReminder.recurring,
+      recurringType: newReminder.recurringType
     }
-    const updatedReminders = [...reminders, newReminder]
-    setReminders(updatedReminders)
-    localStorage.setItem('reminders', JSON.stringify(updatedReminders))
+
+    setReminders([...reminders, reminder])
+    setShowAddReminder(false)
+    setNewReminder({
+      text: '',
+      targetDate: new Date(),
+      targetTime: '09:00',
+      recurring: false,
+      recurringType: 'daily'
+    })
   }
 
-  // Toggle reminder completion
   const toggleReminder = (id) => {
-    const updatedReminders = reminders.map(r =>
+    setReminders(reminders.map(r =>
       r.id === id ? { ...r, completed: !r.completed } : r
-    )
-    setReminders(updatedReminders)
-    localStorage.setItem('reminders', JSON.stringify(updatedReminders))
+    ))
   }
 
-  // Delete reminder
   const deleteReminder = (id) => {
-    const updatedReminders = reminders.filter(r => r.id !== id)
-    setReminders(updatedReminders)
-    localStorage.setItem('reminders', JSON.stringify(updatedReminders))
+    setReminders(reminders.filter(r => r.id !== id))
   }
 
-  // Voice Recognition Handler
-  const startVoiceRecording = () => {
-    if (!('webkitSpeechRecognition' in window)) {
-      alert('Voice recognition not supported. Please use Chrome.')
-      return
-    }
+  // Categorize reminders
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const weekFromNow = new Date(today)
+  weekFromNow.setDate(today.getDate() + 7)
+  const monthFromNow = new Date(today)
+  monthFromNow.setDate(today.getDate() + 30)
 
-    const recognition = new window.webkitSpeechRecognition()
-    recognition.lang = 'en-US'
-    recognition.continuous = false
-    recognition.interimResults = false
+  const pastReminders = reminders.filter(r => {
+    const rDate = new Date(r.targetDate)
+    return rDate < today && !r.completed && !r.recurring
+  }).sort((a, b) => new Date(b.targetDate) - new Date(a.targetDate))
 
-    setIsRecording(true)
+  const todayReminders = reminders.filter(r => {
+    const rDate = new Date(r.targetDate)
+    return rDate >= today && rDate < new Date(today.getTime() + 24 * 60 * 60 * 1000)
+  }).sort((a, b) => new Date(a.targetDate) - new Date(b.targetDate))
 
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript
-      console.log('Voice input:', transcript)
+  const upcomingReminders = reminders.filter(r => {
+    const rDate = new Date(r.targetDate)
+    return rDate >= new Date(today.getTime() + 24 * 60 * 60 * 1000) && rDate < weekFromNow && !r.recurring
+  }).sort((a, b) => new Date(a.targetDate) - new Date(b.targetDate))
 
-      // Simple AI parsing: Check if it contains reminder keywords
-      if (transcript.toLowerCase().includes('remind') || transcript.toLowerCase().includes('reminder')) {
-        // Extract reminder text
-        const reminderText = transcript.replace(/remind me to|reminder to|reminder|remind/gi, '').trim()
-        addReminder({ text: reminderText })
-      } else {
-        // Otherwise create as task
-        addTask({ title: transcript })
-      }
+  const futureReminders = reminders.filter(r => {
+    const rDate = new Date(r.targetDate)
+    return rDate >= weekFromNow && rDate < monthFromNow && !r.recurring
+  }).sort((a, b) => new Date(a.targetDate) - new Date(b.targetDate))
 
-      setIsRecording(false)
-    }
-
-    recognition.onerror = (event) => {
-      console.error('Voice recognition error:', event.error)
-      setIsRecording(false)
-    }
-
-    recognition.onend = () => {
-      setIsRecording(false)
-    }
-
-    recognition.start()
-  }
+  const recurringReminders = reminders.filter(r => r.recurring)
+    .sort((a, b) => a.text.localeCompare(b.text))
 
   return (
-    <div className="tasks-page-container">
-      {/* Header with Voice AI Assistant */}
-      <div className="tasks-header">
-        <h1 className="tasks-page-title">📋 Tasks & Reminders</h1>
-        <button
-          className={`ai-voice-button ${isRecording ? 'recording' : ''}`}
-          onClick={startVoiceRecording}
-          title="AI Voice Assistant - Say a task or reminder"
-        >
-          {isRecording ? '🔴 Listening...' : '🎙️ Voice Assistant'}
-        </button>
-      </div>
+    <>
+      <Head>
+        <title>Reminders | ProdyJEE</title>
+      </Head>
 
-      {/* Main Layout: Kanban (70%) + Reminders (30%) */}
-      <div className="tasks-main-layout">
-        {/* Primary Container - Kanban Board */}
-        <div className="kanban-container">
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCorners}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-          >
-            <div className="kanban-columns">
-              {columns.map(status => (
-                <KanbanColumn
-                  key={status}
-                  status={status}
-                  tasks={tasksByStatus[status]}
-                  onAddTask={addTask}
-                />
-              ))}
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      }}>
+        {/* Navigation */}
+        <nav style={{
+          background: 'rgba(255, 255, 255, 0.15)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+          padding: '16px 32px'
+        }}>
+          <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <a href="/dashboard" style={{
+                color: 'white',
+                textDecoration: 'none',
+                fontSize: '14px',
+                fontWeight: '600',
+                opacity: 0.9,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                transition: 'opacity 0.2s'
+              }}>
+                ← Back
+              </a>
+              <div style={{ borderLeft: '1px solid rgba(255, 255, 255, 0.3)', height: '24px' }}></div>
+              <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: 'white' }}>🔔 Reminders</h1>
+            </div>
+            <span style={{ fontSize: '13px', color: 'white', opacity: 0.7 }}>v{packageJson.version}</span>
+          </div>
+        </nav>
+
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px' }}>
+          {/* Header with Add Button */}
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.2)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: '16px',
+            padding: '20px',
+            marginBottom: '24px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <div>
+              <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: 'white' }}>
+                Manage Your Reminders
+              </h2>
+              <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: 'rgba(255, 255, 255, 0.8)' }}>
+                {reminders.length} total reminders
+              </p>
             </div>
 
-            <DragOverlay>
-              {activeTaskId ? (
-                <TaskCard
-                  task={tasks.find(t => t.id === activeTaskId)}
-                  isDragging
-                />
-              ) : null}
-            </DragOverlay>
-          </DndContext>
-        </div>
-
-        {/* Secondary Container - Reminders Checklist */}
-        <div className="reminders-container">
-          <div className="reminders-header">
-            <h2 className="reminders-title">🔔 Reminders</h2>
-            <button
-              className="add-reminder-btn"
-              onClick={() => {
-                const text = prompt('Enter reminder:')
-                if (text) addReminder({ text })
-              }}
-            >
-              + Add
+            <button onClick={() => setShowAddReminder(true)} style={{
+              padding: '12px 24px',
+              borderRadius: '10px',
+              border: 'none',
+              background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+              color: 'white',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '600',
+              boxShadow: '0 4px 12px rgba(245, 87, 108, 0.4)'
+            }}>
+              + Add Reminder
             </button>
           </div>
 
-          <div className="reminders-list">
-            {reminders.length === 0 ? (
-              <p className="empty-state">No reminders yet. Use voice to add one!</p>
-            ) : (
-              reminders.map(reminder => (
-                <ReminderItem
-                  key={reminder.id}
-                  reminder={reminder}
-                  onToggle={toggleReminder}
-                  onDelete={deleteReminder}
-                />
-              ))
-            )}
+          {/* Reminders Container */}
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.2)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: '16px',
+            padding: '24px'
+          }}>
+            <div style={{ display: 'grid', gap: '24px' }}>
+              {/* 1. Past Reminders */}
+              <ReminderSection
+                title="⏰ Past Reminders (Overdue)"
+                color="#ef4444"
+                reminders={pastReminders}
+                onToggle={toggleReminder}
+                onDelete={deleteReminder}
+                emptyMessage="No overdue reminders"
+              />
+
+              {/* 2. Today's Reminders */}
+              <ReminderSection
+                title="📅 Today's Reminders"
+                color="#f59e0b"
+                reminders={todayReminders}
+                onToggle={toggleReminder}
+                onDelete={deleteReminder}
+                emptyMessage="No reminders for today"
+                showTime={true}
+              />
+
+              {/* 3. Upcoming Reminders (This Week) */}
+              <ReminderSection
+                title="📆 Upcoming Reminders (This Week)"
+                color="#3b82f6"
+                reminders={upcomingReminders}
+                onToggle={toggleReminder}
+                onDelete={deleteReminder}
+                emptyMessage="No upcoming reminders this week"
+              />
+
+              {/* 4. Future Reminders (This Month) */}
+              <ReminderSection
+                title="📌 Future Reminders (This Month)"
+                color="#8b5cf6"
+                reminders={futureReminders}
+                onToggle={toggleReminder}
+                onDelete={deleteReminder}
+                emptyMessage="No future reminders this month"
+              />
+
+              {/* 5. Recurring Reminders (Annually) */}
+              <ReminderSection
+                title="🔄 Recurring Reminders"
+                color="#10b981"
+                reminders={recurringReminders}
+                onToggle={toggleReminder}
+                onDelete={deleteReminder}
+                emptyMessage="No recurring reminders"
+                showRecurring={true}
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      <style jsx>{`
-        .tasks-page-container {
-          min-height: 100vh;
-          background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-          padding: 20px;
-        }
+        {/* Add Reminder Modal */}
+        {showAddReminder && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            backdropFilter: 'blur(10px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}>
+            <div style={{
+              background: 'white',
+              borderRadius: '16px',
+              padding: '32px',
+              maxWidth: '500px',
+              width: '90%',
+              maxHeight: '80vh',
+              overflowY: 'auto'
+            }}>
+              <h2 style={{ margin: '0 0 24px 0', fontSize: '24px', fontWeight: '700' }}>Add New Reminder</h2>
 
-        .tasks-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 24px;
-          background: rgba(255, 255, 255, 0.9);
-          padding: 20px 24px;
-          border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '14px' }}>Reminder Text</label>
+                  <textarea
+                    value={newReminder.text}
+                    onChange={(e) => setNewReminder({ ...newReminder, text: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '2px solid #e5e7eb',
+                      fontSize: '14px',
+                      minHeight: '80px'
+                    }}
+                    placeholder="Enter reminder text..."
+                  />
+                </div>
 
-        .tasks-page-title {
-          margin: 0;
-          font-size: 2rem;
-          font-weight: 700;
-          color: #1f2937;
-        }
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '14px' }}>Date</label>
+                    <input
+                      type="date"
+                      value={newReminder.targetDate.toISOString().split('T')[0]}
+                      onChange={(e) => setNewReminder({ ...newReminder, targetDate: new Date(e.target.value) })}
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        borderRadius: '8px',
+                        border: '2px solid #e5e7eb',
+                        fontSize: '14px'
+                      }}
+                    />
+                  </div>
 
-        .ai-voice-button {
-          background: linear-gradient(135deg, #6366f1, #4f46e5);
-          color: white;
-          border: none;
-          padding: 12px 24px;
-          border-radius: 8px;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s;
-          box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-        }
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '14px' }}>Time</label>
+                    <input
+                      type="time"
+                      value={newReminder.targetTime}
+                      onChange={(e) => setNewReminder({ ...newReminder, targetTime: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        borderRadius: '8px',
+                        border: '2px solid #e5e7eb',
+                        fontSize: '14px'
+                      }}
+                    />
+                  </div>
+                </div>
 
-        .ai-voice-button:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
-        }
+                <div>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={newReminder.recurring}
+                      onChange={(e) => setNewReminder({ ...newReminder, recurring: e.target.checked })}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
+                    <span style={{ fontWeight: '600', fontSize: '14px' }}>Make this a recurring reminder</span>
+                  </label>
+                </div>
 
-        .ai-voice-button.recording {
-          background: linear-gradient(135deg, #ef4444, #dc2626);
-          animation: pulse 1.5s infinite;
-        }
+                {newReminder.recurring && (
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '14px' }}>Recurring Type</label>
+                    <select
+                      value={newReminder.recurringType}
+                      onChange={(e) => setNewReminder({ ...newReminder, recurringType: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        borderRadius: '8px',
+                        border: '2px solid #e5e7eb',
+                        fontSize: '14px'
+                      }}
+                    >
+                      <option value="daily">Daily</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Yearly</option>
+                    </select>
+                  </div>
+                )}
 
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.7; }
-        }
-
-        .tasks-main-layout {
-          display: grid;
-          grid-template-columns: 70% 30%;
-          gap: 20px;
-          height: calc(100vh - 140px);
-        }
-
-        .kanban-container {
-          background: rgba(255, 255, 255, 0.95);
-          border-radius: 12px;
-          padding: 20px;
-          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-          overflow: hidden;
-        }
-
-        .kanban-columns {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 16px;
-          height: 100%;
-        }
-
-        .reminders-container {
-          background: rgba(255, 255, 255, 0.95);
-          border-radius: 12px;
-          padding: 20px;
-          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-          display: flex;
-          flex-direction: column;
-        }
-
-        .reminders-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 16px;
-          padding-bottom: 12px;
-          border-bottom: 2px solid rgba(0, 0, 0, 0.08);
-        }
-
-        .reminders-title {
-          margin: 0;
-          font-size: 1.25rem;
-          font-weight: 600;
-          color: #1f2937;
-        }
-
-        .add-reminder-btn {
-          background: #10b981;
-          color: white;
-          border: none;
-          padding: 8px 16px;
-          border-radius: 6px;
-          font-size: 14px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .add-reminder-btn:hover {
-          background: #059669;
-          transform: translateY(-1px);
-        }
-
-        .reminders-list {
-          flex: 1;
-          overflow-y: auto;
-        }
-
-        .empty-state {
-          text-align: center;
-          color: #9ca3af;
-          font-size: 14px;
-          margin-top: 40px;
-        }
-
-        @media (max-width: 1024px) {
-          .tasks-main-layout {
-            grid-template-columns: 1fr;
-            grid-template-rows: auto auto;
-          }
-        }
-      `}</style>
-    </div>
-  )
-}
-
-// Kanban Column Component
-function KanbanColumn({ status, tasks, onAddTask }) {
-  const getStatusColor = () => {
-    if (status === 'To Do') return '#3b82f6'
-    if (status === 'In Progress') return '#f59e0b'
-    if (status === 'Done') return '#10b981'
-    return '#9ca3af'
-  }
-
-  return (
-    <div className="kanban-column" data-status={status}>
-      <div className="column-header" style={{ backgroundColor: getStatusColor() }}>
-        <h3 className="column-title">{status}</h3>
-        <span className="task-count">{tasks.length}</span>
-      </div>
-
-      <div className="column-content">
-        <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
-          {tasks.map(task => (
-            <TaskCard key={task.id} task={task} />
-          ))}
-        </SortableContext>
-
-        {tasks.length === 0 && (
-          <p className="empty-column">No tasks</p>
+                <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+                  <button
+                    onClick={addReminder}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      color: 'white',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Add Reminder
+                  </button>
+                  <button
+                    onClick={() => setShowAddReminder(false)}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: '2px solid #e5e7eb',
+                      background: 'white',
+                      color: '#6b7280',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
-
-      <style jsx>{`
-        .kanban-column {
-          display: flex;
-          flex-direction: column;
-          background: #f9fafb;
-          border-radius: 8px;
-          height: 100%;
-          overflow: hidden;
-        }
-
-        .column-header {
-          padding: 12px 16px;
-          color: white;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .column-title {
-          margin: 0;
-          font-size: 16px;
-          font-weight: 600;
-        }
-
-        .task-count {
-          background: rgba(255, 255, 255, 0.3);
-          padding: 4px 10px;
-          border-radius: 12px;
-          font-size: 14px;
-          font-weight: 600;
-        }
-
-        .column-content {
-          flex: 1;
-          padding: 12px;
-          overflow-y: auto;
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-
-        .empty-column {
-          text-align: center;
-          color: #9ca3af;
-          font-size: 13px;
-          margin-top: 20px;
-        }
-      `}</style>
-    </div>
+    </>
   )
 }
 
-// Task Card Component
-function TaskCard({ task, isDragging }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging: isSortableDragging,
-  } = useSortable({ id: task.id })
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isSortableDragging ? 0.5 : 1,
-  }
-
-  const getPriorityColor = (priority) => {
-    if (priority === 'high') return '#ef4444'
-    if (priority === 'medium') return '#f59e0b'
-    return '#10b981'
-  }
-
+// Reminder Section Component
+function ReminderSection({ title, color, reminders, onToggle, onDelete, emptyMessage, showTime, showRecurring }) {
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className={`task-card ${isDragging ? 'dragging' : ''}`}
-    >
-      <div className="task-header">
-        <h4 className="task-title">{task.title}</h4>
-        <span
-          className="priority-badge"
-          style={{ backgroundColor: getPriorityColor(task.priority) }}
-        >
-          {task.priority || 'medium'}
+    <div>
+      <h3 style={{
+        margin: '0 0 16px 0',
+        fontSize: '18px',
+        fontWeight: '700',
+        color: 'white',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px'
+      }}>
+        <div style={{
+          width: '4px',
+          height: '24px',
+          background: color,
+          borderRadius: '2px'
+        }}></div>
+        {title}
+        <span style={{
+          background: 'rgba(255, 255, 255, 0.2)',
+          padding: '4px 10px',
+          borderRadius: '12px',
+          fontSize: '13px',
+          fontWeight: '600'
+        }}>
+          {reminders.length}
         </span>
-      </div>
+      </h3>
 
-      {task.description && (
-        <p className="task-description">{task.description}</p>
+      {reminders.length === 0 ? (
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.1)',
+          borderRadius: '12px',
+          padding: '24px',
+          textAlign: 'center',
+          color: 'rgba(255, 255, 255, 0.6)',
+          fontSize: '14px'
+        }}>
+          {emptyMessage}
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gap: '10px' }}>
+          {reminders.map(reminder => (
+            <ReminderItem
+              key={reminder.id}
+              reminder={reminder}
+              color={color}
+              onToggle={onToggle}
+              onDelete={onDelete}
+              showTime={showTime}
+              showRecurring={showRecurring}
+            />
+          ))}
+        </div>
       )}
-
-      <div className="task-footer">
-        <span className="task-date">
-          {new Date(task.createdAt).toLocaleDateString()}
-        </span>
-      </div>
-
-      <style jsx>{`
-        .task-card {
-          background: white;
-          border-radius: 8px;
-          padding: 14px;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-          cursor: grab;
-          transition: all 0.2s;
-          border-left: 4px solid ${getPriorityColor(task.priority)};
-        }
-
-        .task-card:hover {
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          transform: translateY(-2px);
-        }
-
-        .task-card.dragging {
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-          cursor: grabbing;
-        }
-
-        .task-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: start;
-          margin-bottom: 8px;
-        }
-
-        .task-title {
-          margin: 0;
-          font-size: 14px;
-          font-weight: 600;
-          color: #1f2937;
-          flex: 1;
-        }
-
-        .priority-badge {
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-size: 10px;
-          font-weight: 600;
-          color: white;
-          text-transform: uppercase;
-        }
-
-        .task-description {
-          margin: 0 0 10px 0;
-          font-size: 13px;
-          color: #6b7280;
-          line-height: 1.4;
-        }
-
-        .task-footer {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .task-date {
-          font-size: 11px;
-          color: #9ca3af;
-        }
-      `}</style>
     </div>
   )
 }
 
 // Reminder Item Component
-function ReminderItem({ reminder, onToggle, onDelete }) {
+function ReminderItem({ reminder, color, onToggle, onDelete, showTime, showRecurring }) {
   const formatDate = (dateString) => {
     const date = new Date(dateString)
     return date.toLocaleString('en-US', {
       month: 'short',
       day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      year: 'numeric',
+      ...(showTime && { hour: '2-digit', minute: '2-digit' })
     })
   }
 
   return (
-    <div className={`reminder-item ${reminder.completed ? 'completed' : ''}`}>
-      <label className="reminder-checkbox">
-        <input
-          type="checkbox"
-          checked={reminder.completed}
-          onChange={() => onToggle(reminder.id)}
-        />
-        <span className="checkmark"></span>
-      </label>
+    <div style={{
+      background: 'rgba(255, 255, 255, 0.95)',
+      borderRadius: '12px',
+      padding: '16px',
+      borderLeft: `4px solid ${color}`,
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+      transition: 'all 0.2s'
+    }}>
+      <input
+        type="checkbox"
+        checked={reminder.completed}
+        onChange={() => onToggle(reminder.id)}
+        style={{
+          width: '20px',
+          height: '20px',
+          cursor: 'pointer',
+          accentColor: color,
+          flexShrink: 0
+        }}
+      />
 
-      <div className="reminder-content">
-        <p className="reminder-text">{reminder.text}</p>
-        <span className="reminder-date">
-          📅 {formatDate(reminder.targetDate)}
-        </span>
+      <div style={{ flex: 1 }}>
+        <div style={{
+          fontSize: '15px',
+          fontWeight: '600',
+          color: reminder.completed ? '#9ca3af' : '#1f2937',
+          textDecoration: reminder.completed ? 'line-through' : 'none',
+          marginBottom: '4px'
+        }}>
+          {reminder.text}
+        </div>
+
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '12px', color: '#6b7280' }}>
+            📅 {formatDate(reminder.targetDate)}
+          </span>
+
+          {reminder.recurring && showRecurring && (
+            <span style={{
+              fontSize: '11px',
+              background: color,
+              color: 'white',
+              padding: '3px 8px',
+              borderRadius: '6px',
+              fontWeight: '600'
+            }}>
+              🔄 {reminder.recurringType}
+            </span>
+          )}
+        </div>
       </div>
 
       <button
-        className="delete-reminder-btn"
         onClick={() => onDelete(reminder.id)}
-        title="Delete reminder"
+        style={{
+          background: 'rgba(239, 68, 68, 0.1)',
+          border: 'none',
+          color: '#ef4444',
+          fontSize: '18px',
+          width: '32px',
+          height: '32px',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+          transition: 'all 0.2s'
+        }}
+        onMouseOver={(e) => {
+          e.target.style.background = '#ef4444'
+          e.target.style.color = 'white'
+        }}
+        onMouseOut={(e) => {
+          e.target.style.background = 'rgba(239, 68, 68, 0.1)'
+          e.target.style.color = '#ef4444'
+        }}
       >
         ×
       </button>
-
-      <style jsx>{`
-        .reminder-item {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px;
-          background: white;
-          border-radius: 8px;
-          margin-bottom: 8px;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-          transition: all 0.2s;
-          border-left: 3px solid #6366f1;
-        }
-
-        .reminder-item:hover {
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-        }
-
-        .reminder-item.completed {
-          opacity: 0.6;
-          border-left-color: #9ca3af;
-        }
-
-        .reminder-item.completed .reminder-text {
-          text-decoration: line-through;
-          color: #9ca3af;
-        }
-
-        .reminder-checkbox {
-          position: relative;
-          cursor: pointer;
-          flex-shrink: 0;
-        }
-
-        .reminder-checkbox input[type="checkbox"] {
-          width: 20px;
-          height: 20px;
-          cursor: pointer;
-          accent-color: #6366f1;
-        }
-
-        .reminder-content {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .reminder-text {
-          margin: 0;
-          font-size: 14px;
-          color: #1f2937;
-          font-weight: 500;
-        }
-
-        .reminder-date {
-          font-size: 12px;
-          color: #6b7280;
-        }
-
-        .delete-reminder-btn {
-          background: rgba(239, 68, 68, 0.1);
-          border: none;
-          color: #ef4444;
-          font-size: 20px;
-          width: 28px;
-          height: 28px;
-          border-radius: 4px;
-          cursor: pointer;
-          transition: all 0.2s;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-        }
-
-        .delete-reminder-btn:hover {
-          background: #ef4444;
-          color: white;
-        }
-      `}</style>
     </div>
   )
+}
+
+// Generate sample reminders
+function generateSampleReminders() {
+  const today = new Date()
+  const reminders = []
+
+  // Past reminders (2 days ago)
+  const twoDaysAgo = new Date(today)
+  twoDaysAgo.setDate(today.getDate() - 2)
+  reminders.push({
+    id: 'reminder-past-1',
+    text: 'Submit Physics assignment',
+    targetDate: twoDaysAgo.toISOString(),
+    completed: false,
+    recurring: false
+  })
+
+  // Today's reminders
+  const todayMorning = new Date(today)
+  todayMorning.setHours(9, 0, 0, 0)
+  reminders.push({
+    id: 'reminder-today-1',
+    text: 'Morning study session - Physics',
+    targetDate: todayMorning.toISOString(),
+    completed: false,
+    recurring: false
+  })
+
+  const todayAfternoon = new Date(today)
+  todayAfternoon.setHours(14, 0, 0, 0)
+  reminders.push({
+    id: 'reminder-today-2',
+    text: 'Chemistry lab work',
+    targetDate: todayAfternoon.toISOString(),
+    completed: false,
+    recurring: false
+  })
+
+  // Upcoming (this week)
+  const tomorrow = new Date(today)
+  tomorrow.setDate(today.getDate() + 1)
+  tomorrow.setHours(10, 0, 0, 0)
+  reminders.push({
+    id: 'reminder-upcoming-1',
+    text: 'Math mock test',
+    targetDate: tomorrow.toISOString(),
+    completed: false,
+    recurring: false
+  })
+
+  const threeDays = new Date(today)
+  threeDays.setDate(today.getDate() + 3)
+  threeDays.setHours(15, 0, 0, 0)
+  reminders.push({
+    id: 'reminder-upcoming-2',
+    text: 'Review weekly progress',
+    targetDate: threeDays.toISOString(),
+    completed: false,
+    recurring: false
+  })
+
+  // Future (this month)
+  const twoWeeks = new Date(today)
+  twoWeeks.setDate(today.getDate() + 14)
+  twoWeeks.setHours(9, 0, 0, 0)
+  reminders.push({
+    id: 'reminder-future-1',
+    text: 'Monthly test preparation',
+    targetDate: twoWeeks.toISOString(),
+    completed: false,
+    recurring: false
+  })
+
+  // Recurring reminders
+  const recurringMorning = new Date(today)
+  recurringMorning.setHours(6, 0, 0, 0)
+  reminders.push({
+    id: 'reminder-recurring-1',
+    text: 'Morning exercise and meditation',
+    targetDate: recurringMorning.toISOString(),
+    completed: false,
+    recurring: true,
+    recurringType: 'daily'
+  })
+
+  const recurringEvening = new Date(today)
+  recurringEvening.setHours(21, 0, 0, 0)
+  reminders.push({
+    id: 'reminder-recurring-2',
+    text: 'Review day\'s learning',
+    targetDate: recurringEvening.toISOString(),
+    completed: false,
+    recurring: true,
+    recurringType: 'daily'
+  })
+
+  const recurringWeekly = new Date(today)
+  recurringWeekly.setHours(10, 0, 0, 0)
+  reminders.push({
+    id: 'reminder-recurring-3',
+    text: 'Weekly progress review',
+    targetDate: recurringWeekly.toISOString(),
+    completed: false,
+    recurring: true,
+    recurringType: 'weekly'
+  })
+
+  return reminders
 }
