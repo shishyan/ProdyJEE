@@ -6287,3 +6287,327 @@ body {
     min-width: 44px;
   }
 }
+
+/* ============================================
+   ENHANCED EDITABLE MODAL STYLES
+   ============================================ */
+
+/* Chapter Information Section */
+.chapter-info-section {
+  background: rgba(79, 172, 254, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(79, 172, 254, 0.2);
+}
+
+.chapter-info-section h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chapter-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* Field Groups */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-group.full-width {
+  grid-column: span 3;
+}
+
+.field-group label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Read-only Fields */
+.readonly-field,
+.readonly-field-small {
+  padding: 6px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+  color: #374151;
+  font-weight: 500;
+  cursor: not-allowed;
+}
+
+.readonly-field-small {
+  font-size: 12px;
+  padding: 5px 8px;
+}
+
+/* Editable Fields */
+.editable-field,
+.editable-field-small {
+  padding: 6px 10px;
+  border: 1px solid rgba(79, 172, 254, 0.3);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  color: #1f2937;
+  transition: all 0.2s ease;
+}
+
+.editable-field-small {
+  font-size: 12px;
+  padding: 5px 8px;
+}
+
+.editable-field:focus,
+.editable-field-small:focus {
+  outline: none;
+  border-color: #4facfe;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+}
+
+/* Topic Item Editable */
+.topic-item-editable {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.topic-item-editable:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(79, 172, 254, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.topic-item-editable.editing {
+  background: rgba(79, 172, 254, 0.05);
+  border: 2px solid #4facfe;
+  cursor: default;
+  transform: none;
+  box-shadow: 0 6px 20px rgba(79, 172, 254, 0.15);
+}
+
+/* Topic View Mode */
+.topic-view-mode {
+  pointer-events: none;
+}
+
+.topic-view-mode .topic-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.topic-view-mode h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  flex: 1;
+}
+
+.topic-view-mode h4.done {
+  text-decoration: line-through;
+  color: #10b981;
+}
+
+.topic-view-mode .topic-id {
+  font-size: 11px;
+  color: #9ca3af;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.topic-view-mode .topic-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.status-badge,
+.stage-badge,
+.proficiency-badge {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.stage-badge {
+  background: rgba(139, 92, 246, 0.1);
+  color: #7c3aed;
+}
+
+.proficiency-badge {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+}
+
+/* Topic Progress (Small) */
+.topic-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-bar-small {
+  flex: 1;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill-small {
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: 3px;
+}
+
+.progress-text-small {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  min-width: 35px;
+  text-align: right;
+}
+
+.topic-hint {
+  font-size: 10px;
+  color: #9ca3af;
+  margin-top: 6px;
+  font-style: italic;
+  pointer-events: none;
+}
+
+/* Topic Edit Form */
+.topic-edit-form {
+  pointer-events: auto;
+}
+
+.topic-edit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(79, 172, 254, 0.2);
+}
+
+.topic-edit-header h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.topic-edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.save-btn,
+.cancel-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.save-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.save-btn:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.cancel-btn {
+  background: rgba(0, 0, 0, 0.05);
+  color: #6b7280;
+}
+
+.cancel-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #374151;
+}
+
+/* Topic Edit Grid */
+.topic-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* Modal Bottom Sections */
+.modal-bottom-sections {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid rgba(79, 172, 254, 0.1);
+}
+
+.modal-bottom-sections h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.notes-textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid rgba(79, 172, 254, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  color: #1f2937;
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.notes-textarea:focus {
+  outline: none;
+  border-color: #4facfe;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+}
+
+/* Responsive adjustments for editable modal */
+@media (max-width: 768px) {
+  .chapter-fields-grid,
+  .topic-edit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field-group.full-width {
+    grid-column: span 1;
+  }
+}
