@@ -2322,13 +2322,12 @@ export default function Home() {
   const [filterPriority, setFilterPriority] = useState('All')
   const [filterLabel, setFilterLabel] = useState('All')
   const [selectedDueDate, setSelectedDueDate] = useState(null)
-  const [backgroundTheme, setBackgroundTheme] = useState('mountain')
+  const [backgroundTheme, setBackgroundTheme] = useState('mountains')
   const [navbarBackground, setNavbarBackground] = useState('default')
   const [viewMode, setViewMode] = useState('kanban') // Only Kanban view - simplified
   const [groupBy, setGroupBy] = useState('status') // status, stage, proficiency
   const [studyPlans, setStudyPlans] = useState([])
   const [weatherEffect, setWeatherEffect] = useState(false)
-  const [showSettings, setShowSettings] = useState(false)
   const [showBackgroundSettings, setShowBackgroundSettings] = useState(false)
   const [backgroundMusic, setBackgroundMusic] = useState('zen-mixed')
   const [musicVolume, setMusicVolume] = useState(0.2)
@@ -2350,6 +2349,7 @@ export default function Home() {
   const [showSidebar, setShowSidebar] = useState(true)
   const [showFooter, setShowFooter] = useState(true)
   const [showSettingsPanel, setShowSettingsPanel] = useState(false)
+  const [showNavigationHint, setShowNavigationHint] = useState(true)
   
   // New MS Planner features
   const [searchQuery, setSearchQuery] = useState('')
@@ -3072,11 +3072,11 @@ export default function Home() {
                 <CloudIcon />
               </button>
               <button
-                className="header-action-btn"
-                onClick={() => setShowSettings(true)}
+                className={`header-action-btn ${showSettingsPanel ? 'active' : ''}`}
+                onClick={() => setShowSettingsPanel(!showSettingsPanel)}
                 title="Settings"
               >
-                <CogIcon />
+                <SettingsIcon />
               </button>
               <button
                 className="header-action-btn"
@@ -3084,13 +3084,6 @@ export default function Home() {
                 title="Background Settings"
               >
                 <PaletteIcon />
-              </button>
-              <button
-                className={`header-action-btn ${showSettingsPanel ? 'active' : ''}`}
-                onClick={() => setShowSettingsPanel(!showSettingsPanel)}
-                title="Layout Settings"
-              >
-                <SettingsIcon />
               </button>
               <a
                 href="/login"
@@ -3266,21 +3259,23 @@ export default function Home() {
                     </div>
                     
                     {/* Keyboard Navigation Hint */}
-                    <div className="keyboard-hint">
-                      <div style={{ marginBottom: '4px', fontWeight: 600, color: '#1a202c', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <NavigationIcon />
-                        <span>Scrollbar-Free Navigation</span>
+                    {showNavigationHint && (
+                      <div className="keyboard-hint">
+                        <div style={{ marginBottom: '4px', fontWeight: 600, color: '#1a202c', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <NavigationIcon />
+                          <span>Scrollbar-Free Navigation</span>
+                        </div>
+                        <div>
+                          <kbd>Ctrl</kbd> + <kbd>←</kbd> / <kbd>→</kbd> Navigate columns
+                        </div>
+                        <div>
+                          <kbd>Ctrl</kbd> + <kbd>Home</kbd> / <kbd>End</kbd> Jump to start/end
+                        </div>
+                        <div style={{ marginTop: '4px', fontSize: '10px', color: '#9ca3af' }}>
+                          Mouse wheel also scrolls horizontally
+                        </div>
                       </div>
-                      <div>
-                        <kbd>Ctrl</kbd> + <kbd>←</kbd> / <kbd>→</kbd> Navigate columns
-                      </div>
-                      <div>
-                        <kbd>Ctrl</kbd> + <kbd>Home</kbd> / <kbd>End</kbd> Jump to start/end
-                      </div>
-                      <div style={{ marginTop: '4px', fontSize: '10px', color: '#9ca3af' }}>
-                        Mouse wheel also scrolls horizontally
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </DndContext>
               </>
@@ -3387,7 +3382,7 @@ export default function Home() {
             <div className="settings-panel-header">
               <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <LayoutIcon />
-                <span>Layout Settings</span>
+                <span>Settings</span>
               </h3>
               <button 
                 className="settings-close-btn"
@@ -3398,6 +3393,7 @@ export default function Home() {
             </div>
             
             <div className="settings-panel-content">
+              {/* Container Visibility Section */}
               <div className="settings-section">
                 <h4 className="settings-section-title">Container Visibility</h4>
                 <p className="settings-section-description">
@@ -3476,6 +3472,75 @@ export default function Home() {
                       <span className="toggle-slider"></span>
                     </label>
                   </div>
+
+                  <div className="settings-toggle-item">
+                    <div className="settings-toggle-info">
+                      <span className="settings-toggle-icon"><NavigationIcon /></span>
+                      <div className="settings-toggle-text">
+                        <span className="settings-toggle-label">Navigation Hint</span>
+                        <span className="settings-toggle-desc">Scrollbar-free keyboard shortcuts</span>
+                      </div>
+                    </div>
+                    <label className="toggle-switch">
+                      <input 
+                        type="checkbox" 
+                        checked={showNavigationHint}
+                        onChange={() => setShowNavigationHint(!showNavigationHint)}
+                      />
+                      <span className="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Zen Music Section */}
+              <div className="settings-section">
+                <h4 className="settings-section-title">Zen Music</h4>
+                <p className="settings-section-description">
+                  Background music for focus and relaxation
+                </p>
+                
+                <div className="settings-toggle-group">
+                  <div className="settings-toggle-item">
+                    <div className="settings-toggle-info">
+                      <span className="settings-toggle-icon"><MusicIcon /></span>
+                      <div className="settings-toggle-text">
+                        <span className="settings-toggle-label">Play Music</span>
+                        <span className="settings-toggle-desc">{musicPlaying ? 'Music is playing' : 'Music is paused'}</span>
+                      </div>
+                    </div>
+                    <label className="toggle-switch">
+                      <input 
+                        type="checkbox" 
+                        checked={musicPlaying}
+                        onChange={() => setMusicPlaying(!musicPlaying)}
+                      />
+                      <span className="toggle-slider"></span>
+                    </label>
+                  </div>
+
+                  <div className="settings-form-group">
+                    <label className="settings-form-label">
+                      <MusicIcon />
+                      <span>Music Track</span>
+                    </label>
+                    <select 
+                      className="settings-form-select"
+                      value={backgroundMusic} 
+                      onChange={(e) => setBackgroundMusic(e.target.value)}
+                    >
+                      <option value="zen-mixed">Zen Mixed (Waves + Campfire + Rain + Crickets)</option>
+                      <option value="zen-forest">Zen Forest</option>
+                      <option value="zen-rain">Zen Rain</option>
+                      <option value="zen-wind">Zen Wind</option>
+                      <option value="zen-birds">Zen Birds</option>
+                      <option value="zen-water">Zen Water</option>
+                      <option value="meditation">Meditation</option>
+                      <option value="flute">Flute</option>
+                      <option value="nature">Nature</option>
+                      <option value="none">None</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
@@ -3487,6 +3552,7 @@ export default function Home() {
                     setShowNavBar(true)
                     setShowSidebar(true)
                     setShowFooter(true)
+                    setShowNavigationHint(true)
                   }}
                 >
                   Reset to Default
@@ -4250,95 +4316,6 @@ export default function Home() {
                     }} className="cancel-btn">❌ Close</button>
                   </div>
               </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showSettings && (
-        <div className="modal-overlay">
-          <div className="settings-modal glass-card">
-            <div className="modal-header">
-              <h2>Settings</h2>
-              <button className="close-btn" onClick={() => setShowSettings(false)}>×</button>
-            </div>
-            <div className="modal-body">
-              {/* Background Theme and Weather Effects moved to top navbar */}
-
-              <div className="settings-section">
-                <h3>Background Music</h3>
-                <div className="setting-item">
-                  <MusicIcon />
-                  <select value={backgroundMusic} onChange={(e) => setBackgroundMusic(e.target.value)}>
-                    <option value="zen-mixed">Zen Mixed (Waves + Campfire + Rain + Crickets)</option>
-                    <option value="zen-forest">Zen Forest</option>
-                    <option value="zen-rain">Zen Rain</option>
-                    <option value="zen-wind">Zen Wind</option>
-                    <option value="zen-birds">Zen Birds</option>
-                    <option value="zen-water">Zen Water</option>
-                    <option value="meditation">Meditation</option>
-                    <option value="flute">Flute</option>
-                    <option value="nature">Nature</option>
-                    <option value="none">None</option>
-                  </select>
-                </div>
-                <div className="setting-item">
-                  <button
-                    className={`nav-btn ${musicPlaying ? 'active' : ''}`}
-                    onClick={() => setMusicPlaying(!musicPlaying)}
-                  >
-                    {musicPlaying ? 'Pause' : 'Play'} Music
-                  </button>
-                </div>
-              </div>
-
-              <div className="settings-section">
-                <h3>Filters</h3>
-                <div className="setting-item">
-                  <input
-                    type="text"
-                    placeholder="Search tasks..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="search-input"
-                  />
-                </div>
-                <div className="setting-item">
-                  <select value={filterPriority} onChange={(e) => setFilterPriority(e.target.value)}>
-                    <option value="All">All Priorities</option>
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                    <option value="Important">Important</option>
-                  </select>
-                </div>
-                <div className="setting-item">
-                  <select value={filterLabel} onChange={(e) => setFilterLabel(e.target.value)}>
-                    <option value="All">All Labels</option>
-                    <option value="Math">Math</option>
-                    <option value="Physics">Physics</option>
-                    <option value="Chemistry">Chemistry</option>
-                    <option value="High Priority">High Priority</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="settings-section">
-                <h3>Data Management</h3>
-                <div className="setting-item">
-                  <button
-                    className="nav-btn delete-all-btn"
-                    onClick={deleteAllCards}
-                    style={{ backgroundColor: '#ef4444', color: 'white', border: 'none' }}
-                    title="Delete all study plan cards from the Kanban board"
-                  >
-                    🗑️ Delete All Cards
-                  </button>
-                  <span style={{ fontSize: '12px', color: '#666', marginLeft: '10px' }}>
-                    Permanently delete all study plan cards
-                  </span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
