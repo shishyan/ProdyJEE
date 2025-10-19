@@ -502,6 +502,8 @@ const groupStudyPlansByChapter = (studyPlans) => {
         studyPlans: [],
         // Aggregate status based on all topics in the chapter
         aggregatedStatus: 'In Queue',
+        aggregatedStage: 'Initiated',
+        aggregatedProficiency: 0,
         totalTopics: 0,
         completedTopics: 0,
         inProgressTopics: 0,
@@ -513,7 +515,7 @@ const groupStudyPlansByChapter = (studyPlans) => {
     chapterGroups[chapterKey].totalTopics++
   })
 
-  // Calculate aggregated status and progress for each chapter
+  // Calculate aggregated status, stage, and proficiency for each chapter
   Object.values(chapterGroups).forEach(chapter => {
     const plans = chapter.studyPlans
     const statusCounts = {
@@ -540,6 +542,24 @@ const groupStudyPlansByChapter = (studyPlans) => {
     } else {
       chapter.aggregatedStatus = 'In Queue'
     }
+
+    // Determine aggregated stage (most advanced stage that at least one topic has reached)
+    const stageHierarchy = ['Initiated', 'Skimmed', 'Grasped', 'Practiced', 'Revised', 'Mastered']
+    let maxStage = 'Initiated'
+    plans.forEach(plan => {
+      if (plan.learning_stage) {
+        const currentIndex = stageHierarchy.indexOf(plan.learning_stage)
+        const maxIndex = stageHierarchy.indexOf(maxStage)
+        if (currentIndex > maxIndex) {
+          maxStage = plan.learning_stage
+        }
+      }
+    })
+    chapter.aggregatedStage = maxStage
+
+    // Calculate aggregated proficiency (average of all topic proficiencies)
+    const totalProficiency = plans.reduce((sum, plan) => sum + (plan.learning_proficiency || 0), 0)
+    chapter.aggregatedProficiency = Math.round(totalProficiency / plans.length)
   })
 
   return Object.values(chapterGroups)
@@ -630,38 +650,69 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
       <div className="chapter-content">
         <div className={`chapter-details-grid ${chapter.aggregatedStatus === 'In Queue' ? 'backlog-grid' : ''}`}>
           {chapter.aggregatedStatus === 'In Queue' ? (
-            <div className="detail-row">
-              <span className="detail-label">Status:</span>
-              <span
-                className="status-badge"
-                style={{
-                  color: getStatusColor(chapter.aggregatedStatus)
-                }}
-              >
-                {chapter.aggregatedStatus}
-              </span>
-              {earliestTargetDate && (
-                <span className={`target-date-display ${daysLeft !== null && daysLeft < 0 ? 'overdue' : daysLeft !== null && daysLeft <= 7 ? 'urgent' : ''}`}>
-                  {daysLeft !== null ? (
-                    daysLeft < 0 ? `⏰ ${Math.abs(daysLeft)} days overdue` : `📅 ${daysLeft} days left`
-                  ) : (
-                    `📅 ${new Date(earliestTargetDate).toLocaleDateString()}`
-                  )}
+            <>
+              <div className="detail-row">
+                <span className="detail-label">Status:</span>
+                <span
+                  className="status-badge"
+                  style={{
+                    color: getStatusColor(chapter.aggregatedStatus)
+                  }}
+                >
+                  {chapter.aggregatedStatus}
                 </span>
+              </div>
+              {earliestTargetDate && (
+                <div className="detail-row">
+                  <span className={`target-date-display ${daysLeft !== null && daysLeft < 0 ? 'overdue' : daysLeft !== null && daysLeft <= 7 ? 'urgent' : ''}`}>
+                    {daysLeft !== null ? (
+                      daysLeft < 0 ? `⏰ ${Math.abs(daysLeft)} days overdue` : `📅 ${daysLeft} days left`
+                    ) : (
+                      `📅 ${new Date(earliestTargetDate).toLocaleDateString()}`
+                    )}
+                  </span>
+                </div>
               )}
-            </div>
+            </>
           ) : (
-            <div className="detail-row">
-              <span className="detail-label">Status:</span>
-              <span
-                className="status-badge"
-                style={{
-                  color: getStatusColor(chapter.aggregatedStatus)
-                }}
-              >
-                {chapter.aggregatedStatus}
-              </span>
-            </div>
+            <>
+              <div className="detail-row">
+                <span className="detail-label">Status:</span>
+                <span
+                  className="status-badge"
+                  style={{
+                    color: getStatusColor(chapter.aggregatedStatus),
+                    fontSize: '11px'
+                  }}
+                >
+                  {chapter.aggregatedStatus}
+                </span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Stage:</span>
+                <span
+                  className="status-badge"
+                  style={{
+                    color: '#8b5cf6',
+                    fontSize: '11px'
+                  }}
+                >
+                  {chapter.aggregatedStage}
+                </span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Proficiency:</span>
+                <span
+                  className="status-badge"
+                  style={{
+                    color: getProficiencyColor(chapter.aggregatedProficiency),
+                    fontSize: '11px'
+                  }}
+                >
+                  {chapter.aggregatedProficiency}%
+                </span>
+              </div>
+            </>
           )}
         </div>
 
