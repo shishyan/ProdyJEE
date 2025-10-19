@@ -2392,7 +2392,7 @@ export default function Home() {
   const [voiceRecordings, setVoiceRecordings] = useState([])
   const [isRecording, setIsRecording] = useState(false)
   const [mediaRecorder, setMediaRecorder] = useState(null)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false) // Changed to false - expanded by default for desktop
   const [currentPage, setCurrentPage] = useState('kanban') // 'kanban', 'schedule', 'timer', 'dashboard'
   
   // Container visibility states for responsive layout

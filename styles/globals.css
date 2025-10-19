@@ -526,11 +526,12 @@ body {
 
 /* 3. LEFT SIDEBAR CONTAINER */
 .left-sidebar-container {
-  position: fixed;
+  position: sticky; /* Changed from fixed to sticky for flex layout */
   left: 0;
   top: 150px; /* Positioned below header (70px) + navbar (80px) */
-  bottom: 50px; /* Space for footer */
+  height: calc(100vh - 200px); /* Full height minus header/navbar/footer */
   width: 280px;
+  flex-shrink: 0; /* Prevent sidebar from shrinking */
   background: transparent;
   border-right: 1px solid rgba(229, 231, 235, 0.3);
   box-shadow: none;
@@ -539,6 +540,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  align-self: flex-start; /* Align to top */
 }
 
 .left-sidebar-container.collapsed {
@@ -734,10 +736,10 @@ body {
 /* 4. MAIN CONTENT CONTAINER */
 .main-content-container {
   flex: 1;
-  margin-left: 280px;
+  margin-left: 0; /* Removed - flex handles spacing */
   padding: 16px; /* Reduced from 32px for more space */
   min-height: calc(100vh - 180px);
-  transition: margin-left 0.3s ease;
+  transition: all 0.3s ease;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.95) 100%);
   border-radius: 20px;
   border: 1px solid rgba(229, 231, 235, 0.5);
@@ -748,7 +750,7 @@ body {
 }
 
 .left-sidebar-container.collapsed ~ .main-content-container {
-  margin-left: 60px;
+  margin-left: 0; /* Removed - flex handles spacing */
 }
 
 /* 5. FOOTER CONTAINER */
