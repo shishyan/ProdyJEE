@@ -2401,7 +2401,7 @@ export default function Home() {
   const [showSidebar, setShowSidebar] = useState(true)
   const [showFooter, setShowFooter] = useState(true)
   const [showSettingsPanel, setShowSettingsPanel] = useState(false)
-  const [showNavigationHint, setShowNavigationHint] = useState(true)
+  const [showNavigationHint, setShowNavigationHint] = useState(false)
   
   // New MS Planner features
   const [searchQuery, setSearchQuery] = useState('')
@@ -3089,8 +3089,9 @@ export default function Home() {
       {/* 1. TOP HEADER CONTAINER - Fixed at top */}
       {showTopHeader && (
         <header className="top-header-container">
+          {/* Left Section - Brand & Actions (Max 16% width) */}
           <div className="header-content">
-            {/* Left Side - App Logo, Title, Subtitle */}
+            {/* App Logo, Title */}
             <div className="header-brand">
               <div className="brand-logo">
                 <span className="brand-main">Prody</span>
@@ -3099,43 +3100,17 @@ export default function Home() {
               </div>
               <div className="brand-subtitle">
                 <span>Peepal Prodigy School</span>
-                <span className="version-tag">v1.0.3-ffa8e94</span>
               </div>
             </div>
 
-            {/* Center - Search Bar */}
-            <div className="header-search">
-              <input
-                type="text"
-                placeholder="Search chapters, subjects, goals..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input"
-              />
-            </div>
-
-            {/* Right Side - User Profile, Settings, Actions */}
+            {/* Settings Actions */}
             <div className="header-actions">
-              <button
-                className={`header-action-btn ${weatherEffect ? 'active' : ''}`}
-                onClick={() => setWeatherEffect(!weatherEffect)}
-                title={weatherEffect ? 'Disable Weather Effects' : 'Enable Weather Effects'}
-              >
-                <CloudIcon />
-              </button>
               <button
                 className={`header-action-btn ${showSettingsPanel ? 'active' : ''}`}
                 onClick={() => setShowSettingsPanel(!showSettingsPanel)}
                 title="Settings"
               >
                 <SettingsIcon />
-              </button>
-              <button
-                className="header-action-btn"
-                onClick={() => setShowBackgroundSettings(true)}
-                title="Background Settings"
-              >
-                <PaletteIcon />
               </button>
               <a
                 href="/login"
@@ -3144,6 +3119,20 @@ export default function Home() {
               >
                 <UserIcon />
               </a>
+            </div>
+          </div>
+
+          {/* Right Section - Navigation (Takes remaining space) */}
+          <div className="header-nav-section">
+            {/* Search Bar */}
+            <div className="header-search">
+              <input
+                type="text"
+                placeholder="Search chapters, subjects, goals..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input"
+              />
             </div>
           </div>
         </header>
@@ -3224,19 +3213,27 @@ export default function Home() {
       <div className="content-wrapper">
         {/* 3. LEFT SIDEBAR CONTAINER */}
         {showSidebar && (
-          <aside className={`left-sidebar-container ${sidebarCollapsed ? 'collapsed' : 'expanded'}`}>
+          <aside 
+            className={`left-sidebar-container ${sidebarCollapsed ? 'collapsed' : 'expanded'}`}
+            onClick={(e) => {
+              // Only toggle if clicking on the sidebar background, not on navigation items
+              if (e.target === e.currentTarget || e.target.closest('.sidebar-header') || e.target.closest('.sidebar-footer')) {
+                setSidebarCollapsed(!sidebarCollapsed);
+              }
+            }}
+          >
             <div className="sidebar-header">
-              <button 
+              <button
                 className="sidebar-toggle-btn"
-                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSidebarCollapsed(!sidebarCollapsed);
+                }}
                 title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
               >
                 {sidebarCollapsed ? <MenuIcon /> : <XIcon />}
               </button>
-              {!sidebarCollapsed && <h3 className="sidebar-title">Quick Access</h3>}
-            </div>
-            
-            <div className="sidebar-content">
+            </div>            <div className="sidebar-content" onClick={(e) => e.stopPropagation()}>
               {/* Main Navigation Menu */}
               {!sidebarCollapsed && (
                 <div className="sidebar-section">
