@@ -3791,519 +3791,380 @@ export default function Home() {
         </div>
       )}
       {editingChapter && (
-        <div className="modal-overlay">
-          <div className="chapter-modal glass-card">
-            <div className="modal-header">
-              <h2>Chapter: {editingChapter.chapter_name}</h2>
-              <button className="close-btn" onClick={() => {
-                setEditingChapter(null)
-                setEditingTopicId(null)
-              }}>×</button>
-            </div>
-            <div className="modal-body">
-              {/* Chapter-Level Information */}
-              <div className="chapter-info-section">
-                <h3>Chapter Information</h3>
-                <div className="chapter-fields-grid">
-                  <div className="field-group">
-                    <label>Chapter ID</label>
-                    <input 
-                      type="text" 
-                      value={editingChapter.chapter_id} 
-                      readOnly
-                      className="readonly-field"
-                    />
+        <div className="modal-overlay" onClick={() => {
+          setEditingChapter(null)
+          setEditingTopicId(null)
+        }}>
+          <div 
+            className="chapter-modal-redesigned glass-card" 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              borderLeft: `3px dashed ${getStatusColor(editingChapter.aggregatedStatus)}`
+            }}
+          >
+            {/* Modal Header - Two Column Layout */}
+            <div className="modal-header-compact">
+              <div className="header-title-row">
+                <h2 className="modal-chapter-title">{editingChapter.chapter_name}</h2>
+                <button className="close-btn-compact" onClick={() => {
+                  setEditingChapter(null)
+                  setEditingTopicId(null)
+                }}>×</button>
+              </div>
+              
+              <div className="header-two-columns">
+                {/* Left Column - Overview Details */}
+                <div className="overview-column">
+                  <div className="overview-item">
+                    <span className="overview-label">Subject:</span>
+                    <span className="overview-value">{editingChapter.subject}</span>
                   </div>
-                  <div className="field-group">
-                    <label>Subject</label>
-                    <input 
-                      type="text" 
-                      value={editingChapter.subject} 
-                      readOnly
-                      className="readonly-field"
-                    />
+                  <div className="overview-item">
+                    <span className="overview-label">Curriculum:</span>
+                    <span className="overview-value">{editingChapter.curriculum}</span>
                   </div>
-                  <div className="field-group">
-                    <label>Curriculum</label>
-                    <input 
-                      type="text" 
-                      value={editingChapter.curriculum} 
-                      readOnly
-                      className="readonly-field"
-                    />
+                  <div className="overview-item">
+                    <span className="overview-label">Grade:</span>
+                    <span className="overview-value">{editingChapter.grade}</span>
                   </div>
-                  <div className="field-group">
-                    <label>Grade</label>
-                    <input 
-                      type="text" 
-                      value={editingChapter.grade} 
-                      readOnly
-                      className="readonly-field"
-                    />
+                  <div className="overview-item">
+                    <span className="overview-label">Topics:</span>
+                    <span className="overview-value">{editingChapter.totalTopics} ({editingChapter.completedTopics} ✓)</span>
                   </div>
-                  <div className="field-group">
-                    <label>Total Topics</label>
-                    <input 
-                      type="text" 
-                      value={editingChapter.totalTopics} 
-                      readOnly
-                      className="readonly-field"
-                    />
+                </div>
+
+                {/* Right Column - Status, Stage, Proficiency */}
+                <div className="controls-column">
+                  {/* Status */}
+                  <div className="control-group-compact">
+                    <label className="control-label-compact">Status:</label>
+                    <div className="control-chips-compact">
+                      {['In Queue', 'To Do', 'In Progress', 'Done', 'Closed'].map(status => (
+                        <button
+                          key={status}
+                          className={`chip-compact ${editingChapter.aggregatedStatus === status ? 'active' : ''}`}
+                          style={{
+                            backgroundColor: editingChapter.aggregatedStatus === status ? getStatusColor(status) : 'transparent',
+                            color: editingChapter.aggregatedStatus === status ? 'white' : '#6b7280',
+                            borderColor: getStatusColor(status)
+                          }}
+                          onClick={() => {
+                            const updatedPlans = studyPlans.map(plan => 
+                              plan.chapter_id === editingChapter.chapter_id 
+                                ? {...plan, learning_status: status}
+                                : plan
+                            );
+                            setStudyPlans(updatedPlans);
+                            localStorage.setItem('studyPlans', JSON.stringify(updatedPlans));
+                            const allChapters = [
+                              ...groupStudyPlansByChapter(updatedPlans, 'In Queue'),
+                              ...groupStudyPlansByChapter(updatedPlans, 'To Do'),
+                              ...groupStudyPlansByChapter(updatedPlans, 'In Progress'),
+                              ...groupStudyPlansByChapter(updatedPlans, 'Done'),
+                              ...groupStudyPlansByChapter(updatedPlans, 'Closed')
+                            ];
+                            const updatedChapter = allChapters.find(ch => ch.chapter_id === editingChapter.chapter_id);
+                            if (updatedChapter) setEditingChapter(updatedChapter);
+                          }}
+                        >
+                          {status}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="field-group">
-                    <label>Completed</label>
-                    <input 
-                      type="text" 
-                      value={editingChapter.completedTopics} 
-                      readOnly
-                      className="readonly-field"
-                    />
+
+                  {/* Stage */}
+                  <div className="control-group-compact">
+                    <label className="control-label-compact">Stage:</label>
+                    <div className="control-chips-compact">
+                      {['Initiated', 'Skimmed', 'Grasped', 'Practiced', 'Revised', 'Mastered'].map(stage => (
+                        <button
+                          key={stage}
+                          className={`chip-compact ${editingChapter.aggregatedStage === stage ? 'active' : ''}`}
+                          style={{
+                            backgroundColor: editingChapter.aggregatedStage === stage ? '#6366f1' : 'transparent',
+                            color: editingChapter.aggregatedStage === stage ? 'white' : '#6b7280',
+                            borderColor: '#6366f1'
+                          }}
+                          onClick={() => {
+                            const updatedPlans = studyPlans.map(plan => 
+                              plan.chapter_id === editingChapter.chapter_id 
+                                ? {...plan, learning_stage: stage}
+                                : plan
+                            );
+                            setStudyPlans(updatedPlans);
+                            localStorage.setItem('studyPlans', JSON.stringify(updatedPlans));
+                            const allChapters = [
+                              ...groupStudyPlansByChapter(updatedPlans, 'In Queue'),
+                              ...groupStudyPlansByChapter(updatedPlans, 'To Do'),
+                              ...groupStudyPlansByChapter(updatedPlans, 'In Progress'),
+                              ...groupStudyPlansByChapter(updatedPlans, 'Done'),
+                              ...groupStudyPlansByChapter(updatedPlans, 'Closed')
+                            ];
+                            const updatedChapter = allChapters.find(ch => ch.chapter_id === editingChapter.chapter_id);
+                            if (updatedChapter) setEditingChapter(updatedChapter);
+                          }}
+                        >
+                          {stage}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="field-group">
-                    <label>Status</label>
-                    <input 
-                      type="text" 
-                      value={editingChapter.aggregatedStatus} 
-                      readOnly
-                      className="readonly-field"
-                      style={{ color: getStatusColor(editingChapter.aggregatedStatus) }}
-                    />
-                  </div>
-                  <div className="field-group">
-                    <label>Stage</label>
-                    <input 
-                      type="text" 
-                      value={editingChapter.aggregatedStage} 
-                      readOnly
-                      className="readonly-field"
-                      style={{ color: '#8b5cf6' }}
-                    />
-                  </div>
-                  <div className="field-group">
-                    <label>Proficiency</label>
-                    <input 
-                      type="text" 
-                      value={`${editingChapter.aggregatedProficiency}%`} 
-                      readOnly
-                      className="readonly-field"
-                      style={{ color: getProficiencyColor(editingChapter.aggregatedProficiency) }}
-                    />
+
+                  {/* Proficiency - Changed to Novice/Competent/Expert/Master */}
+                  <div className="control-group-compact">
+                    <label className="control-label-compact">Proficiency:</label>
+                    <div className="control-chips-compact">
+                      {[
+                        { label: 'Novice', value: 25 },
+                        { label: 'Competent', value: 50 },
+                        { label: 'Expert', value: 75 },
+                        { label: 'Master', value: 100 }
+                      ].map(prof => (
+                        <button
+                          key={prof.label}
+                          className={`chip-compact ${editingChapter.aggregatedProficiency === prof.value ? 'active' : ''}`}
+                          style={{
+                            backgroundColor: editingChapter.aggregatedProficiency === prof.value ? getProficiencyColor(prof.value) : 'transparent',
+                            color: editingChapter.aggregatedProficiency === prof.value ? 'white' : '#6b7280',
+                            borderColor: getProficiencyColor(prof.value)
+                          }}
+                          onClick={() => {
+                            const updatedPlans = studyPlans.map(plan => 
+                              plan.chapter_id === editingChapter.chapter_id 
+                                ? {...plan, proficiency_percentage: prof.value}
+                                : plan
+                            );
+                            setStudyPlans(updatedPlans);
+                            localStorage.setItem('studyPlans', JSON.stringify(updatedPlans));
+                            const allChapters = [
+                              ...groupStudyPlansByChapter(updatedPlans, 'In Queue'),
+                              ...groupStudyPlansByChapter(updatedPlans, 'To Do'),
+                              ...groupStudyPlansByChapter(updatedPlans, 'In Progress'),
+                              ...groupStudyPlansByChapter(updatedPlans, 'Done'),
+                              ...groupStudyPlansByChapter(updatedPlans, 'Closed')
+                            ];
+                            const updatedChapter = allChapters.find(ch => ch.chapter_id === editingChapter.chapter_id);
+                            if (updatedChapter) setEditingChapter(updatedChapter);
+                          }}
+                        >
+                          {prof.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Topics Section - Editable */}
-              <div className="topics-scrollable-container">
-                <div className="topics-section">
-                  <h3>Topics in this Chapter (Click to Edit)</h3>
-                  <div className="topics-list">
-                  {editingChapter.studyPlans.map(studyPlan => (
+            <div className="modal-body-scrollable">
+              {/* Topics Section - Redesigned with 3-Checkbox System */}
+              <div className="modal-section-compact">
+                <h3 className="section-title-compact">📚 Topics</h3>
+                <div className="topics-list-redesigned">
+                  {editingChapter.studyPlans.map((studyPlan, index) => {
+                    // Calculate checkbox states from progress
+                    const isStarted = studyPlan.progress_percentage >= 20;
+                    const isStudied = studyPlan.progress_percentage >= 50;
+                    const isPracticed = studyPlan.progress_percentage >= 100;
+
+                    return (
                     <div 
                       key={studyPlan.unique_id} 
-                      className={`topic-item-editable ${editingTopicId === studyPlan.unique_id ? 'editing' : ''}`}
-                      onClick={() => setEditingTopicId(studyPlan.unique_id)}
+                      className="topic-card-redesigned"
                     >
-                      {editingTopicId === studyPlan.unique_id ? (
-                        /* EDIT MODE - Full form */
-                        <div className="topic-edit-form">
-                          <div className="topic-edit-header">
-                            <h4>Editing Topic</h4>
-                            <div className="topic-edit-actions">
-                              <button 
-                                className="save-btn"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setEditingTopicId(null)
-                                  // Save is automatic via state updates
-                                }}
-                              >
-                                ✓ Save
-                              </button>
-                              <button 
-                                className="cancel-btn"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setEditingTopicId(null)
-                                }}
-                              >
-                                × Cancel
-                              </button>
-                            </div>
-                          </div>
+                      {/* Topic Header with Number and Name */}
+                      <div className="topic-header-redesigned">
+                        <span className="topic-number">#{index + 1}</span>
+                        <h4 className="topic-name-redesigned">{studyPlan.topic}</h4>
+                      </div>
 
-                          <div className="topic-edit-grid">
-                            {/* Row 1: IDs */}
-                            <div className="field-group">
-                              <label>Unique ID</label>
-                              <input 
-                                type="text" 
-                                value={studyPlan.unique_id}
-                                readOnly
-                                className="readonly-field-small"
-                              />
-                            </div>
-                            <div className="field-group">
-                              <label>Topic ID</label>
-                              <input 
-                                type="text" 
-                                value={studyPlan.topic_id}
-                                onChange={(e) => {
-                                  const updated = editingChapter.studyPlans.map(p =>
-                                    p.unique_id === studyPlan.unique_id ? {...p, topic_id: e.target.value} : p
-                                  )
-                                  setEditingChapter({...editingChapter, studyPlans: updated})
-                                  // Update main state
-                                  setStudyPlans(prev => {
-                                    const newPlans = prev.map(p =>
-                                      p.unique_id === studyPlan.unique_id ? {...p, topic_id: e.target.value} : p
-                                    )
-                                    localStorage.setItem('study-plans-data', JSON.stringify(newPlans))
-                                    return newPlans
-                                  })
-                                }}
-                                className="editable-field-small"
-                              />
-                            </div>
-                            <div className="field-group">
-                              <label>Chapter ID</label>
-                              <input 
-                                type="text" 
-                                value={studyPlan.chapter_id}
-                                onChange={(e) => {
-                                  const updated = editingChapter.studyPlans.map(p =>
-                                    p.unique_id === studyPlan.unique_id ? {...p, chapter_id: e.target.value} : p
-                                  )
-                                  setEditingChapter({...editingChapter, studyPlans: updated})
-                                  setStudyPlans(prev => {
-                                    const newPlans = prev.map(p =>
-                                      p.unique_id === studyPlan.unique_id ? {...p, chapter_id: e.target.value} : p
-                                    )
-                                    localStorage.setItem('study-plans-data', JSON.stringify(newPlans))
-                                    return newPlans
-                                  })
-                                }}
-                                className="editable-field-small"
-                              />
-                            </div>
+                      {/* 3-Checkbox Progress Tracker */}
+                      <div className="checkbox-tracker">
+                        <label className="checkbox-item">
+                          <input
+                            type="checkbox"
+                            checked={isStarted}
+                            onChange={(e) => {
+                              const newProgress = e.target.checked ? 20 : 0;
+                              const updated = editingChapter.studyPlans.map(p =>
+                                p.unique_id === studyPlan.unique_id 
+                                  ? {...p, progress_percentage: newProgress}
+                                  : p
+                              );
+                              setEditingChapter({...editingChapter, studyPlans: updated});
+                              const updatedPlans = studyPlans.map(p =>
+                                p.unique_id === studyPlan.unique_id 
+                                  ? {...p, progress_percentage: newProgress}
+                                  : p
+                              );
+                              setStudyPlans(updatedPlans);
+                              localStorage.setItem('studyPlans', JSON.stringify(updatedPlans));
+                            }}
+                          />
+                          <span className="checkbox-label" style={{
+                            color: isStarted ? '#f59e0b' : '#9ca3af'
+                          }}>
+                            Started (20%)
+                          </span>
+                        </label>
 
-                            {/* Row 2: Topic Name */}
-                            <div className="field-group full-width">
-                              <label>Topic Name</label>
-                              <input 
-                                type="text" 
-                                value={studyPlan.topic}
-                                onChange={(e) => {
-                                  const updated = editingChapter.studyPlans.map(p =>
-                                    p.unique_id === studyPlan.unique_id ? {...p, topic: e.target.value} : p
-                                  )
-                                  setEditingChapter({...editingChapter, studyPlans: updated})
-                                  setStudyPlans(prev => {
-                                    const newPlans = prev.map(p =>
-                                      p.unique_id === studyPlan.unique_id ? {...p, topic: e.target.value} : p
-                                    )
-                                    localStorage.setItem('study-plans-data', JSON.stringify(newPlans))
-                                    return newPlans
-                                  })
-                                }}
-                                className="editable-field"
-                              />
-                            </div>
+                        <label className="checkbox-item">
+                          <input
+                            type="checkbox"
+                            checked={isStudied}
+                            onChange={(e) => {
+                              const newProgress = e.target.checked ? 50 : 20;
+                              const updated = editingChapter.studyPlans.map(p =>
+                                p.unique_id === studyPlan.unique_id 
+                                  ? {...p, progress_percentage: newProgress}
+                                  : p
+                              );
+                              setEditingChapter({...editingChapter, studyPlans: updated});
+                              const updatedPlans = studyPlans.map(p =>
+                                p.unique_id === studyPlan.unique_id 
+                                  ? {...p, progress_percentage: newProgress}
+                                  : p
+                              );
+                              setStudyPlans(updatedPlans);
+                              localStorage.setItem('studyPlans', JSON.stringify(updatedPlans));
+                            }}
+                          />
+                          <span className="checkbox-label" style={{
+                            color: isStudied ? '#3b82f6' : '#9ca3af'
+                          }}>
+                            Studied (50%)
+                          </span>
+                        </label>
 
-                            {/* Row 3: Chapter Name */}
-                            <div className="field-group full-width">
-                              <label>Chapter Name</label>
-                              <input 
-                                type="text" 
-                                value={studyPlan.chapter_name}
-                                onChange={(e) => {
-                                  const updated = editingChapter.studyPlans.map(p =>
-                                    p.unique_id === studyPlan.unique_id ? {...p, chapter_name: e.target.value} : p
-                                  )
-                                  setEditingChapter({...editingChapter, studyPlans: updated})
-                                  setStudyPlans(prev => {
-                                    const newPlans = prev.map(p =>
-                                      p.unique_id === studyPlan.unique_id ? {...p, chapter_name: e.target.value} : p
-                                    )
-                                    localStorage.setItem('study-plans-data', JSON.stringify(newPlans))
-                                    return newPlans
-                                  })
-                                }}
-                                className="editable-field"
-                              />
-                            </div>
+                        <label className="checkbox-item">
+                          <input
+                            type="checkbox"
+                            checked={isPracticed}
+                            onChange={(e) => {
+                              const newProgress = e.target.checked ? 100 : 50;
+                              const updated = editingChapter.studyPlans.map(p =>
+                                p.unique_id === studyPlan.unique_id 
+                                  ? {...p, progress_percentage: newProgress}
+                                  : p
+                              );
+                              setEditingChapter({...editingChapter, studyPlans: updated});
+                              const updatedPlans = studyPlans.map(p =>
+                                p.unique_id === studyPlan.unique_id 
+                                  ? {...p, progress_percentage: newProgress}
+                                  : p
+                              );
+                              setStudyPlans(updatedPlans);
+                              localStorage.setItem('studyPlans', JSON.stringify(updatedPlans));
+                            }}
+                          />
+                          <span className="checkbox-label" style={{
+                            color: isPracticed ? '#10b981' : '#9ca3af'
+                          }}>
+                            Practiced (100%)
+                          </span>
+                        </label>
+                      </div>
 
-                            {/* Row 4: Subject, Curriculum, Grade */}
-                            <div className="field-group">
-                              <label>Subject</label>
-                              <select 
-                                value={studyPlan.subject}
-                                onChange={(e) => {
-                                  const updated = editingChapter.studyPlans.map(p =>
-                                    p.unique_id === studyPlan.unique_id ? {...p, subject: e.target.value} : p
-                                  )
-                                  setEditingChapter({...editingChapter, studyPlans: updated})
-                                  setStudyPlans(prev => {
-                                    const newPlans = prev.map(p =>
-                                      p.unique_id === studyPlan.unique_id ? {...p, subject: e.target.value} : p
-                                    )
-                                    localStorage.setItem('study-plans-data', JSON.stringify(newPlans))
-                                    return newPlans
-                                  })
-                                }}
-                                className="editable-field-small"
-                              >
-                                <option value="Physics">Physics</option>
-                                <option value="Chemistry">Chemistry</option>
-                                <option value="Mathematics">Mathematics</option>
-                                <option value="Biology">Biology</option>
-                              </select>
-                            </div>
-                            <div className="field-group">
-                              <label>Curriculum</label>
-                              <input 
-                                type="text" 
-                                value={studyPlan.curriculum}
-                                onChange={(e) => {
-                                  const updated = editingChapter.studyPlans.map(p =>
-                                    p.unique_id === studyPlan.unique_id ? {...p, curriculum: e.target.value} : p
-                                  )
-                                  setEditingChapter({...editingChapter, studyPlans: updated})
-                                  setStudyPlans(prev => {
-                                    const newPlans = prev.map(p =>
-                                      p.unique_id === studyPlan.unique_id ? {...p, curriculum: e.target.value} : p
-                                    )
-                                    localStorage.setItem('study-plans-data', JSON.stringify(newPlans))
-                                    return newPlans
-                                  })
-                                }}
-                                className="editable-field-small"
-                              />
-                            </div>
-                            <div className="field-group">
-                              <label>Grade</label>
-                              <input 
-                                type="number" 
-                                value={studyPlan.grade}
-                                onChange={(e) => {
-                                  const updated = editingChapter.studyPlans.map(p =>
-                                    p.unique_id === studyPlan.unique_id ? {...p, grade: parseInt(e.target.value)} : p
-                                  )
-                                  setEditingChapter({...editingChapter, studyPlans: updated})
-                                  setStudyPlans(prev => {
-                                    const newPlans = prev.map(p =>
-                                      p.unique_id === studyPlan.unique_id ? {...p, grade: parseInt(e.target.value)} : p
-                                    )
-                                    localStorage.setItem('study-plans-data', JSON.stringify(newPlans))
-                                    return newPlans
-                                  })
-                                }}
-                                className="editable-field-small"
-                              />
-                            </div>
-
-                            {/* Row 5: Status, Stage, Proficiency */}
-                            <div className="field-group">
-                              <label>Status</label>
-                              <select 
-                                value={studyPlan.learning_status}
-                                onChange={(e) => {
-                                  const updated = editingChapter.studyPlans.map(p =>
-                                    p.unique_id === studyPlan.unique_id ? {...p, learning_status: e.target.value} : p
-                                  )
-                                  setEditingChapter({...editingChapter, studyPlans: updated})
-                                  setStudyPlans(prev => {
-                                    const newPlans = prev.map(p =>
-                                      p.unique_id === studyPlan.unique_id ? {...p, learning_status: e.target.value} : p
-                                    )
-                                    localStorage.setItem('study-plans-data', JSON.stringify(newPlans))
-                                    return newPlans
-                                  })
-                                }}
-                                className="editable-field-small"
-                              >
-                                <option value="In Queue">In Queue</option>
-                                <option value="To Do">To Do</option>
-                                <option value="In Progress">In Progress</option>
-                                <option value="Done">Done</option>
-                              </select>
-                            </div>
-                            <div className="field-group">
-                              <label>Stage</label>
-                              <select 
-                                value={studyPlan.learning_stage}
-                                onChange={(e) => {
-                                  const updated = editingChapter.studyPlans.map(p =>
-                                    p.unique_id === studyPlan.unique_id ? {...p, learning_stage: e.target.value} : p
-                                  )
-                                  setEditingChapter({...editingChapter, studyPlans: updated})
-                                  setStudyPlans(prev => {
-                                    const newPlans = prev.map(p =>
-                                      p.unique_id === studyPlan.unique_id ? {...p, learning_stage: e.target.value} : p
-                                    )
-                                    localStorage.setItem('study-plans-data', JSON.stringify(newPlans))
-                                    return newPlans
-                                  })
-                                }}
-                                className="editable-field-small"
-                              >
-                                <option value="Initiated">Initiated</option>
-                                <option value="Skimmed">Skimmed</option>
-                                <option value="Grasped">Grasped</option>
-                                <option value="Practiced">Practiced</option>
-                                <option value="Revised">Revised</option>
-                                <option value="Mastered">Mastered</option>
-                              </select>
-                            </div>
-                            <div className="field-group">
-                              <label>Proficiency %</label>
-                              <input 
-                                type="number" 
-                                min="0"
-                                max="100"
-                                value={studyPlan.learning_proficiency}
-                                onChange={(e) => {
-                                  const value = Math.min(100, Math.max(0, parseInt(e.target.value) || 0))
-                                  const updated = editingChapter.studyPlans.map(p =>
-                                    p.unique_id === studyPlan.unique_id ? {...p, learning_proficiency: value} : p
-                                  )
-                                  setEditingChapter({...editingChapter, studyPlans: updated})
-                                  setStudyPlans(prev => {
-                                    const newPlans = prev.map(p =>
-                                      p.unique_id === studyPlan.unique_id ? {...p, learning_proficiency: value} : p
-                                    )
-                                    localStorage.setItem('study-plans-data', JSON.stringify(newPlans))
-                                    return newPlans
-                                  })
-                                }}
-                                className="editable-field-small"
-                              />
-                            </div>
-
-                            {/* Row 6: Progress Percentage */}
-                            <div className="field-group">
-                              <label>Progress %</label>
-                              <input 
-                                type="number" 
-                                min="0"
-                                max="100"
-                                value={studyPlan.progress_percentage}
-                                onChange={(e) => {
-                                  const value = Math.min(100, Math.max(0, parseInt(e.target.value) || 0))
-                                  const updated = editingChapter.studyPlans.map(p =>
-                                    p.unique_id === studyPlan.unique_id ? {...p, progress_percentage: value} : p
-                                  )
-                                  setEditingChapter({...editingChapter, studyPlans: updated})
-                                  setStudyPlans(prev => {
-                                    const newPlans = prev.map(p =>
-                                      p.unique_id === studyPlan.unique_id ? {...p, progress_percentage: value} : p
-                                    )
-                                    localStorage.setItem('study-plans-data', JSON.stringify(newPlans))
-                                    return newPlans
-                                  })
-                                }}
-                                className="editable-field-small"
-                              />
-                            </div>
-                            <div className="field-group">
-                              <label>Target Date</label>
-                              <input 
-                                type="date" 
-                                value={studyPlan.target_date || ''}
-                                onChange={(e) => {
-                                  const updated = editingChapter.studyPlans.map(p =>
-                                    p.unique_id === studyPlan.unique_id ? {...p, target_date: e.target.value} : p
-                                  )
-                                  setEditingChapter({...editingChapter, studyPlans: updated})
-                                  setStudyPlans(prev => {
-                                    const newPlans = prev.map(p =>
-                                      p.unique_id === studyPlan.unique_id ? {...p, target_date: e.target.value} : p
-                                    )
-                                    localStorage.setItem('study-plans-data', JSON.stringify(newPlans))
-                                    return newPlans
-                                  })
-                                }}
-                                className="editable-field-small"
-                              />
-                            </div>
-                            <div className="field-group">
-                              <label>Completion Date</label>
-                              <input 
-                                type="date" 
-                                value={studyPlan.actual_completion_date || ''}
-                                onChange={(e) => {
-                                  const updated = editingChapter.studyPlans.map(p =>
-                                    p.unique_id === studyPlan.unique_id ? {...p, actual_completion_date: e.target.value} : p
-                                  )
-                                  setEditingChapter({...editingChapter, studyPlans: updated})
-                                  setStudyPlans(prev => {
-                                    const newPlans = prev.map(p =>
-                                      p.unique_id === studyPlan.unique_id ? {...p, actual_completion_date: e.target.value} : p
-                                    )
-                                    localStorage.setItem('study-plans-data', JSON.stringify(newPlans))
-                                    return newPlans
-                                  })
-                                }}
-                                className="editable-field-small"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        /* VIEW MODE - Compact display */
-                        <div className="topic-view-mode">
-                          <div className="topic-header">
-                            <h4 className={studyPlan.learning_status === 'Done' ? 'done' : ''}>
-                              {studyPlan.topic}
-                            </h4>
-                            <span className="topic-id">ID: {studyPlan.topic_id}</span>
-                          </div>
-                          <div className="topic-meta">
-                            <span className="status-badge" style={{
-                              backgroundColor: `${getStatusColor(studyPlan.learning_status)}20`,
-                              color: getStatusColor(studyPlan.learning_status)
-                            }}>
-                              {studyPlan.learning_status}
-                            </span>
-                            <span className="stage-badge">
-                              Stage: {studyPlan.learning_stage}
-                            </span>
-                            <span className="proficiency-badge">
-                              Proficiency: {studyPlan.learning_proficiency}%
-                            </span>
-                          </div>
-                          <div className="topic-progress">
-                            <div className="progress-bar-small">
-                              <div 
-                                className="progress-fill-small"
-                                style={{
-                                  width: `${studyPlan.progress_percentage}%`,
-                                  backgroundColor: studyPlan.progress_percentage === 100 ? '#10b981' : '#f59e0b'
-                                }}
-                              />
-                            </div>
-                            <span className="progress-text-small">{studyPlan.progress_percentage}%</span>
-                          </div>
-                          <div className="topic-hint">Click to edit all fields</div>
-                        </div>
-                      )}
+                      {/* Progress Bar */}
+                      <div className="progress-bar-container-redesigned">
+                        <div 
+                          className="progress-bar-fill-redesigned"
+                          style={{
+                            width: `${studyPlan.progress_percentage}%`,
+                            backgroundColor: studyPlan.progress_percentage === 100 ? '#10b981' : '#f59e0b'
+                          }}
+                        />
+                        <span className="progress-percentage-label">{studyPlan.progress_percentage}%</span>
+                      </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
-              </div>
 
-              {/* Notes Section - Always Visible Below */}
-              <div className="modal-bottom-sections">
-                <h3>Chapter Notes</h3>
-                <textarea
-                  placeholder="Add notes for this chapter..."
-                  rows="4"
-                  className="notes-textarea"
-                  value={editingChapter.notes || ''}
-                  onChange={(e) => {
-                    setEditingChapter({...editingChapter, notes: e.target.value})
-                  }}
-                />
+              {/* Notes Section - Redesigned with Shivo Voice Assistant */}
+              <div className="modal-section-redesigned notes-section-redesigned">
+                <h3 className="section-title-redesigned">📝 Notes - Powered by Shivo 🎙️</h3>
+                <div className="voice-notes-container">
+                  <textarea
+                    placeholder="Add notes for this chapter... (Tip: Use voice recording for hands-free note-taking!)"
+                    rows="4"
+                    className="notes-textarea-redesigned"
+                    value={editingChapter.notes || ''}
+                    onChange={(e) => {
+                      const updatedChapter = {...editingChapter, notes: e.target.value};
+                      setEditingChapter(updatedChapter);
+                      // Save notes to localStorage
+                      const updatedPlans = studyPlans.map(plan => 
+                        plan.chapter_id === editingChapter.chapter_id 
+                          ? {...plan, chapter_notes: e.target.value}
+                          : plan
+                      );
+                      setStudyPlans(updatedPlans);
+                      localStorage.setItem('studyPlans', JSON.stringify(updatedPlans));
+                    }}
+                  />
+                  <div className="voice-controls-bar">
+                    <button
+                      className="voice-record-btn"
+                      onClick={(event) => {
+                        // Implement voice recording with Web Speech API
+                        if (!('webkitSpeechRecognition' in window)) {
+                          alert('Voice recognition not supported in your browser. Please try Chrome.');
+                          return;
+                        }
+                        
+                        const recognition = new window.webkitSpeechRecognition();
+                        recognition.lang = 'en-US';
+                        recognition.continuous = false;
+                        recognition.interimResults = false;
+
+                        recognition.onstart = () => {
+                          console.log('Shivo is listening...');
+                          // Add visual indicator
+                          event.target.textContent = '🔴 Recording...';
+                          event.target.style.backgroundColor = '#ef4444';
+                        };
+
+                        recognition.onresult = (recognitionEvent) => {
+                          const transcript = recognitionEvent.results[0][0].transcript;
+                          const timestamp = new Date().toLocaleString();
+                          const voiceNote = `\n[${timestamp}] Shivo: ${transcript}`;
+                          const updatedNotes = (editingChapter.notes || '') + voiceNote;
+                          
+                          const updatedChapter = {...editingChapter, notes: updatedNotes};
+                          setEditingChapter(updatedChapter);
+                          
+                          // Save to localStorage
+                          const updatedPlans = studyPlans.map(plan => 
+                            plan.chapter_id === editingChapter.chapter_id 
+                              ? {...plan, chapter_notes: updatedNotes}
+                              : plan
+                          );
+                          setStudyPlans(updatedPlans);
+                          localStorage.setItem('studyPlans', JSON.stringify(updatedPlans));
+                        };
+
+                        recognition.onerror = (errorEvent) => {
+                          console.error('Speech recognition error:', errorEvent.error);
+                          alert(`Shivo encountered an error: ${errorEvent.error}`);
+                        };
+
+                        recognition.onend = () => {
+                          console.log('Shivo stopped listening.');
+                          event.target.textContent = '🎙️ Record Voice Note';
+                          event.target.style.backgroundColor = '';
+                        };
+
+                        recognition.start();
+                      }}
+                    >
+                      🎙️ Record Voice Note
+                    </button>
+                    <span className="shivo-label">Powered by Shivo Assistant</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
