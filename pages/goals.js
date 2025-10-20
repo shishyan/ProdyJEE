@@ -235,30 +235,30 @@ export default function GoalsPage() {
         <link rel="stylesheet" href="/ProdyJEE/styles/globals.css" />
       </Head>
 
-      <div className="app-container">
-        <div className="main-content-container" style={{ padding: '32px' }}>
+      <div style={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
           {/* Page Header */}
-          <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
             <div>
-              <h1 style={{ margin: 0, fontSize: '28px', fontWeight: '700', color: '#1a202c', marginBottom: '8px' }}>🎯 My Goals</h1>
-              <p style={{ margin: 0, fontSize: '15px', color: '#718096' }}>Track your academic progress and earn achievement points</p>
+              <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#1a202c', marginBottom: '4px' }}>🎯 My Goals</h1>
+              <p style={{ margin: 0, fontSize: '14px', color: '#718096' }}>Track your academic progress and earn achievement points</p>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#fef3c7', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-                <span style={{ fontSize: '20px' }}>⭐</span>
-                <span style={{ fontSize: '16px', fontWeight: '700', color: '#92400e' }}>{starPoints + badgePoints} pts</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', backgroundColor: '#fef3c7', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                <span style={{ fontSize: '18px' }}>⭐</span>
+                <span style={{ fontSize: '14px', fontWeight: '700', color: '#92400e' }}>{starPoints + badgePoints} pts</span>
               </div>
               <button
                 onClick={() => setShowAddGoal(true)}
                 style={{
-                  padding: '12px 24px',
-                  borderRadius: '10px',
+                  padding: '10px 20px',
+                  borderRadius: '8px',
                   border: 'none',
                   backgroundColor: '#6366f1',
                   color: 'white',
                   fontWeight: '600',
                   cursor: 'pointer',
-                  fontSize: '15px',
+                  fontSize: '14px',
                   transition: 'all 0.2s ease',
                   boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
                 }}
@@ -277,54 +277,54 @@ export default function GoalsPage() {
           </div>
 
           {/* Stats Cards Row */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '20px' }}>
             <div style={{ 
               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
-              borderRadius: '16px', 
-              padding: '24px',
+              borderRadius: '12px', 
+              padding: '16px',
               boxShadow: '0 10px 25px rgba(102, 126, 234, 0.3)',
               color: 'white'
             }}>
-              <div style={{ fontSize: '14px', opacity: 0.9, marginBottom: '8px', fontWeight: '500' }}>⭐ Star Points</div>
-              <div style={{ fontSize: '36px', fontWeight: '700', marginBottom: '4px' }}>{starPoints}</div>
-              <div style={{ fontSize: '13px', opacity: 0.85 }}>10 pts per star</div>
+              <div style={{ fontSize: '12px', opacity: 0.9, marginBottom: '6px', fontWeight: '500' }}>⭐ Star Points</div>
+              <div style={{ fontSize: '28px', fontWeight: '700', marginBottom: '2px' }}>{starPoints}</div>
+              <div style={{ fontSize: '11px', opacity: 0.85 }}>10 pts per star</div>
             </div>
             
             <div style={{ 
               background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', 
-              borderRadius: '16px', 
-              padding: '24px',
+              borderRadius: '12px', 
+              padding: '16px',
               boxShadow: '0 10px 25px rgba(240, 147, 251, 0.3)',
               color: 'white'
             }}>
-              <div style={{ fontSize: '14px', opacity: 0.9, marginBottom: '8px', fontWeight: '500' }}>🏆 Badge Points</div>
-              <div style={{ fontSize: '36px', fontWeight: '700', marginBottom: '4px' }}>{badgePoints}</div>
-              <div style={{ fontSize: '13px', opacity: 0.85 }}>100 pts per badge</div>
+              <div style={{ fontSize: '12px', opacity: 0.9, marginBottom: '6px', fontWeight: '500' }}>🏆 Badge Points</div>
+              <div style={{ fontSize: '28px', fontWeight: '700', marginBottom: '2px' }}>{badgePoints}</div>
+              <div style={{ fontSize: '11px', opacity: 0.85 }}>100 pts per badge</div>
             </div>
             
             <div style={{ 
               background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', 
-              borderRadius: '16px', 
-              padding: '24px',
+              borderRadius: '12px', 
+              padding: '16px',
               boxShadow: '0 10px 25px rgba(79, 172, 254, 0.3)',
               color: 'white'
             }}>
-              <div style={{ fontSize: '14px', opacity: 0.9, marginBottom: '8px', fontWeight: '500' }}>✨ Total Score</div>
-              <div style={{ fontSize: '36px', fontWeight: '700', marginBottom: '4px' }}>{starPoints + badgePoints}</div>
-              <div style={{ fontSize: '13px', opacity: 0.85 }}>Combined points</div>
+              <div style={{ fontSize: '12px', opacity: 0.9, marginBottom: '6px', fontWeight: '500' }}>✨ Total Score</div>
+              <div style={{ fontSize: '28px', fontWeight: '700', marginBottom: '2px' }}>{starPoints + badgePoints}</div>
+              <div style={{ fontSize: '11px', opacity: 0.85 }}>Combined points</div>
             </div>
           </div>
 
           {/* Subject Filter Pills - Modern Style */}
           <div style={{ 
             backgroundColor: 'white', 
-            borderRadius: '16px',
-            padding: '20px',
-            marginBottom: '24px',
+            borderRadius: '12px',
+            padding: '16px',
+            marginBottom: '20px',
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
           }}>
-            <div style={{ fontSize: '13px', color: '#718096', marginBottom: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Filter by Subject</div>
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <div style={{ fontSize: '12px', color: '#718096', marginBottom: '10px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Filter by Subject</div>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               {subjects.map(subject => {
                 const subjectColors = {
                   'Chemistry': { bg: '#fef3c7', border: '#fbbf24', text: '#92400e' },
@@ -338,15 +338,15 @@ export default function GoalsPage() {
                     key={subject}
                     onClick={() => setSelectedSubject(subject)}
                     style={{
-                      padding: '10px 20px',
-                      borderRadius: '12px',
+                      padding: '8px 16px',
+                      borderRadius: '10px',
                       border: selectedSubject === subject ? `2px solid ${colors.border}` : '2px solid transparent',
                       backgroundColor: selectedSubject === subject ? colors.bg : '#f9fafb',
                       color: selectedSubject === subject ? colors.text : '#4b5563',
                       fontWeight: selectedSubject === subject ? '600' : '500',
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
-                      fontSize: '14px'
+                      fontSize: '13px'
                     }}
                   >
                     {subject}
@@ -356,8 +356,8 @@ export default function GoalsPage() {
             </div>
           </div>
 
-          {/* Main Content - Modern Two Column Layout */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '24px' }}>
+          {/* Main Content - Responsive Layout */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
             {/* Goals List */}
             <div>
               {subjectGoals.length === 0 ? (
@@ -400,7 +400,7 @@ export default function GoalsPage() {
                   </button>
                 </div>
               ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
                   {subjectGoals.map(([goalKey, goal]) => {
                     const daysLeft = getDaysRemaining(goal.targetDate)
                     const isOverdue = daysLeft < 0

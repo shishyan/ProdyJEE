@@ -204,6 +204,67 @@ const backgroundOptions = [
     category: 'Abstract',
     isGradient: true
   },
+  { 
+    id: 'abstract-waves', 
+    name: 'Abstract Waves', 
+    url: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    preview: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    category: 'Abstract',
+    isGradient: true
+  },
+  { 
+    id: 'abstract-mesh', 
+    name: 'Color Mesh', 
+    url: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    preview: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    category: 'Abstract',
+    isGradient: true
+  },
+  { 
+    id: 'abstract-aurora', 
+    name: 'Aurora Gradient', 
+    url: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+    preview: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+    category: 'Abstract',
+    isGradient: true
+  },
+  
+  // Animals & Wildlife (5 options)
+  { 
+    id: 'butterfly', 
+    name: 'Butterfly Garden', 
+    url: 'https://images.unsplash.com/photo-1526336024174-e58f5cdd8e13?w=1920&q=80',
+    preview: 'https://images.unsplash.com/photo-1526336024174-e58f5cdd8e13?w=400&q=80',
+    category: 'Animals'
+  },
+  { 
+    id: 'birds', 
+    name: 'Flying Birds', 
+    url: 'https://images.unsplash.com/photo-1444464666168-49d633b86797?w=1920&q=80',
+    preview: 'https://images.unsplash.com/photo-1444464666168-49d633b86797?w=400&q=80',
+    category: 'Animals'
+  },
+  { 
+    id: 'peacock', 
+    name: 'Peacock Feathers', 
+    url: 'https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=1920&q=80',
+    preview: 'https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=400&q=80',
+    category: 'Animals'
+  },
+  { 
+    id: 'deer', 
+    name: 'Forest Deer', 
+    url: 'https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=1920&q=80',
+    preview: 'https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=400&q=80',
+    category: 'Animals'
+  },
+  { 
+    id: 'koi', 
+    name: 'Koi Fish Pond', 
+    url: 'https://images.unsplash.com/photo-1520990413788-bd4f14852456?w=1920&q=80',
+    preview: 'https://images.unsplash.com/photo-1520990413788-bd4f14852456?w=400&q=80',
+    category: 'Animals'
+  },
   
   // Custom option
   { 
@@ -276,7 +337,7 @@ export default function BackgroundSettings({ show, onClose }) {
     }
   }
 
-  const categories = ['All', 'Nature', 'Mountains', 'Water', 'Flowers', 'Sky', 'Abstract', 'Custom']
+  const categories = ['All', 'Nature', 'Mountains', 'Water', 'Flowers', 'Animals', 'Sky', 'Abstract', 'Custom']
   
   const filteredBackgrounds = selectedCategory === 'All' 
     ? backgroundOptions 
@@ -386,7 +447,16 @@ export default function BackgroundSettings({ show, onClose }) {
           ))}
         </div>
 
-        {/* Custom Upload Section */}
+        {/* Hidden Custom Upload Input */}
+        <input
+          id="custom-bg-upload"
+          type="file"
+          accept="image/*"
+          onChange={handleCustomUpload}
+          style={{ display: 'none' }}
+        />
+
+        {/* Custom Upload Section - Visible Instructions */}
         {selectedCategory === 'Custom' && (
           <div style={{
             marginBottom: '24px',
@@ -399,20 +469,10 @@ export default function BackgroundSettings({ show, onClose }) {
             <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1a1a1a', marginBottom: '16px' }}>
               ✨ Upload Your Custom Background
             </h3>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleCustomUpload}
-              style={{
-                width: '100%',
-                padding: '12px',
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
-                fontSize: '14px',
-                cursor: 'pointer'
-              }}
-            />
-            <p style={{ fontSize: '12px', color: '#718096', marginTop: '8px' }}>
+            <p style={{ fontSize: '12px', color: '#718096', marginBottom: '8px' }}>
+              Click the "Upload Custom" card below to select an image
+            </p>
+            <p style={{ fontSize: '12px', color: '#718096' }}>
               Supported formats: JPG, PNG, WEBP (Max 5MB recommended)
             </p>
           </div>
@@ -428,7 +488,7 @@ export default function BackgroundSettings({ show, onClose }) {
           {filteredBackgrounds.map(bg => (
             <div
               key={bg.id}
-              onClick={() => applyBackground(bg.id)}
+              onClick={() => bg.isCustom ? document.getElementById('custom-bg-upload').click() : applyBackground(bg.id)}
               style={{
                 borderRadius: '16px',
                 overflow: 'hidden',
@@ -458,12 +518,18 @@ export default function BackgroundSettings({ show, onClose }) {
                 <div style={{
                   height: '180px',
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
                   background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  fontSize: '48px'
+                  gap: '12px'
                 }}>
-                  📤
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  <span style={{color: 'white', fontSize: '14px', fontWeight: '600'}}>Upload Image</span>
                 </div>
               ) : (
                 // Regular background preview
@@ -570,8 +636,36 @@ export default function BackgroundSettings({ show, onClose }) {
         {/* Apply Button */}
         <button
           onClick={() => {
-            applyBackground(selectedBg)
-            setTimeout(() => window.location.reload(), 300)
+            // Ensure we apply with current transparency and contrast values
+            const bg = backgroundOptions.find(b => b.id === selectedBg)
+            if (bg) {
+              const imageUrl = selectedBg === 'custom' && customImageUrl ? customImageUrl : bg.url
+              const config = {
+                id: selectedBg,
+                url: imageUrl,
+                transparency: transparency,
+                contrast: contrast
+              }
+              localStorage.setItem('app-background', JSON.stringify(config))
+              
+              // Apply immediately to body
+              if (bg.isGradient || imageUrl.startsWith('linear-gradient')) {
+                document.body.style.backgroundImage = imageUrl
+              } else {
+                document.body.style.backgroundImage = `url(${imageUrl})`
+              }
+              document.body.style.backgroundSize = 'cover'
+              document.body.style.backgroundPosition = 'center'
+              document.body.style.backgroundAttachment = 'fixed'
+              document.body.style.filter = `contrast(${contrast}%)`
+              
+              // Apply transparency overlay
+              const overlayOpacity = transparency / 100
+              document.body.style.setProperty('--bg-overlay-opacity', overlayOpacity)
+              
+              // Reload after a short delay
+              setTimeout(() => window.location.reload(), 300)
+            }
           }}
           style={{
             marginTop: '24px',

@@ -264,6 +264,12 @@ const ExpandIcon = () => (
   </svg>
 )
 
+const MoonIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+  </svg>
+)
+
 
 
 function SortableTask({ task, onEdit, onUpdateProgress }) {
@@ -688,10 +694,6 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
         <span className="status-badge" style={{ color: '#8b5cf6', fontSize: '11px' }}>
           {chapter.aggregatedStage}
         </span>
-        <span className="detail-label">Proficiency:</span>
-        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-          {getProficiencyIcons(chapterProficiency)}
-        </div>
       </div>
 
       <div className="chapter-content">
@@ -730,19 +732,24 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
               </div>
             </div>
 
-            <div className="chapter-progress">
-              <div className="progress-bar">
-                <div
-                  className="progress-fill"
-                  style={{
-                    width: `${progressPercentage}%`,
-                    backgroundColor: progressPercentage === 100 ? '#10b981' : progressPercentage > 0 ? '#f59e0b' : '#6b7280'
-                  }}
-                ></div>
-              </div>
-              <div className="progress-info">
-                <span className="progress-label">Progress</span>
-                <span className="progress-text">{progressPercentage}% Complete</span>
+            {/* Progress Percentage and Stars at Bottom */}
+            <div className="chapter-footer-row" style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              marginTop: '12px',
+              paddingTop: '8px',
+              borderTop: '1px solid rgba(0, 0, 0, 0.08)'
+            }}>
+              <span className="progress-percentage" style={{
+                fontSize: '14px',
+                fontWeight: '600',
+                color: progressPercentage === 100 ? '#10b981' : progressPercentage > 0 ? '#f59e0b' : '#6b7280'
+              }}>
+                {progressPercentage}%
+              </span>
+              <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                {getProficiencyIcons(chapterProficiency)}
               </div>
             </div>
           </>
@@ -2524,6 +2531,9 @@ export default function Home() {
   const [navbarBackground, setNavbarBackground] = useState('default')
   const [viewMode, setViewMode] = useState('kanban') // Only Kanban view - simplified
   const [groupBy, setGroupBy] = useState('status') // status, stage, proficiency
+  const [filterStatus, setFilterStatus] = useState('all') // all, In Queue, In Progress, Done, Closed
+  const [filterStage, setFilterStage] = useState('all') // all, Initiated, Skimmed, Grasped, Practiced, Revised, Mastered
+  const [filterProficiency, setFilterProficiency] = useState('all') // all, Novice (25), Competent (50), Expert (75), Master (100)
   const [studyPlans, setStudyPlans] = useState([])
   const [weatherEffect, setWeatherEffect] = useState(true)
   const [showBackgroundSettings, setShowBackgroundSettings] = useState(false)
@@ -2550,11 +2560,17 @@ export default function Home() {
   const [showNavigationHint, setShowNavigationHint] = useState(false)
   const [activeSettingsTab, setActiveSettingsTab] = useState('visibility')
   
+  // Main content container customization
+  const [containerBgColor, setContainerBgColor] = useState('#ffffff')
+  const [containerTransparency, setContainerTransparency] = useState(100) // 0-100
+  const [containerBlur, setContainerBlur] = useState(10) // 0-30
+  const [containerElevation, setContainerElevation] = useState(15) // 0-50
+  const [containerBorderThickness, setContainerBorderThickness] = useState(0) // 0-10
+  
   // New MS Planner features
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState('default') // 'default', 'progress', 'duedate', 'proficiency'
   const [selectedChapters, setSelectedChapters] = useState(new Set())
-  const [filterStatus, setFilterStatus] = useState('all') // 'all', 'Done', 'In Progress', 'To Do', 'In Queue'
   const [showBulkActions, setShowBulkActions] = useState(false)
   
   // Class and Curriculum filters
@@ -2791,6 +2807,29 @@ export default function Home() {
       return () => bucketsContainer.removeEventListener('scroll', handleScroll)
     }
   }, [currentPage])
+
+  // Apply container customization styles
+  useEffect(() => {
+    const container = document.querySelector('.main-content-container')
+    if (container) {
+      const rgbaColor = hexToRgba(containerBgColor, containerTransparency / 100)
+      container.style.backgroundColor = rgbaColor
+      container.style.backdropFilter = `blur(${containerBlur}px)`
+      container.style.webkitBackdropFilter = `blur(${containerBlur}px)`
+      container.style.boxShadow = `0 ${containerElevation}px ${containerElevation * 2}px rgba(0, 0, 0, ${containerElevation / 100})`
+      container.style.border = containerBorderThickness > 0 
+        ? `${containerBorderThickness}px solid rgba(0, 0, 0, 0.1)` 
+        : 'none'
+    }
+  }, [containerBgColor, containerTransparency, containerBlur, containerElevation, containerBorderThickness])
+
+  // Helper function to convert hex to rgba
+  const hexToRgba = (hex, alpha) => {
+    const r = parseInt(hex.slice(1, 3), 16)
+    const g = parseInt(hex.slice(3, 5), 16)
+    const b = parseInt(hex.slice(5, 7), 16)
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`
+  }
 
   // Touch gesture support for mobile scrollbar-free navigation
   useEffect(() => {
@@ -3277,9 +3316,22 @@ export default function Home() {
 
   const filterChapters = (chapters) => {
     return chapters.filter(chapter => {
-      // Status filter
+      // Status filter - check aggregatedStatus from Study Plans
       if (filterStatus !== 'all' && chapter.aggregatedStatus !== filterStatus) {
         return false
+      }
+      
+      // Stage filter - check aggregatedStage from Study Plans
+      if (filterStage !== 'all' && chapter.aggregatedStage !== filterStage) {
+        return false
+      }
+      
+      // Proficiency filter - check aggregatedProficiency from Study Plans
+      if (filterProficiency !== 'all') {
+        const profValue = parseInt(filterProficiency)
+        if (chapter.aggregatedProficiency !== profValue) {
+          return false
+        }
       }
       
       // Search filter - search in chapter name and topics
@@ -3422,36 +3474,16 @@ export default function Home() {
               />
             </div>
 
-            {/* Red Recorder Button - AI Assistant */}
-            <button
-              className="header-action-btn"
-              onClick={() => {
-                alert('Voice Assistant AI - Coming Soon!\nCapture notes, to-dos, and voice commands.')
-              }}
-              title="AI Voice Assistant"
-              style={{ backgroundColor: '#ef4444', color: 'white', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            >
-              <MicrophoneIcon />
-            </button>
-
-            {/* Settings Dropdown Menu */}
+            {/* Unified Settings Icon (includes Profile & Controls) */}
             <div style={{ position: 'relative' }}>
               <button
                 className={`header-action-btn ${showSettingsPanel ? 'active' : ''}`}
                 onClick={() => setShowSettingsPanel(!showSettingsPanel)}
-                title="Settings"
+                title="Settings & Profile"
               >
                 <SettingsIcon />
               </button>
             </div>
-
-            <a
-              href="/login"
-              className="header-action-btn user-profile"
-              title="User Profile"
-            >
-              <UserIcon />
-            </a>
           </div>
         </header>
       )}
@@ -3470,16 +3502,7 @@ export default function Home() {
             }}
           >
             <div className="sidebar-header">
-              <button
-                className="sidebar-toggle-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSidebarCollapsed(!sidebarCollapsed);
-                }}
-                title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-              >
-                {sidebarCollapsed ? <ExpandIcon /> : <CollapseIcon />}
-              </button>
+              {/* Header is now empty - toggle button moved to footer */}
             </div>            <div className="sidebar-content" onClick={(e) => e.stopPropagation()}>
               {/* Main Navigation Menu */}
               <div className="sidebar-section">
@@ -3523,11 +3546,28 @@ export default function Home() {
                   <span className="icon-wrapper"><MeditationIcon /></span>
                   {!sidebarCollapsed && <span>Goals</span>}
                 </button>
+                <button
+                  className={`sidebar-nav-item ${currentPage === 'progress' ? 'active' : ''}`}
+                  onClick={() => setCurrentPage('progress')}
+                  data-icon="progress"
+                >
+                  <span className="icon-wrapper"><CheckCircleIcon /></span>
+                  {!sidebarCollapsed && <span>Progress</span>}
+                </button>
               </div>
             </div>
             
             <div className="sidebar-footer">
-              {/* Empty - attribution moved to main footer */}
+              <button
+                className="sidebar-toggle-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSidebarCollapsed(!sidebarCollapsed);
+                }}
+                title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+              >
+                {sidebarCollapsed ? <ExpandIcon /> : <CollapseIcon />}
+              </button>
             </div>
           </aside>
         )}
@@ -3572,16 +3612,55 @@ export default function Home() {
                   </div>
                   
                   <div className="kanban-controls-right">
-                    <label className="controls-label">Filter By</label>
-                    <select
-                      value={groupBy}
-                      onChange={(e) => setGroupBy(e.target.value)}
-                      className="filter-select"
-                    >
-                      <option value="status">Status</option>
-                      <option value="stage">Stage</option>
-                      <option value="proficiency">Proficiency</option>
-                    </select>
+                    {/* Status Filter */}
+                    <div className="kanban-filter-group">
+                      <label className="controls-label">Status</label>
+                      <select
+                        value={filterStatus}
+                        onChange={(e) => setFilterStatus(e.target.value)}
+                        className="filter-select"
+                      >
+                        <option value="all">All</option>
+                        <option value="In Queue">In Queue</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Done">Done</option>
+                        <option value="Closed">Closed</option>
+                      </select>
+                    </div>
+
+                    {/* Stage Filter */}
+                    <div className="kanban-filter-group">
+                      <label className="controls-label">Stage</label>
+                      <select
+                        value={filterStage}
+                        onChange={(e) => setFilterStage(e.target.value)}
+                        className="filter-select"
+                      >
+                        <option value="all">All</option>
+                        <option value="Initiated">Initiated</option>
+                        <option value="Skimmed">Skimmed</option>
+                        <option value="Grasped">Grasped</option>
+                        <option value="Practiced">Practiced</option>
+                        <option value="Revised">Revised</option>
+                        <option value="Mastered">Mastered</option>
+                      </select>
+                    </div>
+
+                    {/* Proficiency Filter */}
+                    <div className="kanban-filter-group">
+                      <label className="controls-label">Proficiency</label>
+                      <select
+                        value={filterProficiency}
+                        onChange={(e) => setFilterProficiency(e.target.value)}
+                        className="filter-select"
+                      >
+                        <option value="all">All</option>
+                        <option value="25">Novice</option>
+                        <option value="50">Competent</option>
+                        <option value="75">Expert</option>
+                        <option value="100">Master</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
 
@@ -3763,6 +3842,240 @@ export default function Home() {
         {currentPage === 'goals' && (
           <GoalsPage />
         )}
+
+        {currentPage === 'progress' && (
+          <>
+            {/* Progress Page Controls - Class, Subjects & Filter */}
+            <div className="progress-controls-container">
+              <div className="progress-controls-left">
+                {/* Class Selector */}
+                <div className="progress-class-selector">
+                  <label className="controls-label">Class</label>
+                  <select
+                    value={selectedClass}
+                    onChange={(e) => setSelectedClass(e.target.value)}
+                    className="filter-select"
+                  >
+                    <option value="6">6th Grade</option>
+                    <option value="11">11th Grade</option>
+                  </select>
+                </div>
+                
+                <div className="progress-subjects-group">
+                  <h3 className="controls-label">Subjects</h3>
+                  <div className="subject-chips-horizontal">
+                    {subjects.map(subject => (
+                      <button
+                        key={subject.subject_id}
+                        className={`subject-chip ${selectedSubject?.subject_id === subject.subject_id ? 'active' : ''}`}
+                        onClick={() => setSelectedSubject(subject)}
+                      >
+                        <BookOpenIcon />
+                        <span>{subject.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Progress Dashboard - Gantt Style */}
+            {selectedSubject && (
+              <div style={{ height: 'calc(100% - 80px)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                {/* Gantt Chart Header */}
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '16px', 
+                  padding: '16px 20px',
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  borderRadius: '12px',
+                  marginBottom: '16px',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+                }}>
+                  <h2 style={{ margin: 0, fontSize: '18px', fontWeight: '600', color: '#1a202c' }}>
+                    📊 Progress Timeline - {selectedSubject.name}
+                  </h2>
+                  <div style={{ marginLeft: 'auto', display: 'flex', gap: '16px', fontSize: '13px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#10b981' }}></span>
+                      <span>Done (100%)</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#3b82f6' }}></span>
+                      <span>In Progress (50-99%)</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#f59e0b' }}></span>
+                      <span>Started (1-49%)</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: '#9ca3af' }}></span>
+                      <span>Not Started (0%)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Gantt Chart Body - Scrollable */}
+                <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+                  {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+                    .map((chapter, chapterIndex) => {
+                      const completedTopics = chapter.studyPlans.filter(plan => plan.progress_percentage >= 100).length;
+                      const totalTopics = chapter.studyPlans.length;
+                      const progressPercentage = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+                      const chapterColor = progressPercentage === 100 ? '#10b981' : 
+                                           progressPercentage >= 50 ? '#3b82f6' : 
+                                           progressPercentage > 0 ? '#f59e0b' : '#9ca3af';
+
+                      return (
+                        <div key={chapter.chapter_id} style={{ 
+                          background: 'rgba(255, 255, 255, 0.8)',
+                          borderRadius: '12px',
+                          padding: '16px',
+                          marginBottom: '12px',
+                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+                        }}>
+                          {/* Chapter Row */}
+                          <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '12px',
+                            marginBottom: '12px',
+                            padding: '8px',
+                            background: 'rgba(0, 0, 0, 0.02)',
+                            borderRadius: '8px'
+                          }}>
+                            <div style={{
+                              minWidth: '60px',
+                              height: '32px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              background: chapterColor,
+                              color: 'white',
+                              borderRadius: '6px',
+                              fontSize: '12px',
+                              fontWeight: '700',
+                              boxShadow: `0 2px 8px ${chapterColor}40`
+                            }}>
+                              {chapter.chapter_id}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: '14px', fontWeight: '600', color: '#1a202c', marginBottom: '4px' }}>
+                                {chapter.chapter_name}
+                              </div>
+                              <div style={{ display: 'flex', gap: '8px', fontSize: '12px', color: '#6b7280' }}>
+                                <span>{totalTopics} topics</span>
+                                <span>•</span>
+                                <span>{completedTopics} completed</span>
+                                <span>•</span>
+                                <span style={{ color: chapterColor, fontWeight: '600' }}>{progressPercentage}%</span>
+                              </div>
+                            </div>
+                            <div style={{
+                              width: '200px',
+                              height: '24px',
+                              background: '#e5e7eb',
+                              borderRadius: '12px',
+                              overflow: 'hidden',
+                              position: 'relative'
+                            }}>
+                              <div style={{
+                                width: `${progressPercentage}%`,
+                                height: '100%',
+                                background: chapterColor,
+                                borderRadius: '12px',
+                                transition: 'width 0.3s ease'
+                              }}></div>
+                              <span style={{
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
+                                transform: 'translate(-50%, -50%)',
+                                fontSize: '11px',
+                                fontWeight: '700',
+                                color: progressPercentage > 50 ? 'white' : '#1a202c'
+                              }}>
+                                {progressPercentage}%
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Topics Grid - Compact Icons */}
+                          <div style={{ 
+                            display: 'grid', 
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', 
+                            gap: '8px',
+                            paddingLeft: '72px'
+                          }}>
+                            {chapter.studyPlans.map((topic, topicIndex) => {
+                              const topicProgress = topic.progress_percentage || 0;
+                              const topicColor = topicProgress === 100 ? '#10b981' : 
+                                                 topicProgress >= 50 ? '#3b82f6' : 
+                                                 topicProgress > 0 ? '#f59e0b' : '#9ca3af';
+                              
+                              return (
+                                <div 
+                                  key={topic.unique_id}
+                                  title={`${topic.topic} - ${topicProgress}%`}
+                                  style={{
+                                    height: '40px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    background: topicColor,
+                                    color: 'white',
+                                    borderRadius: '6px',
+                                    fontSize: '11px',
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    boxShadow: `0 2px 6px ${topicColor}30`,
+                                    position: 'relative'
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'scale(1.05)';
+                                    e.currentTarget.style.boxShadow = `0 4px 12px ${topicColor}50`;
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'scale(1)';
+                                    e.currentTarget.style.boxShadow = `0 2px 6px ${topicColor}30`;
+                                  }}
+                                  onClick={() => {
+                                    const topicToEdit = {
+                                      ...topic,
+                                      chapter_name: chapter.chapter_name,
+                                      subject: chapter.subject,
+                                      grade: chapter.grade,
+                                      curriculum: chapter.curriculum
+                                    };
+                                    setEditingStudyPlan(topicToEdit);
+                                  }}
+                                >
+                                  <div style={{ textAlign: 'center' }}>
+                                    <div>{topic.topic.substring(0, 8)}</div>
+                                    <div style={{ fontSize: '9px', opacity: 0.9 }}>{topicProgress}%</div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+
+            {!selectedSubject && (
+              <div className="empty-state">
+                <BookOpenIcon />
+                <h3>Select a Subject</h3>
+                <p>Choose a subject from the filters above to view chapter progress</p>
+              </div>
+            )}
+          </>
+        )}
         </main>
         {/* End of MAIN CONTENT CONTAINER */}
       </div>
@@ -3773,6 +4086,43 @@ export default function Home() {
         <footer className="footer-container">
           <div className="footer-content">
             <span className="footer-text">© 2025 ProdyJEE - Peepal Prodigy School</span>
+            
+            {/* Voice Assistant - Bottom Right */}
+            <button
+              className="footer-voice-assistant"
+              onClick={() => {
+                alert('Voice Assistant AI - Coming Soon!\nCapture notes, to-dos, and voice commands.')
+              }}
+              title="AI Voice Assistant"
+              style={{ 
+                position: 'absolute',
+                right: '20px',
+                bottom: '10px',
+                backgroundColor: '#ef4444', 
+                color: 'white', 
+                borderRadius: '50%', 
+                width: '48px', 
+                height: '48px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(239, 68, 68, 0.4)',
+                transition: 'all 0.3s ease',
+                zIndex: 1000
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.1)'
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(239, 68, 68, 0.6)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)'
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.4)'
+              }}
+            >
+              <MicrophoneIcon />
+            </button>
           </div>
         </footer>
       )}
@@ -3780,183 +4130,201 @@ export default function Home() {
       {/* Modern Settings Panel */}
       {showSettingsPanel && (
         <div className="settings-panel-overlay" onClick={() => setShowSettingsPanel(false)}>
-          <div className="settings-panel" onClick={(e) => e.stopPropagation()}>
-            <div className="settings-panel-header">
-              <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <LayoutIcon />
-                <span>Settings</span>
-              </h3>
-              <button 
-                className="settings-close-btn"
-                onClick={() => setShowSettingsPanel(false)}
-              >
+          <div className="settings-panel-compact" onClick={(e) => e.stopPropagation()}>
+            <div className="settings-panel-header-compact">
+              <h3><LayoutIcon /> Settings</h3>
+              <button className="settings-close-btn" onClick={() => setShowSettingsPanel(false)}>
                 <XIcon />
               </button>
             </div>
             
-            {/* Settings Tabs */}
-            <div className="settings-tabs">
-              <button 
-                className={`settings-tab ${activeSettingsTab === 'visibility' ? 'active' : ''}`}
-                onClick={() => setActiveSettingsTab('visibility')}
-              >
-                Visibility
-              </button>
-              <button 
-                className={`settings-tab ${activeSettingsTab === 'appearance' ? 'active' : ''}`}
-                onClick={() => setActiveSettingsTab('appearance')}
-              >
-                Appearance
-              </button>
-              <button 
-                className={`settings-tab ${activeSettingsTab === 'audio' ? 'active' : ''}`}
-                onClick={() => setActiveSettingsTab('audio')}
-              >
-                Audio
-              </button>
-            </div>
-            
-            <div className="settings-panel-content">
+            <div className="settings-body-compact">
+              {/* Vertical Tabs */}
+              <div className="settings-tabs-vertical">
+                <button 
+                  className={`settings-tab-vertical ${activeSettingsTab === 'visibility' ? 'active' : ''}`}
+                  onClick={() => setActiveSettingsTab('visibility')}
+                >
+                  <GridIcon />
+                  <span>Visibility</span>
+                </button>
+                <button 
+                  className={`settings-tab-vertical ${activeSettingsTab === 'container' ? 'active' : ''}`}
+                  onClick={() => setActiveSettingsTab('container')}
+                >
+                  <LayoutIcon />
+                  <span>Container</span>
+                </button>
+                <button 
+                  className={`settings-tab-vertical ${activeSettingsTab === 'appearance' ? 'active' : ''}`}
+                  onClick={() => setActiveSettingsTab('appearance')}
+                >
+                  <LayoutIcon />
+                  <span>Appearance</span>
+                </button>
+                <button 
+                  className={`settings-tab-vertical ${activeSettingsTab === 'audio' ? 'active' : ''}`}
+                  onClick={() => setActiveSettingsTab('audio')}
+                >
+                  <MusicIcon />
+                  <span>Audio</span>
+                </button>
+              </div>
+              
+              {/* Content Area */}
+              <div className="settings-content-compact">
               {/* Container Visibility Section */}
               {activeSettingsTab === 'visibility' && (
-              <div className="settings-section">
-                <h4 className="settings-section-title">Container Visibility</h4>
-                <p className="settings-section-description">
-                  Toggle visibility of different layout containers
-                </p>
-                
-                <div className="settings-toggle-group">
-                  <div className="settings-toggle-item">
-                    <div className="settings-toggle-info">
-                      <span className="settings-toggle-icon"><GridIcon /></span>
-                      <div className="settings-toggle-text">
-                        <span className="settings-toggle-label">Top Header</span>
-                        <span className="settings-toggle-desc">Brand, search, and actions</span>
-                      </div>
-                    </div>
-                    <label className="toggle-switch">
-                      <input 
-                        type="checkbox" 
-                        checked={showTopHeader}
-                        onChange={() => setShowTopHeader(!showTopHeader)}
-                      />
-                      <span className="toggle-slider"></span>
+              <div className="settings-section-compact">
+                <div className="settings-toggle-group-compact">
+                  <div className="settings-toggle-item-compact">
+                    <GridIcon />
+                    <span>Top Header</span>
+                    <label className="toggle-switch-mini">
+                      <input type="checkbox" checked={showTopHeader} onChange={() => setShowTopHeader(!showTopHeader)} />
+                      <span className="toggle-slider-mini"></span>
                     </label>
                   </div>
 
-                  <div className="settings-toggle-item">
-                    <div className="settings-toggle-info">
-                      <span className="settings-toggle-icon"><NavigationIcon /></span>
-                      <div className="settings-toggle-text">
-                        <span className="settings-toggle-label">Navigation Bar</span>
-                        <span className="settings-toggle-desc">Subject filters and controls</span>
-                      </div>
-                    </div>
-                    <label className="toggle-switch">
-                      <input 
-                        type="checkbox" 
-                        checked={showNavBar}
-                        onChange={() => setShowNavBar(!showNavBar)}
-                      />
-                      <span className="toggle-slider"></span>
+                  <div className="settings-toggle-item-compact">
+                    <NavigationIcon />
+                    <span>Navigation Bar</span>
+                    <label className="toggle-switch-mini">
+                      <input type="checkbox" checked={showNavBar} onChange={() => setShowNavBar(!showNavBar)} />
+                      <span className="toggle-slider-mini"></span>
                     </label>
                   </div>
 
-                  <div className="settings-toggle-item">
-                    <div className="settings-toggle-info">
-                      <span className="settings-toggle-icon"><MenuIcon /></span>
-                      <div className="settings-toggle-text">
-                        <span className="settings-toggle-label">Left Sidebar</span>
-                        <span className="settings-toggle-desc">Navigation and breadcrumbs</span>
-                      </div>
-                    </div>
-                    <label className="toggle-switch">
-                      <input 
-                        type="checkbox" 
-                        checked={showSidebar}
-                        onChange={() => setShowSidebar(!showSidebar)}
-                      />
-                      <span className="toggle-slider"></span>
+                  <div className="settings-toggle-item-compact">
+                    <MenuIcon />
+                    <span>Left Sidebar</span>
+                    <label className="toggle-switch-mini">
+                      <input type="checkbox" checked={showSidebar} onChange={() => setShowSidebar(!showSidebar)} />
+                      <span className="toggle-slider-mini"></span>
                     </label>
                   </div>
 
-                  <div className="settings-toggle-item">
-                    <div className="settings-toggle-info">
-                      <span className="settings-toggle-icon"><BarChartIcon /></span>
-                      <div className="settings-toggle-text">
-                        <span className="settings-toggle-label">Footer</span>
-                        <span className="settings-toggle-desc">Overview and AI assistant</span>
-                      </div>
-                    </div>
-                    <label className="toggle-switch">
-                      <input 
-                        type="checkbox" 
-                        checked={showFooter}
-                        onChange={() => setShowFooter(!showFooter)}
-                      />
-                      <span className="toggle-slider"></span>
+                  <div className="settings-toggle-item-compact">
+                    <BarChartIcon />
+                    <span>Footer</span>
+                    <label className="toggle-switch-mini">
+                      <input type="checkbox" checked={showFooter} onChange={() => setShowFooter(!showFooter)} />
+                      <span className="toggle-slider-mini"></span>
                     </label>
                   </div>
 
-                  <div className="settings-toggle-item">
-                    <div className="settings-toggle-info">
-                      <span className="settings-toggle-icon"><NavigationIcon /></span>
-                      <div className="settings-toggle-text">
-                        <span className="settings-toggle-label">Navigation Hint</span>
-                        <span className="settings-toggle-desc">Scrollbar-free keyboard shortcuts</span>
-                      </div>
-                    </div>
-                    <label className="toggle-switch">
-                      <input 
-                        type="checkbox" 
-                        checked={showNavigationHint}
-                        onChange={() => setShowNavigationHint(!showNavigationHint)}
-                      />
-                      <span className="toggle-slider"></span>
+                  <div className="settings-toggle-item-compact">
+                    <NavigationIcon />
+                    <span>Navigation Hint</span>
+                    <label className="toggle-switch-mini">
+                      <input type="checkbox" checked={showNavigationHint} onChange={() => setShowNavigationHint(!showNavigationHint)} />
+                      <span className="toggle-slider-mini"></span>
                     </label>
                   </div>
                 </div>
               </div>
               )}
 
+              {/* Container Customization Section */}
+              {activeSettingsTab === 'container' && (
+              <div className="settings-section-compact">
+                <div className="settings-form-group-compact">
+                  <label>Background Color</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <input 
+                      type="color" 
+                      value={containerBgColor} 
+                      onChange={(e) => setContainerBgColor(e.target.value)}
+                      style={{ width: '60px', height: '40px', cursor: 'pointer', border: '2px solid rgba(255, 255, 255, 0.2)', borderRadius: '8px' }}
+                    />
+                    <input 
+                      type="text" 
+                      value={containerBgColor} 
+                      onChange={(e) => setContainerBgColor(e.target.value)}
+                      style={{ flex: 1, padding: '8px', backgroundColor: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '6px', color: 'white' }}
+                    />
+                  </div>
+                </div>
+
+                <div className="settings-form-group-compact">
+                  <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Transparency</span>
+                    <span style={{ color: 'rgba(255, 255, 255, 0.7)' }}>{containerTransparency}%</span>
+                  </label>
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="100" 
+                    value={containerTransparency} 
+                    onChange={(e) => setContainerTransparency(Number(e.target.value))}
+                    style={{ width: '100%', cursor: 'pointer' }}
+                  />
+                </div>
+
+                <div className="settings-form-group-compact">
+                  <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Blur Effect</span>
+                    <span style={{ color: 'rgba(255, 255, 255, 0.7)' }}>{containerBlur}px</span>
+                  </label>
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="30" 
+                    value={containerBlur} 
+                    onChange={(e) => setContainerBlur(Number(e.target.value))}
+                    style={{ width: '100%', cursor: 'pointer' }}
+                  />
+                </div>
+
+                <div className="settings-form-group-compact">
+                  <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Elevation (Shadow)</span>
+                    <span style={{ color: 'rgba(255, 255, 255, 0.7)' }}>{containerElevation}px</span>
+                  </label>
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="50" 
+                    value={containerElevation} 
+                    onChange={(e) => setContainerElevation(Number(e.target.value))}
+                    style={{ width: '100%', cursor: 'pointer' }}
+                  />
+                </div>
+
+                <div className="settings-form-group-compact">
+                  <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Border Thickness</span>
+                    <span style={{ color: 'rgba(255, 255, 255, 0.7)' }}>{containerBorderThickness}px</span>
+                  </label>
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="10" 
+                    value={containerBorderThickness} 
+                    onChange={(e) => setContainerBorderThickness(Number(e.target.value))}
+                    style={{ width: '100%', cursor: 'pointer' }}
+                  />
+                </div>
+              </div>
+              )}
+
               {/* Zen Music Section */}
               {activeSettingsTab === 'audio' && (
-              <div className="settings-section">
-                <h4 className="settings-section-title">Zen Music</h4>
-                <p className="settings-section-description">
-                  Background music for focus and relaxation
-                </p>
-                
-                <div className="settings-toggle-group">
-                  <div className="settings-toggle-item">
-                    <div className="settings-toggle-info">
-                      <span className="settings-toggle-icon"><MusicIcon /></span>
-                      <div className="settings-toggle-text">
-                        <span className="settings-toggle-label">Play Music</span>
-                        <span className="settings-toggle-desc">{musicPlaying ? 'Music is playing' : 'Music is paused'}</span>
-                      </div>
-                    </div>
-                    <label className="toggle-switch">
-                      <input 
-                        type="checkbox" 
-                        checked={musicPlaying}
-                        onChange={() => setMusicPlaying(!musicPlaying)}
-                      />
-                      <span className="toggle-slider"></span>
+              <div className="settings-section-compact">
+                <div className="settings-toggle-group-compact">
+                  <div className="settings-toggle-item-compact">
+                    <MusicIcon />
+                    <span>Play Music</span>
+                    <label className="toggle-switch-mini">
+                      <input type="checkbox" checked={musicPlaying} onChange={() => setMusicPlaying(!musicPlaying)} />
+                      <span className="toggle-slider-mini"></span>
                     </label>
                   </div>
 
-                  <div className="settings-form-group">
-                    <label className="settings-form-label">
-                      <MusicIcon />
-                      <span>Music Track</span>
-                    </label>
-                    <select 
-                      className="settings-form-select"
-                      value={backgroundMusic} 
-                      onChange={(e) => setBackgroundMusic(e.target.value)}
-                    >
-                      <option value="zen-mixed">Zen Mixed (Waves + Campfire + Rain + Crickets)</option>
+                  <div className="settings-form-group-compact">
+                    <label><MusicIcon /> Music Track</label>
+                    <select value={backgroundMusic} onChange={(e) => setBackgroundMusic(e.target.value)}>
+                      <option value="zen-mixed">Zen Mixed</option>
                       <option value="zen-forest">Zen Forest</option>
                       <option value="zen-rain">Zen Rain</option>
                       <option value="zen-wind">Zen Wind</option>
@@ -3974,122 +4342,65 @@ export default function Home() {
 
               {/* Background & Theme Section */}
               {activeSettingsTab === 'appearance' && (
-              <div className="settings-section">
-                <h4 className="settings-section-title">Background & Theme</h4>
-                <p className="settings-section-description">
-                  Customize background and color theme
-                </p>
-                
-                <div className="settings-toggle-group">
-                  <div className="settings-form-group">
-                    <label className="settings-form-label">
-                      <LayoutIcon />
-                      <span>Color Theme</span>
-                    </label>
-                    <div className="theme-buttons-group" style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
-                      {[
-                        { value: 'light', label: 'Light', icon: '☀️' },
-                        { value: 'dark', label: 'Dark', icon: '🌙' },
-                        { value: 'transparent', label: 'Transparent', icon: '✨' }
-                      ].map(theme => (
-                        <button
-                          key={theme.value}
-                          className={`theme-btn ${colorTheme === theme.value ? 'active' : ''}`}
-                          onClick={() => setColorTheme(theme.value)}
-                          style={{
-                            padding: '8px 16px',
-                            borderRadius: '8px',
-                            border: colorTheme === theme.value ? '2px solid #3b82f6' : '1px solid rgba(255,255,255,0.2)',
-                            background: colorTheme === theme.value ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255,255,255,0.1)',
-                            color: 'white',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px'
-                          }}
-                        >
-                          <span>{theme.icon}</span>
-                          <span>{theme.label}</span>
-                        </button>
-                      ))}
-                    </div>
+              <div className="settings-section-compact">
+                <div className="settings-form-group-compact">
+                  <label><LayoutIcon /> Color Theme</label>
+                  <div className="theme-buttons-compact">
+                    {[
+                      { value: 'light', label: 'Light', icon: '☀️' },
+                      { value: 'dark', label: 'Dark', icon: '🌙' },
+                      { value: 'transparent', label: 'Transparent', icon: '✨' }
+                    ].map(theme => (
+                      <button
+                        key={theme.value}
+                        className={`theme-btn-compact ${colorTheme === theme.value ? 'active' : ''}`}
+                        onClick={() => setColorTheme(theme.value)}
+                      >
+                        <span>{theme.icon}</span> {theme.label}
+                      </button>
+                    ))}
                   </div>
+                </div>
 
-                  <div className="settings-form-group" style={{ marginTop: '16px' }}>
-                    <label className="settings-form-label">
-                      <LayoutIcon />
-                      <span>Background Theme</span>
-                    </label>
-                    <div className="theme-buttons-group" style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
-                      {['nature', 'sunset', 'mountains', 'ocean', 'forest', 'space'].map(theme => (
-                        <button
-                          key={theme}
-                          className={`theme-btn ${backgroundTheme === theme ? 'active' : ''}`}
-                          onClick={() => setBackgroundTheme(theme)}
-                          style={{
-                            padding: '8px 16px',
-                            borderRadius: '8px',
-                            border: backgroundTheme === theme ? '2px solid #3b82f6' : '1px solid rgba(255,255,255,0.2)',
-                            background: backgroundTheme === theme ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255,255,255,0.1)',
-                            color: 'white',
-                            cursor: 'pointer',
-                            textTransform: 'capitalize',
-                            transition: 'all 0.2s ease'
-                          }}
-                        >
-                          {theme}
-                        </button>
-                      ))}
-                    </div>
+                <div className="settings-form-group-compact">
+                  <label><LayoutIcon /> Background Theme</label>
+                  <div className="theme-buttons-compact">
+                    {['nature', 'sunset', 'mountains', 'ocean', 'forest', 'space'].map(theme => (
+                      <button
+                        key={theme}
+                        className={`theme-btn-compact ${backgroundTheme === theme ? 'active' : ''}`}
+                        onClick={() => setBackgroundTheme(theme)}
+                      >
+                        {theme}
+                      </button>
+                    ))}
                   </div>
+                </div>
 
-                  <div className="settings-form-group" style={{ marginTop: '16px' }}>
-                    <button
-                      className="settings-action-btn"
-                      onClick={() => {
-                        setShowBackgroundSettings(true)
-                        setShowSettingsPanel(false)
-                      }}
-                      style={{
-                        width: '100%',
-                        padding: '12px',
-                        borderRadius: '8px',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                        background: 'rgba(59, 130, 246, 0.2)',
-                        color: 'white',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px',
-                        transition: 'all 0.2s ease'
-                      }}
-                    >
-                      <LayoutIcon />
-                      Advanced Background Settings
-                    </button>
-                  </div>
+                <div className="settings-form-group-compact">
+                  <button className="settings-action-btn-compact" onClick={() => {
+                    setShowBackgroundSettings(true)
+                    setShowSettingsPanel(false)
+                  }}>
+                    <LayoutIcon /> Advanced Backgrounds
+                  </button>
                 </div>
               </div>
               )}
 
-              <div className="settings-panel-footer">
-                <button 
-                  className="settings-reset-btn"
-                  onClick={() => {
-                    setShowTopHeader(true)
-                    setShowNavBar(true)
-                    setShowSidebar(true)
-                    setShowFooter(true)
-                    setShowNavigationHint(true)
-                  }}
-                >
-                  Reset to Default
-                </button>
               </div>
+            </div>
+
+            <div className="settings-panel-footer-compact">
+              <button className="settings-reset-btn-compact" onClick={() => {
+                setShowTopHeader(true)
+                setShowNavBar(true)
+                setShowSidebar(true)
+                setShowFooter(true)
+                setShowNavigationHint(true)
+              }}>
+                Reset to Default
+              </button>
             </div>
           </div>
         </div>
@@ -4262,63 +4573,10 @@ export default function Home() {
               borderLeft: `3px dashed ${getStatusColor(editingChapter.aggregatedStatus)}`
             }}
           >
-            {/* Modal Header - Four Column Layout */}
+            {/* Modal Header - Three Column Layout */}
             <div className="modal-header-compact">
               <div className="header-title-row">
                 <h2 className="modal-chapter-title">{editingChapter.chapter_name}</h2>
-                
-                {/* Target Date - Prominent in Header */}
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '8px',
-                  marginLeft: 'auto',
-                  marginRight: '16px'
-                }}>
-                  <label style={{
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    color: '#6b7280',
-                    whiteSpace: 'nowrap'
-                  }}>📅 Target Date:</label>
-                  <input
-                    type="date"
-                    value={editingChapter.studyPlans && editingChapter.studyPlans.length > 0 && editingChapter.studyPlans[0].target_date 
-                      ? new Date(editingChapter.studyPlans[0].target_date).toISOString().split('T')[0]
-                      : ''}
-                    onChange={(e) => {
-                      const newDate = e.target.value;
-                      const updatedPlans = studyPlans.map(plan => 
-                        plan.chapter_id === editingChapter.chapter_id 
-                          ? {...plan, target_date: newDate}
-                          : plan
-                      );
-                      setStudyPlans(updatedPlans);
-                      localStorage.setItem('studyPlans', JSON.stringify(updatedPlans));
-                      const allChapters = [
-                        ...groupStudyPlansByChapter(updatedPlans, 'In Queue'),
-                        ...groupStudyPlansByChapter(updatedPlans, 'To Do'),
-                        ...groupStudyPlansByChapter(updatedPlans, 'In Progress'),
-                        ...groupStudyPlansByChapter(updatedPlans, 'Done'),
-                        ...groupStudyPlansByChapter(updatedPlans, 'Closed')
-                      ];
-                      const updatedChapter = allChapters.find(ch => ch.chapter_id === editingChapter.chapter_id);
-                      if (updatedChapter) setEditingChapter(updatedChapter);
-                    }}
-                    style={{
-                      fontSize: '13px',
-                      padding: '6px 12px',
-                      border: '2px solid rgba(139, 92, 246, 0.4)',
-                      borderRadius: '8px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                      fontWeight: '600',
-                      color: '#374151',
-                      minWidth: '150px',
-                      cursor: 'pointer',
-                      boxShadow: '0 2px 4px rgba(139, 92, 246, 0.1)'
-                    }}
-                  />
-                </div>
                 
                 <button className="close-btn-compact" onClick={() => {
                   setEditingChapter(null)
@@ -4326,42 +4584,58 @@ export default function Home() {
                 }}>×</button>
               </div>
               
-              <div className="header-four-columns">
-                {/* Column 1: Status */}
-                <div className="header-column status-column">
-                  <h3 className="column-header">Status</h3>
-                  <div className="control-chips-vertical">
-                    {['In Queue', 'To Do', 'In Progress', 'Done', 'Closed'].map(status => (
-                      <button
-                        key={status}
-                        className={`chip-compact ${editingChapter.aggregatedStatus === status ? 'active' : ''}`}
-                        style={{
-                          backgroundColor: editingChapter.aggregatedStatus === status ? getStatusColor(status) : 'transparent',
-                          color: editingChapter.aggregatedStatus === status ? 'white' : '#6b7280',
-                          borderColor: getStatusColor(status)
-                        }}
-                        onClick={() => {
-                          const updatedPlans = studyPlans.map(plan => 
-                            plan.chapter_id === editingChapter.chapter_id 
-                              ? {...plan, learning_status: status}
-                              : plan
-                          );
-                          setStudyPlans(updatedPlans);
-                          localStorage.setItem('studyPlans', JSON.stringify(updatedPlans));
-                          const allChapters = [
-                            ...groupStudyPlansByChapter(updatedPlans, 'In Queue'),
-                            ...groupStudyPlansByChapter(updatedPlans, 'To Do'),
-                            ...groupStudyPlansByChapter(updatedPlans, 'In Progress'),
-                            ...groupStudyPlansByChapter(updatedPlans, 'Done'),
-                            ...groupStudyPlansByChapter(updatedPlans, 'Closed')
-                          ];
-                          const updatedChapter = allChapters.find(ch => ch.chapter_id === editingChapter.chapter_id);
-                          if (updatedChapter) setEditingChapter(updatedChapter);
-                        }}
-                      >
-                        {status}
-                      </button>
-                    ))}
+              <div className="header-three-columns">
+                {/* Column 1: Target Date Calendar */}
+                <div className="header-column calendar-column">
+                  <h3 className="column-header">📅 Target Date</h3>
+                  <div className="calendar-input-wrapper">
+                    <input
+                      type="date"
+                      value={editingChapter.studyPlans && editingChapter.studyPlans.length > 0 && editingChapter.studyPlans[0].target_date 
+                        ? new Date(editingChapter.studyPlans[0].target_date).toISOString().split('T')[0]
+                        : ''}
+                      onChange={(e) => {
+                        const targetDate = e.target.value;
+                        const updatedPlans = studyPlans.map(plan => 
+                          plan.chapter_id === editingChapter.chapter_id 
+                            ? {...plan, target_date: targetDate}
+                            : plan
+                        );
+                        setStudyPlans(updatedPlans);
+                        localStorage.setItem('studyPlans', JSON.stringify(updatedPlans));
+                        const allChapters = [
+                          ...groupStudyPlansByChapter(updatedPlans, 'In Queue'),
+                          ...groupStudyPlansByChapter(updatedPlans, 'To Do'),
+                          ...groupStudyPlansByChapter(updatedPlans, 'In Progress'),
+                          ...groupStudyPlansByChapter(updatedPlans, 'Done'),
+                          ...groupStudyPlansByChapter(updatedPlans, 'Closed')
+                        ];
+                        const updatedChapter = allChapters.find(ch => ch.chapter_id === editingChapter.chapter_id);
+                        if (updatedChapter) setEditingChapter(updatedChapter);
+                      }}
+                      className="calendar-input-large"
+                    />
+                    <div className="calendar-info">
+                      <p className="calendar-status">
+                        Status: <span style={{color: getStatusColor(editingChapter.aggregatedStatus), fontWeight: 'bold'}}>
+                          {editingChapter.aggregatedStatus}
+                        </span>
+                      </p>
+                      {editingChapter.studyPlans && editingChapter.studyPlans.length > 0 && editingChapter.studyPlans[0].target_date && (
+                        <p className="calendar-days-left">
+                          {(() => {
+                            const targetDate = new Date(editingChapter.studyPlans[0].target_date);
+                            const today = new Date();
+                            const daysLeft = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
+                            return daysLeft > 0 
+                              ? `${daysLeft} days left` 
+                              : daysLeft === 0 
+                              ? 'Due today!' 
+                              : `${Math.abs(daysLeft)} days overdue`;
+                          })()}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
 
