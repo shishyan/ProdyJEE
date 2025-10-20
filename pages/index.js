@@ -607,6 +607,27 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
   // Check if this card is being hovered over during drag
   const isOverThis = overId === `chapter-${chapter.chapter_id}`
 
+  // Track if user is actually dragging vs clicking
+  const [dragStartPos, setDragStartPos] = useState(null)
+  
+  const handlePointerDown = (e) => {
+    setDragStartPos({ x: e.clientX, y: e.clientY })
+  }
+  
+  const handleClick = (e) => {
+    // Only trigger onClick if the pointer hasn't moved significantly (not a drag)
+    if (dragStartPos) {
+      const deltaX = Math.abs(e.clientX - dragStartPos.x)
+      const deltaY = Math.abs(e.clientY - dragStartPos.y)
+      
+      // If movement is less than 5 pixels, consider it a click
+      if (deltaX < 5 && deltaY < 5 && !isDragging) {
+        onEdit(chapter, e)
+      }
+      setDragStartPos(null)
+    }
+  }
+
   // Calculate highest proficiency in chapter
   const getChapterProficiency = () => {
     if (!chapter.studyPlans || chapter.studyPlans.length === 0) return 'Novice'
@@ -626,7 +647,7 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition: transition || 'transform 200ms cubic-bezier(0.25, 1, 0.5, 1)',
+    transition: transition || 'transform 200ms cubic-bezier(0.25, 1, 0.66, 1)',
     opacity: isDragging ? 0.4 : 1  // MS Planner-style: Show ghost (semi-transparent) when dragging
   }
 
@@ -647,8 +668,6 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
   return (
     <div
       ref={setNodeRef}
-      {...attributes}
-      {...listeners}
       style={{
         ...style,
         border: isSelected ? '2px solid #8b5cf6' : undefined,
@@ -658,10 +677,13 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
       }}
       className={`chapter-card ${isDragging ? 'dragging' : ''} ${isOverThis ? 'drop-indicator' : ''}`}
       data-status={chapter.aggregatedStatus}
-      onClick={(e) => onEdit(chapter, e)}
+      onPointerDown={handlePointerDown}
+      onClick={handleClick}
+      {...attributes}
+      {...listeners}
     >
       {/* Subject and Curriculum above header */}
-      <div className="chapter-meta-top">
+      <div className="chapter-meta-top" style={{ pointerEvents: 'none' }}>
         <span className="meta-subject">{chapter.subject}</span>
         <span className="meta-curriculum" style={{
           backgroundColor: chapter.curriculum === 'JEE' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(59, 130, 246, 0.15)',
@@ -674,7 +696,7 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
         }}>{chapter.curriculum}</span>
       </div>
 
-      <div className="chapter-header" style={{ background: chapter.aggregatedStatus === 'In Queue' ? '#f3f4f6' : `linear-gradient(135deg, ${getStatusColor(chapter.aggregatedStatus)}20, ${getStatusColor(chapter.aggregatedStatus)}60)` }}>
+      <div className="chapter-header" style={{ background: chapter.aggregatedStatus === 'In Queue' ? '#f3f4f6' : `linear-gradient(135deg, ${getStatusColor(chapter.aggregatedStatus)}20, ${getStatusColor(chapter.aggregatedStatus)}60)`, pointerEvents: 'none' }}>
         <div className="chapter-info">
           <h4
             className="chapter-title"
@@ -688,7 +710,7 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
       </div>
 
       {/* Chapter ID, Stage, and Proficiency below title */}
-      <div className="chapter-meta-bottom">
+      <div className="chapter-meta-bottom" style={{ pointerEvents: 'none' }}>
         <span className="meta-id">{chapter.chapter_id}</span>
         <span className="detail-label">Stage:</span>
         <span className="status-badge" style={{ color: '#8b5cf6', fontSize: '11px' }}>
@@ -696,7 +718,7 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
         </span>
       </div>
 
-      <div className="chapter-content">
+      <div className="chapter-content" style={{ pointerEvents: 'none' }}>
         <div className={`chapter-details-grid ${chapter.aggregatedStatus === 'In Queue' ? 'backlog-grid' : ''}`}>
           {chapter.aggregatedStatus === 'In Queue' ? (
             <>
@@ -839,7 +861,7 @@ function Bucket({ bucket, chapters, onEditChapter, onUpdateProgress, onUpdateCha
           <div className="space-y-3" style={{ background: 'none' }}>
             {filteredChapters.map(chapter => (
               <ChapterCard
-                key={chapter.chapter_id}
+                key={`chapter-${chapter.chapter_id}`}
                 chapter={chapter}
                 bucketColor={getStatusColor(bucket.status)}
                 onEdit={onEditChapter}
@@ -2632,8 +2654,8 @@ export default function Home() {
       ...transform,
       // Backlog is in left column (300px wide), needs less horizontal offset
       // Other columns are in right panel, need more offset to account for left column
-      x: transform.x - (isFromBacklog ? 225 : 235),
-      y: transform.y - (isFromBacklog ? 150 : 100),
+      x: transform.x - (isFromBacklog ? 215 : 235),
+      y: transform.y - (isFromBacklog ? 100 : 110),
     }
   }
 
@@ -4127,11 +4149,11 @@ export default function Home() {
                                     position: 'relative'
                                   }}
                                   onMouseEnter={(e) => {
-                                    e.currentTarget.style.transform = 'scale(1.05)';
+                                    e.currentTarget.style.transform = 'scale(1.25)';
                                     e.currentTarget.style.boxShadow = `0 4px 12px ${topicColor}50`;
                                   }}
                                   onMouseLeave={(e) => {
-                                    e.currentTarget.style.transform = 'scale(1)';
+                                    e.currentTarget.style.transform = 'scale(0.75)';
                                     e.currentTarget.style.boxShadow = `0 2px 6px ${topicColor}30`;
                                   }}
                                   onClick={() => {
@@ -4206,11 +4228,11 @@ export default function Home() {
                 zIndex: 1000
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.1)'
+                e.currentTarget.style.transform = 'scale(1.25)'
                 e.currentTarget.style.boxShadow = '0 6px 16px rgba(239, 68, 68, 0.6)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)'
+                e.currentTarget.style.transform = 'scale(0.75)'
                 e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.4)'
               }}
             >

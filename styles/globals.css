@@ -7180,9 +7180,10 @@ main.board {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  overflow: hidden; /* Prevent card content from overflowing */
+  overflow: visible; /* Changed from hidden to visible to allow drag detection */
   word-wrap: break-word; /* Break long words */
   overflow-wrap: break-word;
+  touch-action: none; /* Better touch handling for drag */
 }
 
 .chapter-card > * {
