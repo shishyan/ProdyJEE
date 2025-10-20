@@ -6087,8 +6087,8 @@ main.board {
 
 .filter-select {
   padding: 8px 12px;
-  background: white;
-  border: 1.5px solid rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.5);
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
   border-radius: 8px;
   font-size: 13px;
   font-weight: 500;
@@ -6099,11 +6099,13 @@ main.board {
 }
 
 .filter-select:hover {
-  border-color: #3b82f6;
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(59, 130, 246, 0.4);
 }
 
 .filter-select:focus {
   outline: none;
+  background: rgba(255, 255, 255, 0.8);
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
@@ -6937,6 +6939,68 @@ main.board {
   justify-content: flex-end;
 }
 
+.sidebar-class-selector {
+  width: 100%;
+  padding: 10px;
+}
+
+.sidebar-class-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 6px;
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-class-select {
+  width: 100%;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  color: #1a1a1a;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sidebar-class-select:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.sidebar-class-select:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-class-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: #1a1a1a;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 auto;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sidebar-class-icon:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
 .sidebar-toggle {
   background: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -7013,6 +7077,8 @@ main.board {
   bottom: 10px;
   left: 10px;
   right: 10px;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .sidebar-attribution {

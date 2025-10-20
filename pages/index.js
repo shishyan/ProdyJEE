@@ -3135,11 +3135,43 @@ export default function Home() {
 
         // If moving to a different bucket, change status
         if (activeStatus !== overStatus) {
-          setStudyPlans(prev => prev.map(plan =>
-            activeChapter.studyPlans.some(chapterPlan => chapterPlan.unique_id === plan.unique_id)
-              ? { ...plan, learning_status: overStatus }
-              : plan
-          ))
+          try {
+            // Update all topics in this chapter in the database
+            const updatePromises = activeChapter.studyPlans.map(plan =>
+              fetch('/api/study-plan', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  unique_id: plan.unique_id,
+                  learning_status: overStatus,
+                  // Update additional fields based on status
+                  learning_stage: overStatus === 'Done' ? 'Mastered' : plan.learning_stage,
+                  learning_proficiency: overStatus === 'Done' ? 100 : plan.learning_proficiency,
+                  progress_percentage: overStatus === 'Done' ? 100 : plan.progress_percentage
+                })
+              })
+            )
+
+            await Promise.all(updatePromises)
+
+            // Update local state after successful DB update
+            setStudyPlans(prev => prev.map(plan =>
+              activeChapter.studyPlans.some(chapterPlan => chapterPlan.unique_id === plan.unique_id)
+                ? {
+                    ...plan,
+                    learning_status: overStatus,
+                    learning_stage: overStatus === 'Done' ? 'Mastered' : plan.learning_stage,
+                    learning_proficiency: overStatus === 'Done' ? 100 : plan.learning_proficiency,
+                    progress_percentage: overStatus === 'Done' ? 100 : plan.progress_percentage
+                  }
+                : plan
+            ))
+
+            console.log(`✅ Chapter "${activeChapter.chapter_name}" moved to "${overStatus}" - Database updated`)
+          } catch (error) {
+            console.error('Failed to update chapter in database:', error)
+            alert('Failed to save changes. Please try again.')
+          }
         }
         
         // Note: Card visual reordering within buckets is handled automatically by SortableContext
@@ -3167,15 +3199,42 @@ export default function Home() {
           const draggedChapter = chapters.find(ch => ch.chapter_id === chapterId)
 
           if (draggedChapter) {
-            // Update local state directly
+            // Update database for all topics in this chapter
+            const updatePromises = draggedChapter.studyPlans.map(plan =>
+              fetch('/api/study-plan', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  unique_id: plan.unique_id,
+                  learning_status: targetBucket.status,
+                  // Update additional fields based on status
+                  learning_stage: targetBucket.status === 'Done' ? 'Mastered' : plan.learning_stage,
+                  learning_proficiency: targetBucket.status === 'Done' ? 100 : plan.learning_proficiency,
+                  progress_percentage: targetBucket.status === 'Done' ? 100 : plan.progress_percentage
+                })
+              })
+            )
+
+            await Promise.all(updatePromises)
+
+            // Update local state after successful DB update
             setStudyPlans(prev => prev.map(plan =>
               draggedChapter.studyPlans.some(chapterPlan => chapterPlan.unique_id === plan.unique_id)
-                ? { ...plan, learning_status: targetBucket.status }
+                ? {
+                    ...plan,
+                    learning_status: targetBucket.status,
+                    learning_stage: targetBucket.status === 'Done' ? 'Mastered' : plan.learning_stage,
+                    learning_proficiency: targetBucket.status === 'Done' ? 100 : plan.learning_proficiency,
+                    progress_percentage: targetBucket.status === 'Done' ? 100 : plan.progress_percentage
+                  }
                 : plan
             ))
+
+            console.log(`✅ Chapter "${draggedChapter.chapter_name}" moved to "${targetBucket.status}" - Database updated`)
           }
         } catch (error) {
-          console.error('Failed to update chapter:', error)
+          console.error('Failed to update chapter in database:', error)
+          alert('Failed to save changes. Please try again.')
         }
       }
     }
@@ -3188,17 +3247,42 @@ export default function Home() {
       const chapter = chapters.find(ch => ch.chapter_id === chapterId)
 
       if (chapter) {
-        // Update local state
-        const updatedPlans = studyPlans.map(plan =>
-          chapter.studyPlans.some(chapterPlan => chapterPlan.unique_id === plan.unique_id)
-            ? { ...plan, learning_status: newStatus }
-            : plan
+        // Update database for all topics in this chapter
+        const updatePromises = chapter.studyPlans.map(plan =>
+          fetch('/api/study-plan', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              unique_id: plan.unique_id,
+              learning_status: newStatus,
+              // Update additional fields based on status
+              learning_stage: newStatus === 'Done' ? 'Mastered' : plan.learning_stage,
+              learning_proficiency: newStatus === 'Done' ? 100 : plan.learning_proficiency,
+              progress_percentage: newStatus === 'Done' ? 100 : plan.progress_percentage
+            })
+          })
         )
-        setStudyPlans(updatedPlans)
-        localStorage.setItem('study-plans-data', JSON.stringify(updatedPlans))
+
+        await Promise.all(updatePromises)
+
+        // Update local state after successful DB update
+        setStudyPlans(prev => prev.map(plan =>
+          chapter.studyPlans.some(chapterPlan => chapterPlan.unique_id === plan.unique_id)
+            ? {
+                ...plan,
+                learning_status: newStatus,
+                learning_stage: newStatus === 'Done' ? 'Mastered' : plan.learning_stage,
+                learning_proficiency: newStatus === 'Done' ? 100 : plan.learning_proficiency,
+                progress_percentage: newStatus === 'Done' ? 100 : plan.progress_percentage
+              }
+            : plan
+        ))
+
+        console.log(`✅ Chapter "${chapter.chapter_name}" status updated to "${newStatus}" - Database updated`)
       }
     } catch (error) {
-      console.error('Failed to update chapter status:', error)
+      console.error('Failed to update chapter status in database:', error)
+      alert('Failed to save changes. Please try again.')
     }
   }
 
@@ -3495,20 +3579,42 @@ export default function Home() {
           <aside 
             className={`left-sidebar-container ${sidebarCollapsed ? 'collapsed' : 'expanded'}`}
             onClick={(e) => {
-              // Only toggle if clicking on the sidebar background, not on navigation items
-              if (e.target === e.currentTarget || e.target.closest('.sidebar-header') || e.target.closest('.sidebar-footer')) {
+              // Toggle sidebar on any click
+              if (!e.target.closest('.filter-select')) {
                 setSidebarCollapsed(!sidebarCollapsed);
               }
             }}
           >
             <div className="sidebar-header">
-              {/* Header is now empty - toggle button moved to footer */}
+              {/* Class Selector at the top */}
+              <div className="sidebar-class-selector" onClick={(e) => e.stopPropagation()}>
+                {!sidebarCollapsed ? (
+                  <>
+                    <label className="sidebar-class-label">Class</label>
+                    <select
+                      value={selectedClass}
+                      onChange={(e) => setSelectedClass(e.target.value)}
+                      className="filter-select sidebar-class-select"
+                    >
+                      <option value="6">6th Grade</option>
+                      <option value="11">11th Grade</option>
+                    </select>
+                  </>
+                ) : (
+                  <div className="sidebar-class-icon" title={`Class ${selectedClass}`}>
+                    {selectedClass}
+                  </div>
+                )}
+              </div>
             </div>            <div className="sidebar-content" onClick={(e) => e.stopPropagation()}>
               {/* Main Navigation Menu */}
               <div className="sidebar-section">
                 <button
                   className={`sidebar-nav-item ${currentPage === 'kanban' ? 'active' : ''}`}
-                  onClick={() => setCurrentPage('kanban')}
+                  onClick={() => {
+                    setCurrentPage('kanban');
+                    setSidebarCollapsed(false);
+                  }}
                   data-icon="dashboard"
                 >
                   <span className="icon-wrapper"><HomeIcon /></span>
@@ -3516,7 +3622,10 @@ export default function Home() {
                 </button>
                 <button
                   className={`sidebar-nav-item ${currentPage === 'dashboard' ? 'active' : ''}`}
-                  onClick={() => setCurrentPage('dashboard')}
+                  onClick={() => {
+                    setCurrentPage('dashboard');
+                    setSidebarCollapsed(false);
+                  }}
                   data-icon="analytics"
                 >
                   <span className="icon-wrapper"><BarChartIcon /></span>
@@ -3524,7 +3633,10 @@ export default function Home() {
                 </button>
                 <button
                   className={`sidebar-nav-item ${currentPage === 'schedule' ? 'active' : ''}`}
-                  onClick={() => setCurrentPage('schedule')}
+                  onClick={() => {
+                    setCurrentPage('schedule');
+                    setSidebarCollapsed(false);
+                  }}
                   data-icon="schedule"
                 >
                   <span className="icon-wrapper"><CalendarIcon /></span>
@@ -3532,7 +3644,10 @@ export default function Home() {
                 </button>
                 <button
                   className={`sidebar-nav-item ${currentPage === 'timer' ? 'active' : ''}`}
-                  onClick={() => setCurrentPage('timer')}
+                  onClick={() => {
+                    setCurrentPage('timer');
+                    setSidebarCollapsed(false);
+                  }}
                   data-icon="timer"
                 >
                   <span className="icon-wrapper"><TimerIcon /></span>
@@ -3540,7 +3655,10 @@ export default function Home() {
                 </button>
                 <button
                   className={`sidebar-nav-item ${currentPage === 'goals' ? 'active' : ''}`}
-                  onClick={() => setCurrentPage('goals')}
+                  onClick={() => {
+                    setCurrentPage('goals');
+                    setSidebarCollapsed(false);
+                  }}
                   data-icon="goals"
                 >
                   <span className="icon-wrapper"><MeditationIcon /></span>
@@ -3548,7 +3666,10 @@ export default function Home() {
                 </button>
                 <button
                   className={`sidebar-nav-item ${currentPage === 'progress' ? 'active' : ''}`}
-                  onClick={() => setCurrentPage('progress')}
+                  onClick={() => {
+                    setCurrentPage('progress');
+                    setSidebarCollapsed(false);
+                  }}
                   data-icon="progress"
                 >
                   <span className="icon-wrapper"><CheckCircleIcon /></span>
@@ -3565,6 +3686,7 @@ export default function Home() {
                   setSidebarCollapsed(!sidebarCollapsed);
                 }}
                 title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+                style={!sidebarCollapsed ? { marginLeft: 'auto' } : {}}
               >
                 {sidebarCollapsed ? <ExpandIcon /> : <CollapseIcon />}
               </button>
@@ -3578,22 +3700,9 @@ export default function Home() {
           <>
             {selectedSubject && viewMode === 'kanban' && (
               <>
-                {/* Kanban Board Controls - Class, Subjects & Filter */}
+                {/* Kanban Board Controls - Subjects & Filter */}
                 <div className="kanban-controls-container">
                   <div className="kanban-controls-left">
-                    {/* Class Selector */}
-                    <div className="kanban-class-selector">
-                      <label className="controls-label">Class</label>
-                      <select
-                        value={selectedClass}
-                        onChange={(e) => setSelectedClass(e.target.value)}
-                        className="filter-select"
-                      >
-                        <option value="6">6th Grade</option>
-                        <option value="11">11th Grade</option>
-                      </select>
-                    </div>
-                    
                     <div className="kanban-subjects-group">
                       <h3 className="controls-label">Subjects</h3>
                       <div className="subject-chips-horizontal">
@@ -3612,22 +3721,6 @@ export default function Home() {
                   </div>
                   
                   <div className="kanban-controls-right">
-                    {/* Status Filter */}
-                    <div className="kanban-filter-group">
-                      <label className="controls-label">Status</label>
-                      <select
-                        value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
-                        className="filter-select"
-                      >
-                        <option value="all">All</option>
-                        <option value="In Queue">In Queue</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Done">Done</option>
-                        <option value="Closed">Closed</option>
-                      </select>
-                    </div>
-
                     {/* Stage Filter */}
                     <div className="kanban-filter-group">
                       <label className="controls-label">Stage</label>
