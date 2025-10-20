@@ -3354,31 +3354,59 @@ export default function Home() {
       {/* SINGLE TOP HEADER CONTAINER - Brand + Search + Navigation + Actions */}
       {showTopHeader && (
         <header className="unified-header-container">
-          {/* Brand Section with Class/Curriculum Selectors */}
+          {/* Brand Section */}
           <div className="header-brand">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div>
-                <div className="brand-logo">
-                  <span className="brand-main">Prody</span>
-                  <span className="brand-jee">JEE</span>
-                  <span className="brand-accent">™</span>
-                </div>
-                <div className="brand-subtitle">Peepal Prodigy School</div>
+            <div>
+              <div className="brand-logo">
+                <span className="brand-main">Prody</span>
+                <span className="brand-jee">JEE</span>
+                <span className="brand-accent">™</span>
               </div>
-              
-              {/* Class Selector */}
-              <div className="header-selector-group">
-                <label className="selector-label">Class</label>
-                <select
-                  value={selectedClass}
-                  onChange={(e) => setSelectedClass(e.target.value)}
-                  className="header-select-small"
-                >
-                  <option value="6">6th Grade</option>
-                  <option value="11">11th Grade</option>
-                </select>
-              </div>
+              <div className="brand-subtitle">Peepal Prodigy School</div>
             </div>
+          </div>
+
+          {/* Center - Study Summary Stats */}
+          <div className="header-summary-stats">
+            {selectedSubject && (
+              <>
+                <div className="header-stat">
+                  <span className="header-stat-icon"><BookOpenIcon /></span>
+                  <span className="header-stat-value">
+                    {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name)).length}
+                  </span>
+                  <span className="header-stat-label">Chapters</span>
+                </div>
+                {groupBy === 'status' && (
+                  <>
+                    <div className="header-stat backlog">
+                      <span className="header-stat-icon"><ClockIcon /></span>
+                      <span className="header-stat-value">
+                        {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+                          .filter(chapter => chapter.aggregatedStatus === 'In Queue').length}
+                      </span>
+                      <span className="header-stat-label">Backlog</span>
+                    </div>
+                    <div className="header-stat progress">
+                      <span className="header-stat-icon"><LoaderIcon /></span>
+                      <span className="header-stat-value">
+                        {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+                          .filter(chapter => chapter.aggregatedStatus === 'In Progress').length}
+                      </span>
+                      <span className="header-stat-label">In Progress</span>
+                    </div>
+                    <div className="header-stat done">
+                      <span className="header-stat-icon"><CheckCircleIcon /></span>
+                      <span className="header-stat-value">
+                        {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+                          .filter(chapter => chapter.aggregatedStatus === 'Done').length}
+                      </span>
+                      <span className="header-stat-label">Completed</span>
+                    </div>
+                  </>
+                )}
+              </>
+            )}
           </div>
 
           {/* Actions Section - Right Side */}
@@ -3510,21 +3538,36 @@ export default function Home() {
           <>
             {selectedSubject && viewMode === 'kanban' && (
               <>
-                {/* Kanban Board Controls - Subjects & Filter */}
+                {/* Kanban Board Controls - Class, Subjects & Filter */}
                 <div className="kanban-controls-container">
                   <div className="kanban-controls-left">
-                    <h3 className="controls-label">Subjects</h3>
-                    <div className="subject-chips-horizontal">
-                      {subjects.map(subject => (
-                        <button
-                          key={subject.subject_id}
-                          className={`subject-chip ${selectedSubject?.subject_id === subject.subject_id ? 'active' : ''}`}
-                          onClick={() => setSelectedSubject(subject)}
-                        >
-                          <BookOpenIcon />
-                          <span>{subject.name}</span>
-                        </button>
-                      ))}
+                    {/* Class Selector */}
+                    <div className="kanban-class-selector">
+                      <label className="controls-label">Class</label>
+                      <select
+                        value={selectedClass}
+                        onChange={(e) => setSelectedClass(e.target.value)}
+                        className="filter-select"
+                      >
+                        <option value="6">6th Grade</option>
+                        <option value="11">11th Grade</option>
+                      </select>
+                    </div>
+                    
+                    <div className="kanban-subjects-group">
+                      <h3 className="controls-label">Subjects</h3>
+                      <div className="subject-chips-horizontal">
+                        {subjects.map(subject => (
+                          <button
+                            key={subject.subject_id}
+                            className={`subject-chip ${selectedSubject?.subject_id === subject.subject_id ? 'active' : ''}`}
+                            onClick={() => setSelectedSubject(subject)}
+                          >
+                            <BookOpenIcon />
+                            <span>{subject.name}</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                   
@@ -3724,57 +3767,6 @@ export default function Home() {
         {/* End of MAIN CONTENT CONTAINER */}
       </div>
       {/* End of Content Wrapper */}
-
-      {/* 5. FOOTER CONTAINER - Overview Summary & Voice Assistant AI */}
-      {showFooter && (
-        <footer className="footer-container">
-          <div className="footer-content">
-            {/* Left - Overview Summary */}
-            <div className="footer-overview">
-              {selectedSubject && (
-                <>
-                  <div className="footer-stat">
-                    <span className="footer-stat-icon"><BookOpenIcon /></span>
-                    <span className="footer-stat-value">
-                      {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name)).length}
-                    </span>
-                    <span className="footer-stat-label">Chapters</span>
-                  </div>
-                  {groupBy === 'status' && (
-                    <>
-                      <div className="footer-stat backlog">
-                        <span className="footer-stat-icon"><ClockIcon /></span>
-                        <span className="footer-stat-value">
-                          {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
-                            .filter(chapter => chapter.aggregatedStatus === 'In Queue').length}
-                        </span>
-                        <span className="footer-stat-label">Backlog</span>
-                      </div>
-                      <div className="footer-stat progress">
-                        <span className="footer-stat-icon"><LoaderIcon /></span>
-                        <span className="footer-stat-value">
-                          {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
-                            .filter(chapter => chapter.aggregatedStatus === 'In Progress').length}
-                        </span>
-                        <span className="footer-stat-label">In Progress</span>
-                      </div>
-                      <div className="footer-stat done">
-                        <span className="footer-stat-icon"><CheckCircleIcon /></span>
-                        <span className="footer-stat-value">
-                          {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
-                            .filter(chapter => chapter.aggregatedStatus === 'Done').length}
-                        </span>
-                        <span className="footer-stat-label">Completed</span>
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
-              <span className="footer-text">© 2024 ProdyJEE - Peepal Prodigy School</span>
-            </div>
-          </div>
-        </footer>
-      )}
 
       {/* Modern Settings Panel */}
       {showSettingsPanel && (
