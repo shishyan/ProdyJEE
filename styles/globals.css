@@ -962,7 +962,7 @@ body {
 /* 4. MAIN CONTENT CONTAINER - Takes remaining width in flex layout */
 .main-content-container {
   flex: 1; /* Take all remaining space */
-  padding: 20px 20px 40px 20px; /* Fixed hard padding - extra bottom padding for kanban board breathing room */
+  padding: 10px 10px 10px 10px; /* Fixed hard padding - extra bottom padding for kanban board breathing room */
   min-height: 0; /* Allow flex to control height */
   height: auto; /* Changed from 100% to auto */
   max-height: calc(100vh - 8vh - 7vh - 2%); /* Subtract header + footer + margins */
@@ -4886,8 +4886,8 @@ main.board {
 
 /* Topics Redesigned Styles */
 .topics-list-redesigned {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   max-height: 400px;
   overflow-y: auto;
@@ -5558,10 +5558,132 @@ main.board {
 }
 
 /* Kanban Board Styles */
+
+/* Kanban Controls Container - Subjects & Filter */
+.kanban-controls-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  margin: 16px 16px 8px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.kanban-controls-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.kanban-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.controls-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b5563;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.subject-chips-horizontal {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.subject-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(79, 172, 254, 0.1);
+  border: 1.5px solid rgba(79, 172, 254, 0.3);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #2563eb;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.subject-chip:hover {
+  background: rgba(79, 172, 254, 0.2);
+  border-color: rgba(79, 172, 254, 0.5);
+  transform: translateY(-1px);
+}
+
+.subject-chip.active {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border-color: #2563eb;
+  color: white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.subject-chip svg {
+  width: 16px;
+  height: 16px;
+}
+
+.filter-select {
+  padding: 8px 12px;
+  background: white;
+  border: 1.5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 150px;
+}
+
+.filter-select:hover {
+  border-color: #3b82f6;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Two Column Layout for Kanban */
+.kanban-two-column-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr; /* Left column fixed 300px, right column takes remaining space */
+  gap: 16px;
+  height: 100%;
+  width: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.kanban-left-column {
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Allow scrolling */
+}
+
+.kanban-right-column {
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Allow scrolling */
+  overflow: hidden;
+}
+
 .kanban-board {
   background: none; /* No background */
-  padding: 16px; /* Fixed equal padding on all sides - keeps columns away from edges */
-  height: auto; /* Let content determine height naturally */
+  padding: 0; /* Remove padding since parent has it */
+  height: 100%; /* Take full height of parent */
   display: flex;
   flex-direction: column;
   overflow: hidden; /* No scrollbars */
@@ -5583,11 +5705,27 @@ main.board {
   margin: 0;
 }
 
+/* Backlog Section - Separated with Curved Rectangle */
+.backlog-section {
+  background: rgba(156, 163, 175, 0.08); /* Light gray background */
+  border: 2px dashed rgba(156, 163, 175, 0.3);
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+  height: 100%; /* Take full height in left column */
+  overflow-y: auto; /* Allow scrolling if content exceeds */
+  display: flex;
+  flex-direction: column;
+}
+
 .buckets-container {
-  background: none; /* No background */
+  background: rgba(156, 163, 175, 0.08); /* Same as backlog - Light gray background */
+  border: 2px dashed rgba(156, 163, 175, 0.3); /* Same as backlog - dashed border */
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05); /* Same as backlog */
   display: flex;
   gap: 8px; /* FIXED GAP - never compresses (max 20% compression rule = min 6.4px, but gap is CSS fixed) */
-  padding: 0; /* No padding - kanban-board already has 16px padding on all sides */
   flex: 1;
   overflow-x: auto;
   overflow-y: hidden;
@@ -5611,9 +5749,8 @@ main.board {
   padding: 8px; /* Reduced padding to allow better compression */
   border: 1px solid #e5e7eb;
   transition: all 0.3s ease;
-  min-width: 180px; /* Minimum width when space is very limited */
-  width: 100%; /*calc((100% - 16px) / 1); /* CALCULATED: (100% - (gap × 5 + padding × 2)) / 4 columns */
-  flex: 0 0 auto; /* No grow, no shrink - use calculated width only */
+  min-width: 250px; /* Increased minimum width for better visibility */
+  flex: 1; /* Allow buckets to grow and fill available space equally */
   height: calc(100vh - 8vh - 7vh - 120px); /* Fixed height: viewport minus header, footer, and padding */
   display: flex;
   flex-direction: column;
@@ -5624,17 +5761,43 @@ main.board {
   overflow: hidden; /* CRITICAL: Prevent content from escaping this container */
   box-sizing: border-box; /* Include padding and border in width */
   contain: layout style; /* CRITICAL: Isolate this container - no sharing with siblings */
+  max-width: 100%; /* Prevent bucket from exceeding container */
+}
+
+.bucket > * {
+  max-width: 100%; /* Ensure all direct children respect bucket width */
+  box-sizing: border-box;
+}
+
+.bucket .flex-1 {
+  overflow-y: auto; /* Allow vertical scrolling */
+  overflow-x: hidden; /* Prevent horizontal overflow */
+  max-width: 100%;
+}
+
+.bucket .space-y-3 {
+  max-width: 100%; /* Prevent card container from overflowing */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Dynamic column width based on number of buckets - each column is isolated */
 /* For 5 columns (stage grouping) */
 .buckets-5 .bucket {
-  width: calc((100% - 68px) / 5); /* (100% - (8px gap × 6 gaps + 8px padding-left + 12px padding-right)) / 5 */
+  flex: 1; /* Equal distribution */
+  min-width: 200px;
+}
+
+/* For 4 columns (status grouping: To Do, In Progress, Done, Closed) */
+.buckets-4 .bucket {
+  flex: 1; /* Equal distribution */
+  min-width: 250px;
 }
 
 /* For 3 columns (if needed) */
 .buckets-3 .bucket {
-  width: calc((100% - 52px) / 3); /* (100% - (8px gap × 4 gaps + 8px padding-left + 12px padding-right)) / 3 */
+  flex: 1; /* Equal distribution */
+  min-width: 280px;
 }
 
 .bucket:hover {
@@ -5743,15 +5906,29 @@ main.board {
 }
 
 .bucket-backlog {
-  background: none !important;
+  background: transparent !important;
   border: none !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
   box-shadow: none !important;
+  padding: 0 !important;
+  flex: 1 !important;
+  min-width: auto !important;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  /* Stack columns vertically on mobile */
+  .kanban-two-column-layout {
+    grid-template-columns: 1fr; /* Single column */
+    grid-template-rows: auto 1fr; /* Backlog on top, workflow below */
+  }
+
+  .backlog-section {
+    height: auto; /* Don't force full height on mobile */
+    max-height: 40vh; /* Limit backlog height */
+  }
+
   .study-plan-container {
     padding: 16px;
   }
@@ -6485,6 +6662,15 @@ main.board {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  overflow: hidden; /* Prevent card content from overflowing */
+  word-wrap: break-word; /* Break long words */
+  overflow-wrap: break-word;
+}
+
+.chapter-card > * {
+  max-width: 100%; /* Ensure all children respect card width */
+  box-sizing: border-box;
+  overflow-wrap: break-word;
 }
 
 /* MS Planner-style: Create gap for drop zone */
@@ -6564,6 +6750,22 @@ main.board {
   align-items: center;
   padding: 4px 8px;
   margin-bottom: 4px;
+  max-width: 100%; /* Prevent overflow */
+  box-sizing: border-box;
+  overflow: hidden; /* Hide any overflow */
+}
+
+.chapter-meta-bottom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  flex-wrap: wrap;
 }
 
 .meta-id {
@@ -6573,6 +6775,10 @@ main.board {
   background: rgba(0, 0, 0, 0.05);
   padding: 2px 5px;
   border-radius: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px; /* Limit meta-id width */
 }
 
 .meta-subject {
@@ -6582,6 +6788,17 @@ main.board {
   background: rgba(79, 172, 254, 0.1);
   padding: 2px 5px;
   border-radius: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px; /* Limit subject width */
+}
+
+.meta-curriculum {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0; /* Don't shrink curriculum badge */
 }
 
 .chapter-header {

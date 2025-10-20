@@ -607,6 +607,7 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
     
     const proficiencies = { 'Master': 4, 'Expert': 3, 'Competent': 2, 'Novice': 1 }
     const maxProficiency = chapter.studyPlans.reduce((max, plan) => {
+      // Default to 'Novice' (1) if proficiency is not set
       const level = proficiencies[plan.learning_proficiency] || 1
       return Math.max(max, level)
     }, 1)
@@ -653,14 +654,18 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
       data-status={chapter.aggregatedStatus}
       onClick={(e) => onEdit(chapter, e)}
     >
-      {/* ID and Subject above header */}
+      {/* Subject and Curriculum above header */}
       <div className="chapter-meta-top">
-        <span className="meta-id">{chapter.chapter_id}</span>
         <span className="meta-subject">{chapter.subject}</span>
-        {/* Proficiency Badge */}
-        <div style={{ display: 'flex', gap: '4px', alignItems: 'center', marginLeft: 'auto' }}>
-          {getProficiencyIcons(chapterProficiency)}
-        </div>
+        <span className="meta-curriculum" style={{
+          backgroundColor: chapter.curriculum === 'JEE' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(59, 130, 246, 0.15)',
+          color: chapter.curriculum === 'JEE' ? '#dc2626' : '#2563eb',
+          padding: '2px 8px',
+          borderRadius: '6px',
+          fontSize: '10px',
+          fontWeight: '600',
+          border: `1px solid ${chapter.curriculum === 'JEE' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(59, 130, 246, 0.3)'}`
+        }}>{chapter.curriculum}</span>
       </div>
 
       <div className="chapter-header" style={{ background: chapter.aggregatedStatus === 'In Queue' ? '#f3f4f6' : `linear-gradient(135deg, ${getStatusColor(chapter.aggregatedStatus)}20, ${getStatusColor(chapter.aggregatedStatus)}60)` }}>
@@ -676,37 +681,23 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
         </div>
       </div>
 
+      {/* Chapter ID, Stage, and Proficiency below title */}
+      <div className="chapter-meta-bottom">
+        <span className="meta-id">{chapter.chapter_id}</span>
+        <span className="detail-label">Stage:</span>
+        <span className="status-badge" style={{ color: '#8b5cf6', fontSize: '11px' }}>
+          {chapter.aggregatedStage}
+        </span>
+        <span className="detail-label">Proficiency:</span>
+        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+          {getProficiencyIcons(chapterProficiency)}
+        </div>
+      </div>
+
       <div className="chapter-content">
         <div className={`chapter-details-grid ${chapter.aggregatedStatus === 'In Queue' ? 'backlog-grid' : ''}`}>
           {chapter.aggregatedStatus === 'In Queue' ? (
             <>
-              <div className="detail-row">
-                <span className="detail-label">Stage:</span>
-                <span
-                  className="status-badge"
-                  style={{
-                    color: '#8b5cf6',
-                    fontSize: '11px'
-                  }}
-                >
-                  {chapter.aggregatedStage}
-                </span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">Proficiency:</span>
-                <span
-                  className="status-badge"
-                  style={{
-                    color: getProficiencyColor(chapter.aggregatedProficiency),
-                    fontSize: '11px'
-                  }}
-                >
-                  {chapter.aggregatedProficiency === 25 ? 'Novice' : 
-                   chapter.aggregatedProficiency === 50 ? 'Competent' : 
-                   chapter.aggregatedProficiency === 75 ? 'Expert' : 
-                   chapter.aggregatedProficiency === 100 ? 'Master' : 'Novice'}
-                </span>
-              </div>
               {earliestTargetDate && (
                 <div className="detail-row">
                   <span className={`target-date-display ${daysLeft !== null && daysLeft < 0 ? 'overdue' : daysLeft !== null && daysLeft <= 7 ? 'urgent' : ''}`}>
@@ -721,33 +712,7 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
             </>
           ) : (
             <>
-              <div className="detail-row">
-                <span className="detail-label">Stage:</span>
-                <span
-                  className="status-badge"
-                  style={{
-                    color: '#8b5cf6',
-                    fontSize: '11px'
-                  }}
-                >
-                  {chapter.aggregatedStage}
-                </span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">Proficiency:</span>
-                <span
-                  className="status-badge"
-                  style={{
-                    color: getProficiencyColor(chapter.aggregatedProficiency),
-                    fontSize: '11px'
-                  }}
-                >
-                  {chapter.aggregatedProficiency === 25 ? 'Novice' : 
-                   chapter.aggregatedProficiency === 50 ? 'Competent' : 
-                   chapter.aggregatedProficiency === 75 ? 'Expert' : 
-                   chapter.aggregatedProficiency === 100 ? 'Master' : 'Novice'}
-                </span>
-              </div>
+              {/* Keep empty for non-backlog cards, already showing in meta-bottom */}
             </>
           )}
         </div>
@@ -2546,6 +2511,7 @@ export default function Home() {
   const [editingTask, setEditingTask] = useState(null)
   const [addingTaskToBucket, setAddingTaskToBucket] = useState(null)
   const [activeChapterId, setActiveChapterId] = useState(null) // Track dragged chapter for DragOverlay
+  const [activeChapterBucket, setActiveChapterBucket] = useState(null) // Track source bucket for drag offset
   const [overId, setOverId] = useState(null) // Track which card/bucket is being hovered over
   const [comments, setComments] = useState([])
   const [subtasks, setSubtasks] = useState([])
@@ -2643,10 +2609,15 @@ export default function Home() {
   // Custom modifier to position drag overlay accurately under cursor
   // MS Planner-style: Card follows cursor with minimal offset for natural feel
   const adjustTranslate = ({ transform }) => {
+    // Different offsets for Backlog vs other columns due to two-column layout
+    const isFromBacklog = activeChapterBucket === 'In Queue';
+    
     return {
       ...transform,
-      x: transform.x - 235,  // Minimal horizontal offset - cursor near left edge
-      y: transform.y - 100, // Small vertical offset - cursor near top
+      // Backlog is in left column (300px wide), needs less horizontal offset
+      // Other columns are in right panel, need more offset to account for left column
+      x: transform.x - (isFromBacklog ? 5 : 235),
+      y: transform.y - (isFromBacklog ? 10 : 100),
     }
   }
 
@@ -2702,16 +2673,15 @@ export default function Home() {
     fetchData()
   }, [])
 
-  // Re-filter when class or curriculum selection changes
+  // Re-filter when class selection changes (show both curriculums)
   useEffect(() => {
     if (allStudyPlans.length > 0) {
-      const filteredByGradeAndCurriculum = allStudyPlans.filter(plan => 
-        String(plan.grade) === String(selectedClass) && 
-        plan.curriculum === selectedCurriculum
+      const filteredByGrade = allStudyPlans.filter(plan => 
+        String(plan.grade) === String(selectedClass)
       )
       
       // Extract unique subjects from filtered data
-      const uniqueSubjects = [...new Set(filteredByGradeAndCurriculum.map(plan => plan.subject))]
+      const uniqueSubjects = [...new Set(filteredByGrade.map(plan => plan.subject))]
       const subjectsData = uniqueSubjects.map((subject, index) => ({
         subject_id: index + 1,
         name: subject,
@@ -2719,14 +2689,14 @@ export default function Home() {
       }))
       
       setSubjects(subjectsData)
-      setStudyPlans(filteredByGradeAndCurriculum)
+      setStudyPlans(filteredByGrade)
       
       // Update selected subject if current one is no longer available
       if (subjectsData.length > 0 && !subjectsData.find(s => s.name === selectedSubject?.name)) {
         setSelectedSubject(subjectsData[0])
       }
     }
-  }, [selectedClass, selectedCurriculum, allStudyPlans])
+  }, [selectedClass, allStudyPlans])
 
   useEffect(() => {
     // Apply background theme and color theme to body
@@ -3016,15 +2986,14 @@ export default function Home() {
     // Store all unfiltered data
     setAllStudyPlans(finalStudyPlansData)
     
-    // Apply grade and curriculum filters
-    const filteredByGradeAndCurriculum = finalStudyPlansData.filter(plan => 
-      String(plan.grade) === String(selectedClass) && 
-      plan.curriculum === selectedCurriculum
+    // Apply grade filter only (show both curriculums)
+    const filteredByGrade = finalStudyPlansData.filter(plan => 
+      String(plan.grade) === String(selectedClass)
     )
 
     setPlans([]) // Clear plans since we're not using them
     setSubjects(subjectsData)
-    setStudyPlans(filteredByGradeAndCurriculum)
+    setStudyPlans(filteredByGrade)
     if (subjectsData.length > 0) setSelectedSubject(subjectsData[0])
     setLoading(false)
   }
@@ -3086,6 +3055,13 @@ export default function Home() {
     if (active.id.startsWith('chapter-')) {
       const chapterId = active.id.replace('chapter-', '')
       setActiveChapterId(chapterId)
+      
+      // Find the chapter to determine its source bucket
+      const chapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+      const chapter = chapters.find(ch => ch.chapter_id === chapterId)
+      if (chapter) {
+        setActiveChapterBucket(chapter.aggregatedStatus)
+      }
     }
   }
 
@@ -3094,6 +3070,7 @@ export default function Home() {
 
     // Clear active drag state
     setActiveChapterId(null)
+    setActiveChapterBucket(null)
     setOverId(null)
 
     if (!over) return
@@ -3401,36 +3378,6 @@ export default function Home() {
                   <option value="11">11th Grade</option>
                 </select>
               </div>
-
-              {/* Curriculum Selector */}
-              <div className="header-selector-group">
-                <label className="selector-label">Curriculum</label>
-                <select
-                  value={selectedCurriculum}
-                  onChange={(e) => setSelectedCurriculum(e.target.value)}
-                  className="header-select-small"
-                >
-                  <option value="CBSE">CBSE</option>
-                  <option value="JEE">JEE</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Center Navigation Section - Subject Tabs Only */}
-          <div className="header-nav-section">
-            {/* Subject Filter Tabs */}
-            <div className="header-nav-tabs">
-              {subjects.slice(0, 3).map(subject => (
-                <button
-                  key={subject.subject_id}
-                  className={`nav-tab ${selectedSubject?.subject_id === subject.subject_id ? 'active' : ''}`}
-                  onClick={() => setSelectedSubject(subject)}
-                >
-                  <BookOpenIcon />
-                  <span>{subject.name}</span>
-                </button>
-              ))}
             </div>
           </div>
 
@@ -3446,20 +3393,6 @@ export default function Home() {
                 className="search-input"
               />
             </div>
-
-            {/* Group By Dropdown */}
-            {selectedSubject && viewMode === 'kanban' && (
-              <select
-                value={groupBy}
-                onChange={(e) => setGroupBy(e.target.value)}
-                className="header-select"
-                style={{ fontSize: '12px', padding: '6px 10px' }}
-              >
-                <option value="status">Group by Status</option>
-                <option value="stage">Group by Stage</option>
-                <option value="proficiency">Group by Proficiency</option>
-              </select>
-            )}
 
             {/* Red Recorder Button - AI Assistant */}
             <button
@@ -3577,6 +3510,38 @@ export default function Home() {
           <>
             {selectedSubject && viewMode === 'kanban' && (
               <>
+                {/* Kanban Board Controls - Subjects & Filter */}
+                <div className="kanban-controls-container">
+                  <div className="kanban-controls-left">
+                    <h3 className="controls-label">Subjects</h3>
+                    <div className="subject-chips-horizontal">
+                      {subjects.map(subject => (
+                        <button
+                          key={subject.subject_id}
+                          className={`subject-chip ${selectedSubject?.subject_id === subject.subject_id ? 'active' : ''}`}
+                          onClick={() => setSelectedSubject(subject)}
+                        >
+                          <BookOpenIcon />
+                          <span>{subject.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="kanban-controls-right">
+                    <label className="controls-label">Filter By</label>
+                    <select
+                      value={groupBy}
+                      onChange={(e) => setGroupBy(e.target.value)}
+                      className="filter-select"
+                    >
+                      <option value="status">Status</option>
+                      <option value="stage">Stage</option>
+                      <option value="proficiency">Proficiency</option>
+                    </select>
+                  </div>
+                </div>
+
                 <DndContext
                   sensors={sensors}
                   collisionDetection={closestCorners}
@@ -3584,12 +3549,52 @@ export default function Home() {
                   onDragOver={(event) => setOverId(event.over?.id || null)}
                   onDragEnd={handleChapterDragEnd}
                 >
-                  <div className="kanban-board">
-                    <div className={`buckets-container buckets-${buckets.length}`}>
-                      {buckets.map(bucket => {
-                        const allChapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
-                        const filtered = filterChapters(allChapters)
-                        const sorted = sortChapters(filtered)
+                  <div className="kanban-two-column-layout">
+                    {/* Left Column - Backlog */}
+                    <div className="kanban-left-column">
+                      <div className="backlog-section">
+                        {buckets.filter(b => b.status === 'In Queue').map(bucket => {
+                          const allChapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+                          const filtered = filterChapters(allChapters)
+                          const sorted = sortChapters(filtered)
+                          
+                          // Filter by bucket - handle proficiency ranges
+                          const bucketChapters = sorted.filter(chapter => {
+                            if (groupBy === 'proficiency' && bucket.minValue !== undefined) {
+                              const profValue = chapter[bucket.field] || 0;
+                              return profValue >= bucket.minValue && profValue <= bucket.maxValue;
+                            }
+                            return chapter[bucket.field] === bucket.status;
+                          });
+                          
+                          return (
+                            <Bucket
+                              key={bucket.id}
+                              bucket={bucket}
+                              chapters={bucketChapters}
+                              onEditChapter={onEditChapter}
+                              onUpdateProgress={fetchData}
+                              onUpdateChapterStatus={updateChapterStatus}
+                              getStatusColor={getStatusColor}
+                              getProficiencyColor={getProficiencyColor}
+                              selectedChapters={selectedChapters}
+                              onToggleChapterSelect={toggleChapterSelect}
+                              overId={overId}
+                            />
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Right Column - Main Workflow */}
+                    <div className="kanban-right-column">
+                      <div className="kanban-board">
+                        {/* Main Workflow Columns */}
+                        <div className={`buckets-container buckets-${buckets.filter(b => b.status !== 'In Queue').length}`}>
+                          {buckets.filter(b => b.status !== 'In Queue').map(bucket => {
+                            const allChapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+                            const filtered = filterChapters(allChapters)
+                            const sorted = sortChapters(filtered)
                         
                         // Filter by bucket - handle proficiency ranges
                         const bucketChapters = sorted.filter(chapter => {
@@ -3636,7 +3641,12 @@ export default function Home() {
                         </div>
                       </div>
                     )}
+                      </div>
+                      {/* End kanban-board */}
+                    </div>
+                    {/* End kanban-right-column */}
                   </div>
+                  {/* End kanban-two-column-layout */}
 
                   {/* DragOverlay - Renders dragged card in a portal OUTSIDE normal DOM */}
                   <DragOverlay dropAnimation={null} modifiers={[adjustTranslate]}>
@@ -3645,13 +3655,29 @@ export default function Home() {
                       const draggedChapter = allChapters.find(ch => ch.chapter_id === activeChapterId)
                       return draggedChapter ? (
                         <div className="chapter-card dragging" data-status={draggedChapter.aggregatedStatus} style={{ cursor: 'grabbing' }}>
+                          {/* Subject and Curriculum above header */}
                           <div className="chapter-meta-top">
-                            <span className="meta-id">{draggedChapter.chapter_id}</span>
                             <span className="meta-subject">{draggedChapter.subject}</span>
+                            <span className="meta-curriculum">
+                              <span className={`curriculum-badge ${draggedChapter.curriculum.toLowerCase()}`}>
+                                {draggedChapter.curriculum}
+                              </span>
+                            </span>
                           </div>
+
                           <div className="chapter-header" style={{ cursor: 'grabbing', background: draggedChapter.aggregatedStatus === 'In Queue' ? '#f3f4f6' : `linear-gradient(135deg, ${getStatusColor(draggedChapter.aggregatedStatus)}20, ${getStatusColor(draggedChapter.aggregatedStatus)}60)` }}>
                             <h4 className="chapter-title">{draggedChapter.chapter_name}</h4>
                           </div>
+
+                          {/* Chapter ID, Stage, and Proficiency below title */}
+                          <div className="chapter-meta-bottom">
+                            <span className="meta-id">{draggedChapter.chapter_id}</span>
+                            <span className="detail-label">Stage:</span>
+                            <span className="status-badge">{draggedChapter.aggregatedStage}</span>
+                            <span className="detail-label">Proficiency:</span>
+                            <div>{getProficiencyIcons(draggedChapter.aggregatedProficiency)}</div>
+                          </div>
+
                           <div className="chapter-body">
                             <div className="chapter-stats">
                               <div className="stat-row">
@@ -4239,6 +4265,60 @@ export default function Home() {
             <div className="modal-header-compact">
               <div className="header-title-row">
                 <h2 className="modal-chapter-title">{editingChapter.chapter_name}</h2>
+                
+                {/* Target Date - Prominent in Header */}
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '8px',
+                  marginLeft: 'auto',
+                  marginRight: '16px'
+                }}>
+                  <label style={{
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    color: '#6b7280',
+                    whiteSpace: 'nowrap'
+                  }}>📅 Target Date:</label>
+                  <input
+                    type="date"
+                    value={editingChapter.studyPlans && editingChapter.studyPlans.length > 0 && editingChapter.studyPlans[0].target_date 
+                      ? new Date(editingChapter.studyPlans[0].target_date).toISOString().split('T')[0]
+                      : ''}
+                    onChange={(e) => {
+                      const newDate = e.target.value;
+                      const updatedPlans = studyPlans.map(plan => 
+                        plan.chapter_id === editingChapter.chapter_id 
+                          ? {...plan, target_date: newDate}
+                          : plan
+                      );
+                      setStudyPlans(updatedPlans);
+                      localStorage.setItem('studyPlans', JSON.stringify(updatedPlans));
+                      const allChapters = [
+                        ...groupStudyPlansByChapter(updatedPlans, 'In Queue'),
+                        ...groupStudyPlansByChapter(updatedPlans, 'To Do'),
+                        ...groupStudyPlansByChapter(updatedPlans, 'In Progress'),
+                        ...groupStudyPlansByChapter(updatedPlans, 'Done'),
+                        ...groupStudyPlansByChapter(updatedPlans, 'Closed')
+                      ];
+                      const updatedChapter = allChapters.find(ch => ch.chapter_id === editingChapter.chapter_id);
+                      if (updatedChapter) setEditingChapter(updatedChapter);
+                    }}
+                    style={{
+                      fontSize: '13px',
+                      padding: '6px 12px',
+                      border: '2px solid rgba(139, 92, 246, 0.4)',
+                      borderRadius: '8px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                      fontWeight: '600',
+                      color: '#374151',
+                      minWidth: '150px',
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 4px rgba(139, 92, 246, 0.1)'
+                    }}
+                  />
+                </div>
+                
                 <button className="close-btn-compact" onClick={() => {
                   setEditingChapter(null)
                   setEditingTopicId(null)
@@ -4246,28 +4326,7 @@ export default function Home() {
               </div>
               
               <div className="header-four-columns">
-                {/* Column 1: Overview */}
-                <div className="header-column overview-column">
-                  <h3 className="column-header">Overview</h3>
-                  <div className="overview-item">
-                    <span className="overview-label">Subject:</span>
-                    <span className="overview-value">{editingChapter.subject}</span>
-                  </div>
-                  <div className="overview-item">
-                    <span className="overview-label">Curriculum:</span>
-                    <span className="overview-value">{editingChapter.curriculum}</span>
-                  </div>
-                  <div className="overview-item">
-                    <span className="overview-label">Grade:</span>
-                    <span className="overview-value">{editingChapter.grade}</span>
-                  </div>
-                  <div className="overview-item">
-                    <span className="overview-label">Topics:</span>
-                    <span className="overview-value">{editingChapter.totalTopics} ({editingChapter.completedTopics} ✓)</span>
-                  </div>
-                </div>
-
-                {/* Column 2: Status */}
+                {/* Column 1: Status */}
                 <div className="header-column status-column">
                   <h3 className="column-header">Status</h3>
                   <div className="control-chips-vertical">
@@ -4305,7 +4364,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Column 3: Stage */}
+                {/* Column 2: Stage */}
                 <div className="header-column stage-column">
                   <h3 className="column-header">Stage</h3>
                   <div className="control-chips-vertical">
@@ -4343,7 +4402,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Column 4: Proficiency */}
+                {/* Column 3: Proficiency */}
                 <div className="header-column proficiency-column">
                   <h3 className="column-header">Proficiency</h3>
                   <div className="control-chips-vertical">
@@ -4383,6 +4442,27 @@ export default function Home() {
                         {prof.label}
                       </button>
                     ))}
+                  </div>
+                </div>
+
+                {/* Column 4: Overview */}
+                <div className="header-column overview-column">
+                  <h3 className="column-header">Overview</h3>
+                  <div className="overview-item">
+                    <span className="overview-label">Subject:</span>
+                    <span className="overview-value">{editingChapter.subject}</span>
+                  </div>
+                  <div className="overview-item">
+                    <span className="overview-label">Curriculum:</span>
+                    <span className="overview-value">{editingChapter.curriculum}</span>
+                  </div>
+                  <div className="overview-item">
+                    <span className="overview-label">Grade:</span>
+                    <span className="overview-value">{editingChapter.grade}</span>
+                  </div>
+                  <div className="overview-item">
+                    <span className="overview-label">Topics:</span>
+                    <span className="overview-value">{editingChapter.totalTopics} ({editingChapter.completedTopics} ✓)</span>
                   </div>
                 </div>
               </div>
