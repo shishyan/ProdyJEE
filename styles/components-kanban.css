@@ -1,0 +1,221 @@
+/* ========================================
+   KANBAN BOARD COMPONENT STYLES
+   ======================================== */
+
+/* Kanban Board Container */
+.kanban-board {
+  background: none;
+  padding: 16px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.board-header {
+  margin-bottom: 12px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.board-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+/* Buckets Container */
+.buckets-container {
+  background: none;
+  display: flex;
+  gap: 8px;
+  padding: 0;
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  box-sizing: border-box;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.buckets-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Bucket Columns */
+.bucket {
+  background: none;
+  border-radius: 12px;
+  padding: 8px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+  min-width: 180px;
+  width: 100%;
+  flex: 0 0 auto;
+  height: calc(100vh - 8vh - 7vh - 120px);
+  display: flex;
+  flex-direction: column;
+  scroll-snap-align: start;
+  box-shadow: none;
+  position: relative;
+  z-index: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  contain: layout style;
+}
+
+/* Dynamic column width based on number of buckets */
+.buckets-5 .bucket {
+  width: calc((100% - 68px) / 5);
+}
+
+.buckets-3 .bucket {
+  width: calc((100% - 52px) / 3);
+}
+
+.bucket:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: #6366f1;
+}
+
+/* MS Planner-style Drop Zone Indicator */
+.bucket.ring-2 {
+  background: rgba(59, 130, 246, 0.05) !important;
+  border-color: #3b82f6 !important;
+  border-style: dashed !important;
+  transition: all 0.2s ease;
+}
+
+.bucket.ring-2::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+  border-radius: 2px;
+  opacity: 0.6;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Bucket Headers - Sticky */
+.bucket h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  background: transparent;
+  z-index: 1;
+  padding: 8px 0;
+  margin: -8px 0 8px 0;
+}
+
+/* Scrollbar-free Cards Container */
+.bucket > div:last-child {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-snap-type: y proximity;
+  scroll-behavior: smooth;
+  padding-right: 4px;
+  margin-right: -4px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.bucket > div:last-child::-webkit-scrollbar {
+  display: none;
+}
+
+/* Card Snap Alignment */
+.bucket > div:last-child > * {
+  scroll-snap-align: start;
+  margin-bottom: 12px;
+}
+
+/* Status-based Bucket Styles */
+.bucket-done,
+.bucket-todo,
+.bucket-in-progress {
+  background: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  backdrop-filter: blur(10px) !important;
+  box-shadow: none !important;
+}
+
+.bucket-backlog {
+  background: none !important;
+  border: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+/* Drag Overlay Styles */
+.drag-overlay {
+  cursor: grabbing;
+  transform: rotate(8deg) scale(1.05);
+  opacity: 0.95;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+}
+
+/* Keyboard Navigation Hint */
+.keyboard-hint {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 1000;
+  animation: fadeInOut 3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; }
+  10%, 90% { opacity: 1; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .buckets-container {
+    grid-template-columns: 1fr;
+    padding: 0 10px;
+  }
+
+  .bucket {
+    min-height: 400px;
+  }
+}

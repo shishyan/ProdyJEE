@@ -1,0 +1,284 @@
+/* ========================================
+   SUBJECT & TOPIC COMPONENTS
+   Subjects tabs, chapter items, subtopic cards
+   ======================================== */
+
+/* ========================================
+   SUBJECTS TABS
+   ======================================== */
+
+.subjects-tabs {
+  display: flex;
+  gap: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.subject-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  color: #1a1a1a;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.subject-tab:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.subject-tab.active {
+  background: rgba(255, 255, 255, 0.2);
+  color: #1a1a1a;
+}
+
+.subject-tab svg {
+  width: 16px;
+  height: 16px;
+}
+
+.subject-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #3b82f6;
+}
+
+/* ========================================
+   SUBJECT ITEMS & BACKLOG
+   ======================================== */
+
+.subject-item {
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.subject-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.subject-item.active {
+  background: var(--accent-gradient);
+  color: white;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.subject-backlog {
+  margin-left: 10px;
+  margin-bottom: 15px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.subject-backlog h4 {
+  margin: 10px 0 8px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #605e5c;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ========================================
+   CHAPTER ITEMS
+   ======================================== */
+
+.chapter-item {
+  margin-bottom: 8px;
+}
+
+.chapter-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #323130;
+  margin-bottom: 4px;
+  padding: 4px 8px;
+  background-color: #f8f8f8;
+  border-radius: 3px;
+}
+
+/* ========================================
+   SUBTOPICS
+   ======================================== */
+
+.subtopics-list {
+  margin-left: 8px;
+}
+
+.subtopic-item {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 4px;
+  padding: 6px 12px;
+  border-left: 3px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 0 8px 8px 0;
+}
+
+.subtopic-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-left-color: #ffffff;
+  color: #ffffff;
+  transform: translateX(4px);
+}
+
+/* Subtopic Cards for Kanban */
+.subtopic-card {
+  background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  cursor: grab;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.subtopic-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.subtopic-card:active {
+  cursor: grabbing;
+}
+
+.subtopic-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.subtopic-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.subtopic-info {
+  flex: 1;
+}
+
+.subtopic-title {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.subtopic-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+/* Subtopic-specific status badges */
+.status-badge.Completed {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.status-badge.InProgress {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+}
+
+.status-badge.NotStarted {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  color: white;
+}
+
+.subtopic-progress {
+  margin-bottom: 8px;
+}
+
+.subtopic-stats {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+.stat-item svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* ========================================
+   RESPONSIVE SUBJECT STYLES
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .subject-tab {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  
+  .subtopic-card {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .subjects-tabs {
+    flex-wrap: wrap;
+  }
+  
+  .subject-tab {
+    flex: 1;
+    min-width: 120px;
+    justify-content: center;
+  }
+  
+  .subtopic-header {
+    gap: 8px;
+  }
+  
+  .subtopic-icon {
+    width: 28px;
+    height: 28px;
+  }
+}

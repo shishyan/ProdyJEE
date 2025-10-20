@@ -18,6 +18,9 @@ import {
 } from '@dnd-kit/core'
 import {
   sortableKeyboardCoordinates,
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
 } from '@dnd-kit/sortable'
 import {
   useSortable,
@@ -192,9 +195,9 @@ const getProficiencyIcons = (proficiency) => {
     case 'Competent':
       return <div className="proficiency-icons">{starIcon}{starIcon}{starIcon}</div>;
     case 'Expert':
-      return <div className="proficiency-icons">{starIcon}{starIcon}{starIcon}{starIcon}{starIcon}</div>;
+      return <div className="proficiency-icons">{starIcon}{starIcon}{starIcon}{starIcon}</div>;
     case 'Master':
-      return <div className="proficiency-icons">{awardIcon}</div>;
+      return <div className="proficiency-icons">{starIcon}{starIcon}{starIcon}{starIcon}{starIcon}</div>;
     default:
       return <div className="proficiency-icons">{starIcon}</div>;
   }
@@ -585,7 +588,7 @@ const groupStudyPlansByChapter = (studyPlans) => {
 }
 
 // Chapter Card Component
-function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatusColor, getProficiencyColor, isSelected, onToggleSelect }) {
+function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatusColor, getProficiencyColor, isSelected, onToggleSelect, overId }) {
   const {
     attributes,
     listeners,
@@ -593,7 +596,10 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
     transform,
     transition,
     isDragging,
-  } = useDraggable({ id: `chapter-${chapter.chapter_id}` })
+  } = useSortable({ id: `chapter-${chapter.chapter_id}` })
+  
+  // Check if this card is being hovered over during drag
+  const isOverThis = overId === `chapter-${chapter.chapter_id}`
 
   // Calculate highest proficiency in chapter
   const getChapterProficiency = () => {
@@ -612,9 +618,9 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
   const chapterProficiency = getChapterProficiency()
 
   const style = {
-    transform: CSS.Translate.toString(transform),
-    transition: isDragging ? 'none' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    opacity: isDragging ? 0 : 1  // Hide original card completely when dragging
+    transform: CSS.Transform.toString(transform),
+    transition: transition || 'transform 200ms cubic-bezier(0.25, 1, 0.5, 1)',
+    opacity: isDragging ? 0.4 : 1  // MS Planner-style: Show ghost (semi-transparent) when dragging
   }
 
   const progressPercentage = Math.round((chapter.completedTopics / chapter.totalTopics) * 100)
@@ -639,11 +645,11 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
       style={{
         ...style,
         border: isSelected ? '2px solid #8b5cf6' : undefined,
-        backgroundColor: isSelected ? 'rgba(139, 92, 246, 0.1)' : 'rgba(255, 255, 255, 0.3)',
+        backgroundColor: isSelected ? 'rgba(139, 92, 246, 0.1)' : 'transparent',
         boxShadow: isSelected ? 'inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(139, 92, 246, 0.3)' : 'inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1)',
         cursor: isDragging ? 'grabbing' : 'grab'
       }}
-      className={`chapter-card ${isDragging ? 'dragging' : ''}`}
+      className={`chapter-card ${isDragging ? 'dragging' : ''} ${isOverThis ? 'drop-indicator' : ''}`}
       data-status={chapter.aggregatedStatus}
       onClick={(e) => onEdit(chapter, e)}
     >
@@ -794,7 +800,7 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
 }
 
 // Bucket Component
-function Bucket({ bucket, chapters, onEditChapter, onUpdateProgress, onUpdateChapterStatus, getStatusColor, getProficiencyColor, selectedChapters, onToggleChapterSelect }) {
+function Bucket({ bucket, chapters, onEditChapter, onUpdateProgress, onUpdateChapterStatus, getStatusColor, getProficiencyColor, selectedChapters, onToggleChapterSelect, overId }) {
   const { setNodeRef, isOver } = useDroppable({
     id: bucket.id,
   })
@@ -846,33 +852,40 @@ function Bucket({ bucket, chapters, onEditChapter, onUpdateProgress, onUpdateCha
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`bucket bg-gray-50 rounded-lg p-4 min-h-[500px] flex flex-col ${isOver || isDragOver ? 'ring-2 ring-blue-500 bg-blue-50' : ''} ${getStatusClass(bucket.status)}`}
+      className={`bucket rounded-lg p-4 min-h-[500px] flex flex-col ${isOver || isDragOver ? 'ring-2 ring-blue-500' : ''} ${getStatusClass(bucket.status)}`}
+      style={{ background: 'none' }}
     >
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold" style={{ color: getStatusColor(bucket.status) }}>{bucket.name} ({filteredChapters.length})</h3>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="space-y-3">
-          {filteredChapters.map(chapter => (
-            <ChapterCard
-              key={chapter.chapter_id}
-              chapter={chapter}
-              bucketColor={getStatusColor(bucket.status)}
-              onEdit={onEditChapter}
-              onUpdateProgress={onUpdateProgress}
-              getStatusColor={getStatusColor}
-              getProficiencyColor={getProficiencyColor}
-              isSelected={selectedChapters.has(chapter.chapter_id)}
-              onToggleSelect={onToggleChapterSelect}
-            />
-          ))}
-          {filteredChapters.length === 0 && (
-            <div className="flex items-center justify-center h-32 text-gray-500 text-sm border-2 border-dashed border-gray-300 rounded-lg">
-              No chapters in {bucket.name.toLowerCase()}
-            </div>
-          )}
-        </div>
+      <div className="flex-1 overflow-y-auto" style={{ background: 'none' }}>
+        <SortableContext
+          items={filteredChapters.map(ch => `chapter-${ch.chapter_id}`)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="space-y-3" style={{ background: 'none' }}>
+            {filteredChapters.map(chapter => (
+              <ChapterCard
+                key={chapter.chapter_id}
+                chapter={chapter}
+                bucketColor={getStatusColor(bucket.status)}
+                onEdit={onEditChapter}
+                onUpdateProgress={onUpdateProgress}
+                getStatusColor={getStatusColor}
+                getProficiencyColor={getProficiencyColor}
+                isSelected={selectedChapters.has(chapter.chapter_id)}
+                onToggleSelect={onToggleChapterSelect}
+                overId={overId}
+              />
+            ))}
+            {filteredChapters.length === 0 && (
+              <div className="flex items-center justify-center h-32 text-gray-500 text-sm border-2 border-dashed border-gray-300 rounded-lg">
+                No chapters in {bucket.name.toLowerCase()}
+              </div>
+            )}
+          </div>
+        </SortableContext>
       </div>
     </div>
   )
@@ -2533,6 +2546,7 @@ export default function Home() {
   const [editingTask, setEditingTask] = useState(null)
   const [addingTaskToBucket, setAddingTaskToBucket] = useState(null)
   const [activeChapterId, setActiveChapterId] = useState(null) // Track dragged chapter for DragOverlay
+  const [overId, setOverId] = useState(null) // Track which card/bucket is being hovered over
   const [comments, setComments] = useState([])
   const [subtasks, setSubtasks] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
@@ -2626,12 +2640,13 @@ export default function Home() {
     })
   )
 
-  // Custom modifier to position drag overlay near cursor
+  // Custom modifier to position drag overlay accurately under cursor
+  // MS Planner-style: Card follows cursor with minimal offset for natural feel
   const adjustTranslate = ({ transform }) => {
     return {
       ...transform,
-      x: transform.x - 20, // Offset from cursor
-      y: transform.y - 20,
+      x: transform.x - 235,  // Minimal horizontal offset - cursor near left edge
+      y: transform.y - 100, // Small vertical offset - cursor near top
     }
   }
 
@@ -3079,13 +3094,44 @@ export default function Home() {
 
     // Clear active drag state
     setActiveChapterId(null)
+    setOverId(null)
 
     if (!over) return
 
     const activeId = active.id
     const overId = over.id
 
-    if (activeId.startsWith('chapter-')) {
+    // Both are chapter cards - reorder within same or different bucket
+    if (activeId.startsWith('chapter-') && overId.startsWith('chapter-')) {
+      const activeChapterId = activeId.replace('chapter-', '')
+      const overChapterId = overId.replace('chapter-', '')
+
+      if (activeChapterId === overChapterId) return // Same card, no action
+
+      // Get all chapters for the current subject
+      const chapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+      const activeChapter = chapters.find(ch => ch.chapter_id === activeChapterId)
+      const overChapter = chapters.find(ch => ch.chapter_id === overChapterId)
+
+      if (activeChapter && overChapter) {
+        const activeStatus = activeChapter.aggregatedStatus
+        const overStatus = overChapter.aggregatedStatus
+
+        // If moving to a different bucket, change status
+        if (activeStatus !== overStatus) {
+          setStudyPlans(prev => prev.map(plan =>
+            activeChapter.studyPlans.some(chapterPlan => chapterPlan.unique_id === plan.unique_id)
+              ? { ...plan, learning_status: overStatus }
+              : plan
+          ))
+        }
+        
+        // Note: Card visual reordering within buckets is handled automatically by SortableContext
+        // We don't need to manage the order in state because cards are filtered/grouped by status
+      }
+    }
+    // Dragging card to bucket (not over another card)
+    else if (activeId.startsWith('chapter-')) {
       const chapterId = activeId.replace('chapter-', '')
       const targetBucket = buckets.find(b => b.id === overId)
 
@@ -3100,7 +3146,7 @@ export default function Home() {
         }
 
         try {
-          // Update all study plans in this chapter to the new status (local state for static deployment)
+          // Update all study plans in this chapter to the new status
           const chapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
           const draggedChapter = chapters.find(ch => ch.chapter_id === chapterId)
 
@@ -3535,6 +3581,7 @@ export default function Home() {
                   sensors={sensors}
                   collisionDetection={closestCorners}
                   onDragStart={handleChapterDragStart}
+                  onDragOver={(event) => setOverId(event.over?.id || null)}
                   onDragEnd={handleChapterDragEnd}
                 >
                   <div className="kanban-board">
@@ -3565,6 +3612,7 @@ export default function Home() {
                             getProficiencyColor={getProficiencyColor}
                             selectedChapters={selectedChapters}
                             onToggleChapterSelect={toggleChapterSelect}
+                            overId={overId}
                           />
                         )
                       })}

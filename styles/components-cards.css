@@ -1,0 +1,422 @@
+/* ========================================
+   CHAPTER CARDS COMPONENT STYLES
+   ======================================== */
+
+/* Chapter Card Base Styles - Compact Design */
+.chapter-card {
+  background: transparent;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-radius: 12px;
+  padding: 8px;
+  margin: 6px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), 
+              opacity 0.2s ease, 
+              margin 0.25s cubic-bezier(0.25, 1, 0.5, 1), 
+              box-shadow 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  border: 2px dashed transparent;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* MS Planner-style: Create Gap for Drop Zone */
+.chapter-card.drop-indicator {
+  margin-bottom: 100px !important;
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* MS Planner-style: Ghosting Effect When Dragging */
+.chapter-card[style*="opacity: 0"] {
+  opacity: 0.4 !important;
+  transform: scale(0.98);
+}
+
+/* Add Space When Dragging Over a Bucket */
+.bucket.ring-2 .chapter-card {
+  margin-top: 12px;
+  transition: margin 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Status-based Card Border Colors */
+.chapter-card[data-status="In Queue"],
+.chapter-card[data-status="Backlog"] {
+  border: 2px dashed #9ca3af !important;
+}
+
+.chapter-card[data-status="To Do"] {
+  border: 2px dashed #3b82f6 !important;
+}
+
+.chapter-card[data-status="In Progress"] {
+  border: 2px dashed #f97316 !important;
+}
+
+.chapter-card[data-status="Done"] {
+  border: 2px dashed #22c55e !important;
+}
+
+.chapter-card[data-status="Closed"] {
+  border: 2px dashed #8b5cf6 !important;
+}
+
+/* Hover Effect */
+.chapter-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 2;
+}
+
+/* Dragging State - MS Planner Style */
+.chapter-card.dragging {
+  opacity: 0.95;
+  transform: rotate(2deg) scale(1.05);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), 0 5px 15px rgba(0, 0, 0, 0.2);
+  z-index: 9999 !important;
+  cursor: grabbing !important;
+  pointer-events: none;
+  transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.1s ease;
+  border: 2px solid rgba(99, 102, 241, 0.3);
+  animation: cardGrab 0.2s ease-out;
+}
+
+/* Grab animation - subtle pulse when picking up card */
+@keyframes cardGrab {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(1deg) scale(1.08);
+  }
+  100% {
+    transform: rotate(2deg) scale(1.05);
+  }
+}
+
+/* Card Layout Components */
+.chapter-meta-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  margin-bottom: 4px;
+}
+
+.meta-id {
+  font-size: 10px;
+  font-weight: 600;
+  color: #666;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+.meta-subject {
+  font-size: 10px;
+  font-weight: 500;
+  color: #4f94fe;
+  background: rgba(79, 172, 254, 0.1);
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+.chapter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.chapter-info {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.chapter-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.2;
+  background: linear-gradient(135deg, rgba(79, 172, 254, 0.15), rgba(0, 242, 254, 0.15));
+  padding: 5px 10px;
+  border-radius: 6px;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chapter-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  color: #666;
+}
+
+.chapter-id {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.subject-tag {
+  background: rgba(79, 172, 254, 0.1);
+  color: #4f94fe;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.target-date {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.target-date.overdue {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.target-date.urgent {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.chapter-status {
+  flex-shrink: 0;
+}
+
+.status-badge {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Chapter Content and Stats */
+.chapter-content {
+  padding: 0 8px;
+}
+
+.chapter-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  background: none;
+}
+
+.stat-label {
+  color: #666;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.stat-value {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.chapter-details-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 8px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.backlog-grid {
+  flex-direction: column;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1px 0;
+  gap: 4px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.backlog-detail-row {
+  justify-content: space-between;
+}
+
+.detail-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #666;
+  white-space: nowrap;
+}
+
+.detail-value {
+  font-size: 10px;
+  color: #1a1a1a;
+  font-weight: 500;
+}
+
+.chapter-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+/* Progress Bar */
+.chapter-progress {
+  margin-bottom: 8px;
+}
+
+.progress-bar {
+  height: 4px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 3px;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 10px;
+  color: #666;
+  text-align: center;
+}
+
+.progress-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  margin-top: 3px;
+}
+
+.progress-label {
+  font-size: 9px;
+  color: #888;
+  font-weight: 500;
+}
+
+/* Target Date Display */
+.chapter-target-date {
+  text-align: center;
+  margin-top: 8px;
+}
+
+.target-date-display {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.target-date-display.overdue {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.target-date-display.urgent {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+/* Topics Preview */
+.chapter-topics-preview h5 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+}
+
+.topics-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.topic-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 6px;
+}
+
+.topic-item.more {
+  font-style: italic;
+  color: #666;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.topic-name.completed {
+  text-decoration: line-through;
+  color: #10b981;
+}
+
+.topic-progress {
+  font-weight: 500;
+  color: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .chapter-card {
+    padding: 6px;
+    margin: 4px 0;
+  }
+
+  .chapter-title {
+    font-size: 12px;
+  }
+
+  .topics-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .chapter-card {
+    padding: 4px;
+  }
+
+  .chapter-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

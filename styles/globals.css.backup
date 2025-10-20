@@ -967,11 +967,10 @@ body {
   height: auto; /* Changed from 100% to auto */
   max-height: calc(100vh - 8vh - 7vh - 2%); /* Subtract header + footer + margins */
   transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 1);
- /* background: transparent !important; /* Fully transparent so columns show through */
+  background: rgba(255, 255, 255, 0.7); /* 30% transparent (70% opacity) */
   border-radius: 24px; /* Curved rectangle - all corners */
-  border: none; /* No border */
-  box-shadow: none; /* No shadow */
+  border: none;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15); /* Slightly stronger shadow */
   margin: 1% 1.5% 1% 1%; /* Spacing from edges */
   overflow-y: auto;
   overflow-x: hidden;
@@ -2862,7 +2861,7 @@ main.board {
   margin-top: 70px;
   padding: 32px;
   min-height: calc(100vh - 70px);
-  background-color: #d4d6da;
+  background-color: #f5f7fa;
   overflow-y: auto;
   transition: margin-left 0.3s ease;
 }
@@ -2926,20 +2925,22 @@ main.board {
 
 .bucket {
   background: transparent;
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
   border-radius: 16px;
   padding: 20px;
   width: 320px;
   min-height: 200px;
   display: flex;
   flex-direction: column;
-  box-shadow: none;
-  border: none;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .bucket:hover {
   transform: translateY(-2px);
-  box-shadow: none;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
 .bucket.backlog-bucket {
@@ -3121,7 +3122,7 @@ main.board {
 }
 
 .modal-content {
-  background-color: rgba(197, 196, 197, 0.521);
+  background-color: white;
   padding: 20px;
   border-radius: 8px;
   width: 400px;
@@ -5643,36 +5644,6 @@ main.board {
   border-color: #6366f1;
 }
 
-/* Drop zone indicator - MS Planner style */
-.bucket.ring-2 {
-  background: rgba(59, 130, 246, 0.05) !important; /* Subtle blue tint */
-  border-color: #3b82f6 !important;
-  border-style: dashed !important;
-  transition: all 0.2s ease;
-}
-
-.bucket.ring-2::after {
-  content: '';
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
-  right: 8px;
-  height: 4px;
-  background: linear-gradient(90deg, transparent, #3b82f6, transparent);
-  border-radius: 2px;
-  opacity: 0.6;
-  animation: shimmer 1.5s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-  0%, 100% {
-    opacity: 0.4;
-  }
-  50% {
-    opacity: 0.8;
-  }
-}
-
 .bucket h3 {
   font-size: 18px;
   font-weight: 600;
@@ -6471,38 +6442,17 @@ main.board {
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   border-radius: 12px;
-  padding: 8px;
-  margin: 24px 0;
+  padding: 8px; /* Reduced padding for better compression */
+  margin: 6px 0; /* Reduced margin to save space */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), 
-              opacity 0.2s ease, 
-              margin 0.25s cubic-bezier(0.25, 1, 0.5, 1), 
-              box-shadow 0.2s ease;
+  transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
   z-index: 1;
   border: 2px dashed transparent;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-/* MS Planner-style: Create gap for drop zone */
-.chapter-card.drop-indicator {
-  margin-bottom: 100px !important; /* Create space below when another card is hovering over */
-  border-color: rgba(59, 130, 246, 0.3);
-}
-
-/* MS Planner-style: Ghosting effect when dragging */
-.chapter-card[style*="opacity: 0"] {
-  opacity: 0.4 !important; /* Semi-transparent ghost instead of completely hidden */
-  transform: scale(0.98);
-}
-
-/* Add space when dragging over a bucket to show drop zone */
-.bucket.ring-2 .chapter-card {
-  margin-top: 12px;
-  transition: margin 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+  width: 100%; /* Force cards to respect container width */
+  max-width: 100%; /* Prevent overflow */
+  box-sizing: border-box; /* Include padding and border in width calculation */
 }
 
 /* Compact dashed borders with column-themed colors */
@@ -6534,28 +6484,12 @@ main.board {
 }
 
 .chapter-card.dragging {
-  opacity: 0.95; /* Slightly more visible for better tracking */
-  transform: rotate(2deg) scale(1.05); /* Subtle tilt with slightly larger scale */
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), 0 5px 15px rgba(0, 0, 0, 0.2); /* Layered shadow for depth */
+  opacity: 1;
+  transform: rotate(5deg) scale(1.05);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   z-index: 9999 !important;
   cursor: grabbing !important;
   pointer-events: none;
-  transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.1s ease; /* Faster response */
-  border: 2px solid rgba(99, 102, 241, 0.3); /* Subtle blue border for active state */
-  animation: cardGrab 0.2s ease-out; /* Initial grab animation */
-}
-
-/* Grab animation - subtle pulse when picking up card */
-@keyframes cardGrab {
-  0% {
-    transform: rotate(0deg) scale(1);
-  }
-  50% {
-    transform: rotate(1deg) scale(1.08);
-  }
-  100% {
-    transform: rotate(2deg) scale(1.05);
-  }
 }
 
 .chapter-meta-top {

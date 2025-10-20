@@ -1,0 +1,533 @@
+/* ========================================
+   SPECIAL EFFECTS & ANIMATIONS
+   Weather, Voice Assistant, Volume Controls
+   ======================================== */
+
+/* ========================================
+   SCROLL UTILITIES & INDICATORS
+   ======================================== */
+
+/* Scroll Indicators */
+.scroll-indicator {
+  position: absolute;
+  background: rgba(99, 102, 241, 0.1);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6366f1;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(99, 102, 241, 0.2);
+  animation: pulseIndicator 2s infinite;
+}
+
+.scroll-indicator:hover {
+  background: rgba(99, 102, 241, 0.2);
+  transform: scale(1.1);
+}
+
+.scroll-indicator.horizontal-left {
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 60px;
+}
+
+.scroll-indicator.horizontal-right {
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 60px;
+}
+
+.scroll-indicator.vertical-up {
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 40px;
+}
+
+.scroll-indicator.vertical-down {
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 40px;
+}
+
+.scroll-indicator.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes pulseIndicator {
+  0%, 100% {
+    opacity: 0.7;
+    box-shadow: 0 2px 12px rgba(99, 102, 241, 0.2);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+  }
+}
+
+/* Scroll Progress Bar */
+.scroll-progress {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: linear-gradient(90deg, #6366f1 0%, #a855f7 100%);
+  transition: width 0.1s ease;
+  z-index: 9999;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+/* Keyboard Navigation Hints */
+.keyboard-hint {
+  position: fixed;
+  bottom: 70px;
+  right: 20px;
+  background: rgba(249, 245, 247, 0.95);
+  padding: 12px 16px;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  font-size: 12px;
+  color: #6b7280;
+  z-index: 999;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid #e5e7eb;
+  opacity: 0;
+  animation: fadeInHint 0.3s ease-in-out forwards;
+  animation-delay: 1s;
+}
+
+.keyboard-hint.hidden {
+  display: none;
+}
+
+.keyboard-hint kbd {
+  background: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 600;
+  margin: 0 2px;
+}
+
+@keyframes fadeInHint {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Smooth Scroll Utilities */
+.smooth-scroll {
+  scroll-behavior: smooth;
+}
+
+.snap-scroll-x {
+  scroll-snap-type: x mandatory;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.snap-scroll-y {
+  scroll-snap-type: y mandatory;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.snap-start {
+  scroll-snap-align: start;
+}
+
+.snap-center {
+  scroll-snap-align: center;
+}
+
+.snap-end {
+  scroll-snap-align: end;
+}
+
+/* Touch-friendly scroll areas */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Viewport utilities */
+.vh-100 {
+  height: 100vh;
+}
+
+.vw-100 {
+  width: 100vw;
+}
+
+/* ========================================
+   WEATHER OVERLAY EFFECTS
+   ======================================== */
+
+.weather-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.raindrop {
+  position: absolute;
+  width: 2px;
+  height: 50px;
+  background: linear-gradient(to bottom, 
+    rgba(174, 194, 224, 0) 0%, 
+    rgba(174, 194, 224, 0.5) 50%, 
+    rgba(174, 194, 224, 0) 100%
+  );
+  animation: fall linear infinite;
+  opacity: 0.6;
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(-100px);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+/* ========================================
+   VOICE ASSISTANT
+   ======================================== */
+
+.voice-assistant-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.voice-assistant-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.voice-assistant-btn:active {
+  transform: scale(0.95);
+}
+
+.voice-icon {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.voice-pulse {
+  animation: voicePulse 1.5s ease-in-out infinite;
+}
+
+.voice-label {
+  position: absolute;
+  bottom: -25px;
+  font-size: 11px;
+  color: #667eea;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@keyframes voicePulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+/* Footer Assistant */
+.footer-assistant {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.footer-assistant:hover {
+  background: rgba(102, 126, 234, 0.2);
+  transform: translateY(-1px);
+}
+
+/* ========================================
+   VOLUME SLIDER
+   ======================================== */
+
+.volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 80px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.volume-slider::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ========================================
+   MISCELLANEOUS COMPONENTS
+   ======================================== */
+
+/* Version Tag */
+.version-tag {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Priority Icons */
+.priority-icon {
+  font-weight: bold;
+  color: #0078d4;
+}
+
+.priority-icon.low { color: #107c10; }
+.priority-icon.medium { color: #ff8c00; }
+.priority-icon.high { color: #d13438; }
+.priority-icon.important { color: #c239b3; }
+
+/* Due Date Colors */
+.due-date {
+  font-size: 10px;
+  color: #605e5c;
+}
+
+.due-date.overdue { color: #d13438; }
+.due-date.due-soon { color: #ff8c00; }
+
+/* Labels */
+.labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.label {
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 10px;
+  color: white;
+  font-weight: 600;
+}
+
+/* Task & Subtask Components */
+.task-card {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.task-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.task-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.subtask {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid #e1dfdd;
+}
+
+.subtask:last-child {
+  border-bottom: none;
+}
+
+/* Comments Section */
+.comments-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.comment {
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+/* Add Task Button */
+.add-task-btn {
+  width: 100%;
+  padding: 8px;
+  background-color: #f3f2f1;
+  border: 1px dashed #e1dfdd;
+  border-radius: 4px;
+  color: #605e5c;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-task-btn:hover {
+  background-color: #edebe9;
+  border-color: #c8c6c4;
+}
+
+/* Status & Priority Badges */
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.not-started { background: #e0e0e0; color: #666; }
+.status-badge.in-progress { background: #fff4e6; color: #f59e0b; }
+.status-badge.completed { background: #d1fae5; color: #10b981; }
+.status-badge.on-hold { background: #fee2e2; color: #ef4444; }
+
+.priority-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.priority-badge.low { background: #d1fae5; color: #10b981; }
+.priority-badge.medium { background: #fff4e6; color: #f59e0b; }
+.priority-badge.high { background: #fee2e2; color: #ef4444; }
+.priority-badge.important { background: #f3e8ff; color: #a855f7; }
+
+/* Read-only Field */
+.read-only-field {
+  padding: 8px 12px;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+/* React Datepicker Wrapper */
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.react-datepicker-wrapper input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #2d3748;
+  font-size: 14px;
+}
