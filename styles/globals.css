@@ -315,7 +315,7 @@ body {
 }
 
 .brand-main {
-  font-size: 11px; /* Reduced by 40% (18 * 0.6 = 10.8, rounded to 11) */
+  font-size: 5.5px; /* Reduced by 50% (11px * 0.5 = 5.5px) */
   font-weight: 700;
   color: #1a202c;
   letter-spacing: -0.3px;
@@ -930,11 +930,11 @@ body {
 }
 
 .sidebar-nav-item.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: transparent; /* No background when selected */
+  color: #667eea; /* Change text/icon color to purple */
   font-weight: 600;
   border-color: transparent;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: none; /* No shadow */
 }
 
 .sidebar-nav-item svg {
@@ -962,12 +962,12 @@ body {
 /* 4. MAIN CONTENT CONTAINER - Takes remaining width in flex layout */
 .main-content-container {
   flex: 1; /* Take all remaining space */
-  padding: 2%; /* Padding inside the white box */
+  padding: 20px 20px 40px 20px; /* Fixed hard padding - extra bottom padding for kanban board breathing room */
   min-height: 0; /* Allow flex to control height */
   height: auto; /* Changed from 100% to auto */
   max-height: calc(100vh - 8vh - 7vh - 2%); /* Subtract header + footer + margins */
   transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.35); /* Increased opacity from 0.15 to 0.35 */
+  background: rgba(255, 255, 255, 0.7); /* 30% transparent (70% opacity) */
   border-radius: 24px; /* Curved rectangle - all corners */
   border: none;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15); /* Slightly stronger shadow */
@@ -2629,13 +2629,13 @@ body.bg-meadow { --background-image: var(--bg-meadow); }
 }
 
 .sidebar-nav-item:hover {
-  background: #f3f4f6;
-  color: #1a202c;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
 }
 
 .sidebar-nav-item.active {
-  background: #eff6ff;
-  color: #2563eb;
+  background: transparent; /* No background when selected */
+  color: #667eea; /* Change icon color to purple */
   font-weight: 600;
 }
 
@@ -5560,17 +5560,18 @@ main.board {
 
 /* Kanban Board Styles */
 .kanban-board {
-  padding: 0;
-  height: auto; /* Let content determine height instead of fixed viewport calculation */
-  max-height: calc(100vh - 200px); /* Prevent overflow but allow natural sizing */
+  padding: 16px; /* Fixed equal padding on all sides - keeps columns away from edges */
+  height: auto; /* Let content determine height naturally */
   display: flex;
   flex-direction: column;
   overflow: hidden; /* No scrollbars */
   position: relative;
+  width: 100%; /* Force full width */
+  box-sizing: border-box; /* Include padding in width */
 }
 
 .board-header {
-  margin-bottom: 20px;
+  margin-bottom: 12px; /* Reduced from 20px - kanban-board already has 16px padding */
   text-align: center;
   flex-shrink: 0;
 }
@@ -5584,14 +5585,16 @@ main.board {
 
 .buckets-container {
   display: flex;
-  gap: 18px; /* Increased by 16% (12 * 1.16 = 13.92, rounded to 18 for better spacing) */
-  padding: 12px 16px; /* Fixed padding */
+  gap: 8px; /* FIXED GAP - never compresses (max 20% compression rule = min 6.4px, but gap is CSS fixed) */
+  padding: 0; /* No padding - kanban-board already has 16px padding on all sides */
   flex: 1;
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+  width: 100%; /* Force full width */
+  box-sizing: border-box; /* Include padding in width */
   /* Hide scrollbar but keep functionality */
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -5602,23 +5605,35 @@ main.board {
 }
 
 .bucket {
-  background: transparent;
+  background: none; /* No background */
   border-radius: 12px;
-  padding: 12px; /* Fixed padding for content */
+  padding: 8px; /* Reduced padding to allow better compression */
   border: 1px solid #e5e7eb;
   transition: all 0.3s ease;
-  min-width: 280px; /* Minimum width for readability */
-  max-width: 320px; /* Maximum width */
-  width: 300px; /* Default fixed width */
-  flex-shrink: 0;
-  height: 100%;
+  min-width: 180px; /* Minimum width when space is very limited */
+  width: 100%; /*calc((100% - 16px) / 1); /* CALCULATED: (100% - (gap × 5 + padding × 2)) / 4 columns */
+  flex: 0 0 auto; /* No grow, no shrink - use calculated width only */
+  height: calc(100vh - 8vh - 7vh - 120px); /* Fixed height: viewport minus header, footer, and padding */
   display: flex;
   flex-direction: column;
   scroll-snap-align: start;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: none; /* No shadow */
   position: relative;
   z-index: 0; /* Base z-index for columns */
-  overflow: visible; /* Allow cards to slide OVER adjacent columns */
+  overflow: hidden; /* CRITICAL: Prevent content from escaping this container */
+  box-sizing: border-box; /* Include padding and border in width */
+  contain: layout style; /* CRITICAL: Isolate this container - no sharing with siblings */
+}
+
+/* Dynamic column width based on number of buckets - each column is isolated */
+/* For 5 columns (stage grouping) */
+.buckets-5 .bucket {
+  width: calc((100% - 68px) / 5); /* (100% - (8px gap × 6 gaps + 8px padding-left + 12px padding-right)) / 5 */
+}
+
+/* For 3 columns (if needed) */
+.buckets-3 .bucket {
+  width: calc((100% - 52px) / 3); /* (100% - (8px gap × 4 gaps + 8px padding-left + 12px padding-right)) / 3 */
 }
 
 .bucket:hover {
@@ -5636,17 +5651,26 @@ main.board {
   align-items: center;
   justify-content: space-between;
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  background: transparent; /* Transparent background */
+  z-index: 1;
+  padding: 8px 0; /* Add vertical padding for better spacing */
+  margin: -8px 0 8px 0; /* Compensate for padding and adjust bottom margin */
 }
 
 /* Scrollbar-free cards container with vertical snap */
 .bucket > div:last-child {
   flex: 1;
   overflow-y: auto;
-  overflow-x: visible; /* Allow horizontal overflow for dragging */
+  overflow-x: hidden; /* Prevent horizontal overflow and card overlap */
   scroll-snap-type: y proximity;
   scroll-behavior: smooth;
   padding-right: 4px;
   margin-right: -4px;
+  width: 100%; /* Force full width of bucket */
+  max-width: 100%; /* Prevent overflow */
+  box-sizing: border-box; /* Include padding in width */
   /* Hide scrollbar */
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -6412,17 +6436,21 @@ main.board {
 
 /* Chapter Card Styles - Compact design */
 .chapter-card {
+  background: transparent; /* Transparent background */
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   border-radius: 12px;
-  padding: 10px;
-  margin: 8px 6px;
+  padding: 8px; /* Reduced padding for better compression */
+  margin: 6px 0; /* Reduced margin to save space */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
   z-index: 1;
   border: 2px dashed transparent;
+  width: 100%; /* Force cards to respect container width */
+  max-width: 100%; /* Prevent overflow */
+  box-sizing: border-box; /* Include padding and border in width calculation */
 }
 
 /* Compact dashed borders with column-themed colors */
@@ -6450,17 +6478,16 @@ main.board {
 .chapter-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  z-index: 10; /* Elevated on hover */
+  z-index: 2; /* Slight elevation but stays within column */
 }
 
 .chapter-card.dragging {
-  opacity: 0.95;
-  transform: rotate(2deg) scale(1.05);
+  opacity: 1;
+  transform: rotate(5deg) scale(1.05);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  z-index: 9999 !important; /* Slides OVER everything when dragging */
-  position: fixed !important; /* CRITICAL: Fixed positioning for proper scroll tracking */
-  pointer-events: none; /* Prevent accidental interactions during drag */
+  z-index: 9999 !important;
   cursor: grabbing !important;
+  pointer-events: none;
 }
 
 .chapter-meta-top {
@@ -6497,10 +6524,15 @@ main.board {
   padding: 10px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.1);
+  width: 100%; /* Respect card width */
+  max-width: 100%; /* Prevent overflow */
+  box-sizing: border-box; /* Include padding in width */
 }
 
 .chapter-info {
   flex: 1;
+  min-width: 0; /* Allow flex child to shrink below content size */
+  overflow: hidden; /* Prevent text overflow */
 }
 
 .chapter-title {
@@ -6515,6 +6547,9 @@ main.board {
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden; /* Prevent text overflow */
+  text-overflow: ellipsis; /* Add ellipsis for long text */
+  white-space: nowrap; /* Keep text on one line */
 }
 
 .chapter-meta {
@@ -6602,6 +6637,9 @@ main.board {
   flex-direction: column;
   gap: 2px;
   margin-bottom: 8px;
+  width: 100%; /* Respect card width */
+  max-width: 100%; /* Prevent overflow */
+  box-sizing: border-box; /* Include padding in width */
 }
 
 .backlog-grid {
@@ -6614,6 +6652,9 @@ main.board {
   align-items: center;
   padding: 1px 0;
   gap: 4px;
+  width: 100%; /* Respect parent width */
+  max-width: 100%; /* Prevent overflow */
+  box-sizing: border-box; /* Include padding in width */
 }
 
 .backlog-detail-row {

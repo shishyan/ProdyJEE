@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import packageJson from '../package.json'
 import BackgroundSettings from '../components/BackgroundSettings'
 import EnhancedSchedule from '../components/EnhancedSchedule'
+import GoalsPage from './goals'
 import {
   DndContext,
   DragOverlay,
@@ -613,7 +614,7 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
   const style = {
     transform: CSS.Translate.toString(transform),
     transition: isDragging ? 'none' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    opacity: isDragging ? 0.5 : 1  // Make original card semi-transparent when dragging
+    opacity: isDragging ? 0 : 1  // Hide original card completely when dragging
   }
 
   const progressPercentage = Math.round((chapter.completedTopics / chapter.totalTopics) * 100)
@@ -633,11 +634,14 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
   return (
     <div
       ref={setNodeRef}
+      {...attributes}
+      {...listeners}
       style={{
         ...style,
         border: isSelected ? '2px solid #8b5cf6' : undefined,
         backgroundColor: isSelected ? 'rgba(139, 92, 246, 0.1)' : 'rgba(255, 255, 255, 0.3)',
-        boxShadow: isSelected ? 'inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(139, 92, 246, 0.3)' : 'inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1)'
+        boxShadow: isSelected ? 'inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(139, 92, 246, 0.3)' : 'inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.1)',
+        cursor: isDragging ? 'grabbing' : 'grab'
       }}
       className={`chapter-card ${isDragging ? 'dragging' : ''}`}
       data-status={chapter.aggregatedStatus}
@@ -653,7 +657,7 @@ function ChapterCard({ chapter, bucketColor, onEdit, onUpdateProgress, getStatus
         </div>
       </div>
 
-      <div className="chapter-header" {...attributes} {...listeners} style={{ cursor: isDragging ? 'grabbing' : 'grab', background: chapter.aggregatedStatus === 'In Queue' ? '#f3f4f6' : `linear-gradient(135deg, ${getStatusColor(chapter.aggregatedStatus)}20, ${getStatusColor(chapter.aggregatedStatus)}60)` }}>
+      <div className="chapter-header" style={{ background: chapter.aggregatedStatus === 'In Queue' ? '#f3f4f6' : `linear-gradient(135deg, ${getStatusColor(chapter.aggregatedStatus)}20, ${getStatusColor(chapter.aggregatedStatus)}60)` }}>
         <div className="chapter-info">
           <h4
             className="chapter-title"
@@ -2535,7 +2539,7 @@ export default function Home() {
   const [filterPriority, setFilterPriority] = useState('All')
   const [filterLabel, setFilterLabel] = useState('All')
   const [selectedDueDate, setSelectedDueDate] = useState(null)
-  const [backgroundTheme, setBackgroundTheme] = useState('nature') // Changed from 'transparent' to 'nature'
+  const [backgroundTheme, setBackgroundTheme] = useState('ocean') // Default background set to OCEAN
   const [colorTheme, setColorTheme] = useState('dark') // 'light', 'dark', 'transparent'
   const [navbarBackground, setNavbarBackground] = useState('default')
   const [viewMode, setViewMode] = useState('kanban') // Only Kanban view - simplified
@@ -2612,11 +2616,24 @@ export default function Home() {
   }
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Require 8px movement before dragging starts - allows clicks to work
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   )
+
+  // Custom modifier to position drag overlay near cursor
+  const adjustTranslate = ({ transform }) => {
+    return {
+      ...transform,
+      x: transform.x - 20, // Offset from cursor
+      y: transform.y - 20,
+    }
+  }
 
   // Dynamic Bucket configuration based on Group By
   const getBuckets = () => {
@@ -3521,7 +3538,7 @@ export default function Home() {
                   onDragEnd={handleChapterDragEnd}
                 >
                   <div className="kanban-board">
-                    <div className="buckets-container">
+                    <div className={`buckets-container buckets-${buckets.length}`}>
                       {buckets.map(bucket => {
                         const allChapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
                         const filtered = filterChapters(allChapters)
@@ -3574,7 +3591,7 @@ export default function Home() {
                   </div>
 
                   {/* DragOverlay - Renders dragged card in a portal OUTSIDE normal DOM */}
-                  <DragOverlay>
+                  <DragOverlay dropAnimation={null} modifiers={[adjustTranslate]}>
                     {activeChapterId ? (() => {
                       const allChapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
                       const draggedChapter = allChapters.find(ch => ch.chapter_id === activeChapterId)
@@ -3627,100 +3644,7 @@ export default function Home() {
         )}
 
         {currentPage === 'goals' && (
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '100%',
-            gap: '24px',
-            padding: '60px 40px'
-          }}>
-            <div style={{
-              width: '80px',
-              height: '80px',
-              background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '40px',
-              boxShadow: '0 8px 24px rgba(251, 191, 36, 0.3)'
-            }}>
-              ⭐
-            </div>
-            <h2 style={{ 
-              color: 'white', 
-              fontSize: '2.5rem', 
-              marginBottom: '0',
-              fontWeight: '700',
-              textAlign: 'center'
-            }}>
-              Star-Based Goals System
-            </h2>
-            <p style={{ 
-              color: 'rgba(255,255,255,0.9)', 
-              textAlign: 'center', 
-              maxWidth: '700px',
-              fontSize: '1.1rem',
-              lineHeight: '1.8'
-            }}>
-              Track your academic, behavioral, and emotional goals with a star-based reward system. 
-              Set targets, earn stars, and unlock achievements as you progress toward your JEE dreams! 🎯
-            </p>
-            <div style={{ 
-              display: 'flex', 
-              gap: '16px', 
-              flexWrap: 'wrap', 
-              justifyContent: 'center',
-              marginTop: '20px'
-            }}>
-              <a href="/ProdyJEE/goals" style={{
-                padding: '14px 32px',
-                background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                border: 'none',
-                borderRadius: '12px',
-                color: 'white',
-                textDecoration: 'none',
-                fontWeight: '600',
-                fontSize: '1rem',
-                boxShadow: '0 4px 16px rgba(59, 130, 246, 0.4)',
-                transition: 'all 0.3s ease',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <span>Launch Goals Dashboard</span>
-                <span>→</span>
-              </a>
-            </div>
-            <div style={{
-              marginTop: '40px',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '16px',
-              width: '100%',
-              maxWidth: '800px'
-            }}>
-              {[
-                { icon: '📚', title: 'Academic Goals', desc: 'Master topics & ace tests' },
-                { icon: '🎯', title: 'Behavioral Goals', desc: 'Build study discipline' },
-                { icon: '💪', title: 'Emotional Goals', desc: 'Stay motivated & confident' }
-              ].map((item, idx) => (
-                <div key={idx} style={{
-                  padding: '20px',
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  borderRadius: '12px',
-                  textAlign: 'center'
-                }}>
-                  <div style={{ fontSize: '2rem', marginBottom: '8px' }}>{item.icon}</div>
-                  <div style={{ color: 'white', fontWeight: '600', marginBottom: '4px' }}>{item.title}</div>
-                  <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.9rem' }}>{item.desc}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <GoalsPage />
         )}
         </main>
         {/* End of MAIN CONTENT CONTAINER */}
