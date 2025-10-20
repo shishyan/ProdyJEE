@@ -2616,8 +2616,8 @@ export default function Home() {
       ...transform,
       // Backlog is in left column (300px wide), needs less horizontal offset
       // Other columns are in right panel, need more offset to account for left column
-      x: transform.x - (isFromBacklog ? 5 : 235),
-      y: transform.y - (isFromBacklog ? 10 : 100),
+      x: transform.x - (isFromBacklog ? 225 : 235),
+      y: transform.y - (isFromBacklog ? 150 : 100),
     }
   }
 
@@ -3767,6 +3767,15 @@ export default function Home() {
         {/* End of MAIN CONTENT CONTAINER */}
       </div>
       {/* End of Content Wrapper */}
+
+      {/* Footer Container - 6% screen height */}
+      {showFooter && (
+        <footer className="footer-container">
+          <div className="footer-content">
+            <span className="footer-text">© 2025 ProdyJEE - Peepal Prodigy School</span>
+          </div>
+        </footer>
+      )}
 
       {/* Modern Settings Panel */}
       {showSettingsPanel && (

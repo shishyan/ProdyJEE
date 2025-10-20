@@ -1034,8 +1034,8 @@ body {
   flex: 1; /* Take all remaining space */
   padding: 10px 10px 10px 10px; /* Fixed hard padding - extra bottom padding for kanban board breathing room */
   min-height: 0; /* Allow flex to control height */
-  height: auto; /* Changed from 100% to auto */
-  max-height: calc(100vh - 8vh - 7vh - 2%); /* Subtract header + footer + margins */
+  height: calc(86vh - 2%); /* 100vh - 8vh (header) - 6vh (footer) - 2% (margins) */
+  max-height: calc(86vh - 2%); /* Subtract header + footer + margins */
   transition: all 0.3s ease;
   background: rgba(255, 255, 255, 1);
  /* background: transparent !important; /* Fully transparent so columns show through */
@@ -1053,11 +1053,10 @@ body {
   margin-left: 0;
 }
 
-/* 5. FOOTER CONTAINER - 7vh (7% of viewport height) */
-/* 5. FOOTER CONTAINER - 7vh (7% of viewport height) */
+/* 5. FOOTER CONTAINER - 6vh (6% of viewport height) */
 .footer-container {
-  flex: 0 0 7vh;
-  height: 7vh;
+  flex: 0 0 6vh;
+  height: 6vh;
   background: transparent;
   border-top: none; /* Removed border */
   box-shadow: none;
@@ -1069,10 +1068,16 @@ body {
 .footer-content {
   display: flex;
   align-items: center;
-  justify-content: flex-end; /* Align everything to the right */
+  justify-content: center; /* Center align */
   height: 100%;
   padding: 0 2%; /* 2% horizontal padding */
   gap: 3%;
+}
+
+.footer-text {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
 }
 
 .footer-overview {
@@ -5745,7 +5750,7 @@ main.board {
   display: grid;
   grid-template-columns: 300px 1fr; /* Left column fixed 300px, right column takes remaining space */
   gap: 16px;
-  height: 100%;
+  height: calc(100% - 100px); /* Subtract kanban controls container height (~80px + margins) */
   width: 100%;
   padding: 16px;
   box-sizing: border-box;
