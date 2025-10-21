@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  // output: 'export', // DISABLED for development - API routes need server
   trailingSlash: true,
-  basePath: '/ProdyJEE',
-  assetPrefix: '/ProdyJEE/',
+  // basePath: '/ProdyJEE', // DISABLED - Not needed for Capacitor
+  // assetPrefix: '/ProdyJEE/', // DISABLED - Not needed for Capacitor
   // Enhanced Image Optimization
   images: {
     unoptimized: true, // Required for static export

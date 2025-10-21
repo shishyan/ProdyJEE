@@ -12,9 +12,35 @@
   --bg-flowers: url('https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
   --bg-animals: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
   --bg-mountains: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+  
+  /* Ocean Backgrounds (5) */
   --bg-ocean: url('https://images.unsplash.com/photo-1505142468610-359e7d316be0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
-  /* Green Background Options */
+  --bg-ocean-sunset: url('https://images.pexels.com/photos/1118874/pexels-photo-1118874.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  --bg-ocean-waves: url('https://images.pexels.com/photos/189349/pexels-photo-189349.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  --bg-ocean-beach: url('https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  --bg-ocean-tropical: url('https://images.pexels.com/photos/1032650/pexels-photo-1032650.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  --bg-ocean-calm: url('https://images.pexels.com/photos/1287460/pexels-photo-1287460.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  
+  /* River Backgrounds (7) */
+  --bg-river-forest: url('https://images.pexels.com/photos/709552/pexels-photo-709552.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  --bg-river-mountain: url('https://images.pexels.com/photos/147411/italy-mountains-dawn-daybreak-147411.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  --bg-river-waterfall: url('https://images.pexels.com/photos/1029844/pexels-photo-1029844.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  --bg-river-stream: url('https://images.pexels.com/photos/2662116/pexels-photo-2662116.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  --bg-river-rapids: url('https://images.pexels.com/photos/1310788/pexels-photo-1310788.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  --bg-river-sunset: url('https://images.pexels.com/photos/709498/pexels-photo-709498.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  --bg-river-canyon: url('https://images.pexels.com/photos/1624496/pexels-photo-1624496.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  
+  /* Forest Backgrounds (8) */
   --bg-forest-mountain: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+  --bg-forest-pine: url('https://images.pexels.com/photos/1179229/pexels-photo-1179229.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  --bg-forest-misty: url('https://images.pexels.com/photos/4827/nature-forest-trees-fog.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  --bg-forest-autumn: url('https://images.pexels.com/photos/414171/pexels-photo-414171.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  --bg-forest-path: url('https://images.pexels.com/photos/1578750/pexels-photo-1578750.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  --bg-forest-sunlight: url('https://images.pexels.com/photos/1179229/pexels-photo-1179229.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  --bg-forest-tropical: url('https://images.pexels.com/photos/1619317/pexels-photo-1619317.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  --bg-forest-bamboo: url('https://images.pexels.com/photos/325044/pexels-photo-325044.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  
+  /* Legacy (keeping for compatibility) */
   --bg-green-forest: url('https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
   --bg-bamboo: url('https://images.unsplash.com/photo-1578301978018-4c8ccebc52d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
   --bg-jungle: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
@@ -792,15 +818,17 @@ body {
 }
 
 /* Content Wrapper - Contains Sidebar + Main Content */
-/* CONTENT WRAPPER - Takes remaining space below unified header */
+/* CONTENT WRAPPER (RIGHT SIDE CONTAINER) - Height adjusted based on headers */
 .content-wrapper {
   display: flex;
   flex: 1;
   min-height: 0; /* Important for flex children to scroll */
   position: relative;
   gap: 0;
-  overflow: hidden;
-  margin-top: 8vh; /* Below unified header */
+  overflow: hidden; /* Prevent bleed from children */
+  padding: 1% 1.5% 1% 1%; /* Spacing moved from main-content-container margin */
+  align-items: flex-start; /* Prevent stretch - allow natural heights */
+  /* Height is set conditionally below based on visible headers */
 }
 
 /* 3. LEFT SIDEBAR CONTAINER - Max 16% of screen width */
@@ -811,7 +839,7 @@ body {
   min-width: 60px; /* Collapsed width */
   flex-shrink: 0;
   background: transparent;
-  border-right: none; /* Removed border */
+  border-right: none;
   box-shadow: none;
   z-index: 900;
   transition: all 0.3s ease;
@@ -820,6 +848,7 @@ body {
   overflow-y: auto;
   height: 100%;
   cursor: pointer;
+  padding-right: 10px; /* Space for linked design effect */
 }
 
 .left-sidebar-container.collapsed {
@@ -829,14 +858,75 @@ body {
 
 .sidebar-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px;
-  border-bottom: none; /* Removed border */
-  border-top: none; /* Ensure no top border */
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+  padding: 20px 16px;
+  border-bottom: none;
+  border-top: none;
   background: transparent;
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
+}
+
+/* Sidebar Brand Logo */
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.sidebar-brand-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  object-fit: contain;
+}
+
+.sidebar-brand-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-brand-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 1;
+}
+
+.brand-prody {
+  font-size: 22px;
+  font-weight: 700;
+  color: #10b981; /* Green color */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.brand-jee {
+  font-size: 22px;
+  font-weight: 800;
+  color: #f97316; /* Red-orange color */
+  font-family: 'Arial Black', 'Arial Bold', sans-serif;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.brand-tm {
+  font-size: 10px;
+  font-weight: 400;
+  color: #6b7280;
+  vertical-align: super;
+}
+
+.sidebar-brand-subtitle {
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+  line-height: 1;
+  letter-spacing: 0.3px;
 }
 
 .sidebar-toggle-btn {
@@ -866,7 +956,9 @@ body {
   font-weight: 600;
   color: #1a202c;
   margin: 0;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 
+               0 0 20px rgba(255, 255, 255, 0.7),
+               0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .left-sidebar-container.collapsed .sidebar-title {
@@ -886,11 +978,13 @@ body {
 .sidebar-section-title {
   font-size: 12px;
   font-weight: 700;
-  color: #4b5563;
+  color: #1f2937;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin: 0 0 12px 0;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 
+               0 0 15px rgba(255, 255, 255, 0.7),
+               0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .sidebar-stat {
@@ -902,8 +996,10 @@ body {
 }
 
 .stat-label {
-  color: #6b7280;
+  color: #1f2937;
   font-weight: 500;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.9), 
+               0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .stat-value {
@@ -911,7 +1007,8 @@ body {
   color: #1a202c;
   padding: 2px 8px;
   border-radius: 6px;
-  background: #f3f4f6;
+  background: rgba(243, 244, 246, 0.9);
+  text-shadow: none;
 }
 
 .stat-value.stat-backlog {
@@ -967,10 +1064,11 @@ body {
 
 .sidebar-attribution {
   font-size: 10px;
-  color: #4b5563;
+  color: #1f2937;
   text-align: center;
   line-height: 1.4;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 
+               0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .left-sidebar-container.collapsed .sidebar-attribution {
@@ -987,12 +1085,14 @@ body {
   border-radius: 10px;
   font-size: 15px;
   font-weight: 500;
-  color: #4b5563;
+  color: #1f2937;
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s ease;
   background: rgba(255, 255, 255, 0.5);
   border: 1px solid rgba(0, 0, 0, 0.05);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 
+               0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .sidebar-nav-item:hover {
@@ -1002,12 +1102,19 @@ body {
   transform: translateX(4px);
 }
 
+/* LINKED DESIGN: Active sidebar item blends with main content */
 .sidebar-nav-item.active {
-  background: transparent; /* No background when selected */
-  color: #667eea; /* Change text/icon color to purple */
+  background: rgba(255, 255, 255, 1); /* Same as main content background */
+  color: #667eea;
   font-weight: 600;
-  border-color: transparent;
-  box-shadow: none; /* No shadow */
+  border: none;
+  box-shadow: 0 50px 100px rgba(0, 0, 0, 0.15); /* Match main content elevation */
+  border-radius: 24px 0 0 24px; /* Curved left, flat right - links to content */
+  padding-right: 26px; /* Extend into the gap */
+  margin-right: -10px; /* Overlap into padding-right of sidebar */
+  transform: translateX(4px); /* Slight push right */
+  position: relative;
+  z-index: 901; /* Above main content */
 }
 
 .sidebar-nav-item svg {
@@ -1035,26 +1142,247 @@ body {
 /* 4. MAIN CONTENT CONTAINER - Takes remaining width in flex layout */
 .main-content-container {
   flex: 1; /* Take all remaining space */
-  padding: 10px 10px 10px 10px; /* Fixed hard padding - extra bottom padding for kanban board breathing room */
+  padding: 20px; /* Consistent padding all around */
+  padding-bottom: 70px; /* Extra padding for footer */
   min-height: 0; /* Allow flex to control height */
-  height: calc(86vh - 2%); /* 100vh - 8vh (header) - 6vh (footer) - 2% (margins) */
-  max-height: calc(93vh - 1%); /* Subtract header + footer + margins */
+  height: 100%; /* Fill the content-wrapper completely */
+  max-height: 100%; /* Never exceed content-wrapper height */
   transition: all 0.3s ease;
-  background: rgba(255, 255, 255, .66);
- /* background: transparent !important; /* Fully transparent so columns show through */
+  background: rgba(255, 255, 255, 0.67); /* 33% transparent (67% opacity) */
   border-radius: 24px; /* Curved rectangle - all corners */
-  border: none; /* No border */
-  box-shadow: none; /* No shadow */
-  margin: 1% 1.5% 1% 1%; /* Spacing from edges */
-  overflow: hidden; /* Changed from overflow-y: auto - prevent container scrolling */
-  -webkit-backdrop-filter: blur(10px); /* Glass effect */
-  backdrop-filter: blur(10px);
+  border: none;
+  box-shadow: 0 50px 100px rgba(0, 0, 0, 0.15); /* 50px elevation */
+  margin: 2vh 1.5% 2vh 0; /* 2vh top/bottom margins to center vertically, no left margin for linked effect */
+  overflow-y: auto; /* Allow vertical scrolling */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  -webkit-backdrop-filter: blur(30px); /* 30px glass blur effect */
+  backdrop-filter: blur(30px);
+  position: relative;
+  z-index: 900; /* Below active sidebar item */
 }
 
 .left-sidebar-container.collapsed ~ .main-content-container {
-  margin-left: 0;
+  margin-left: 1%;
 }
 
+/* Main Content Header Banner */
+.main-content-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  margin: -20px -20px 20px -20px; /* Extend to edges, add bottom margin */
+  background: rgba(249, 250, 251, 0.6);
+  border-radius: 24px 24px 0 0;
+  border-bottom: 1px solid rgba(229, 231, 235, 0.6);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.content-header-stats {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.content-stat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  border: 1px solid rgba(229, 231, 235, 0.5);
+  transition: all 0.2s ease;
+}
+
+.content-stat:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.content-stat-icon {
+  width: 20px;
+  height: 20px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.content-stat-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.content-stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.content-stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1;
+}
+
+.content-stat-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+/* Stat color variants */
+.content-stat.backlog .content-stat-icon {
+  color: #f59e0b;
+}
+
+.content-stat.backlog .content-stat-value {
+  color: #d97706;
+}
+
+.content-stat.progress .content-stat-icon {
+  color: #3b82f6;
+}
+
+.content-stat.progress .content-stat-value {
+  color: #2563eb;
+}
+
+.content-stat.done .content-stat-icon {
+  color: #10b981;
+}
+
+.content-stat.done .content-stat-value {
+  color: #059669;
+}
+
+.content-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.content-header-search {
+  position: relative;
+}
+
+.content-header-search .search-input {
+  width: 280px;
+  padding: 10px 16px;
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  color: #1f2937;
+  transition: all 0.2s ease;
+}
+
+.content-header-search .search-input:focus {
+  outline: none;
+  border-color: #667eea;
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.content-action-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  background: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  transition: all 0.2s ease;
+}
+
+.content-action-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  border-color: #667eea;
+  color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.content-action-btn.active {
+  background: #667eea;
+  border-color: #667eea;
+  color: white;
+}
+
+.content-action-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* MAIN CONTENT FOOTER - Inside main content container */
+.main-content-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  background: rgba(249, 250, 251, 0.8);
+  border-top: 1px solid rgba(229, 231, 235, 0.6);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  z-index: 10;
+}
+
+.main-content-footer .footer-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0 24px;
+  position: relative;
+}
+
+.main-content-footer .footer-text {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.main-content-footer .footer-voice-assistant {
+  position: absolute;
+  right: 20px;
+  bottom: 10px;
+  width: 48px;
+  height: 48px;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.main-content-footer .footer-voice-assistant:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.6);
+}
+
+.main-content-footer .footer-voice-assistant svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* OLD FOOTER CONTAINER - Keep for backwards compatibility but make it hidden by default */
 /* 5. FOOTER CONTAINER - 6vh (6% of viewport height) */
 .footer-container {
   flex: 0 0 3vh;
@@ -1763,22 +2091,7 @@ body {
    DYNAMIC CONTAINER SIZING WHEN HIDDEN
    ============================================ */
 
-/* When Top Header is hidden, adjust content wrapper margin */
-body:not(:has(.top-header-container)) .content-wrapper,
-.top-header-container:not([style*="display"]):not([style*="none"]) ~ .content-wrapper {
-  margin-top: 60px; /* Only navbar height */
-}
-
-/* When both Top Header and Navbar are hidden */
-body:not(:has(.top-header-container)):not(:has(.top-navbar-container)) .content-wrapper {
-  margin-top: 0;
-}
-
-/* When Navbar is hidden */
-.top-navbar-container[style*="display: none"] ~ .content-wrapper,
-body:not(:has(.top-navbar-container)) .content-wrapper {
-  margin-top: 70px; /* Only header height */
-}
+/* Content wrapper positioning handled naturally by flexbox */
 
 /* When sidebar is hidden, main content expands to full width */
 body:not(:has(.left-sidebar-container)) .main-content-container,
@@ -1793,7 +2106,7 @@ body:not(:has(.footer-container)) .left-sidebar-container,
 }
 
 body:not(:has(.footer-container)) .main-content-container {
-  min-height: calc(100vh - 130px);
+  min-height: calc(100% - 130px); /* Relative to content-wrapper, not viewport */
 }
 
 /* Adjust Left Sidebar top position based on visible containers */

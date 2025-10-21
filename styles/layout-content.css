@@ -4,14 +4,13 @@
   flex: 1;
   padding: 20px 20px 40px 20px;
   min-height: 0;
-  height: auto;
-  max-height: calc(100vh - 8vh - 7vh - 2%);
+  height: 100%; /* Fill the content-wrapper completely */
+  max-height: 100%; /* Never exceed content-wrapper height */
   transition: all 0.3s ease;
   background: rgba(255, 255, 255, 0.7); /* 30% transparent (70% opacity) */
   border-radius: 24px;
   border: none;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  margin: 1% 1.5% 1% 1%;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-backdrop-filter: blur(10px);
