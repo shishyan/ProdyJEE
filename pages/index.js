@@ -449,13 +449,8 @@ function SubTopicCard({ subtopic, chapterName, onEdit, onUpdateProgress }) {
             checked={isCompleted}
             onChange={async (e) => {
               e.stopPropagation()
-              const newStatus = e.target.checked ? 'Completed' : 'Not Started'
-              await fetch(`/api/subtopics/${subtopic.subtopic_id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: newStatus })
-              })
-              if (onUpdateProgress) onUpdateProgress()
+              // Subtopics not available in static version
+              alert('Subtopics are not available in the static version. Please use the full server version for subtopic management.')
             }}
             onClick={(e) => e.stopPropagation()}
           />
@@ -3064,12 +3059,15 @@ export default function Home() {
         }
 
         try {
-          await fetch(`/api/study-plan/${studyPlanId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ learning_status: targetBucket.status })
-          })
-          fetchData() // Refresh data
+          // For static deployment, update localStorage directly
+          const updatedPlans = studyPlans.map(plan =>
+            plan.unique_id === studyPlanId
+              ? { ...plan, learning_status: targetBucket.status }
+              : plan
+          )
+          setStudyPlans(updatedPlans)
+          localStorage.setItem('study-plans-data', JSON.stringify(updatedPlans))
+          console.log(`✅ Study plan ${studyPlanId} moved to "${targetBucket.status}"`)
         } catch (error) {
           console.error('Failed to update study plan:', error)
         }
@@ -3124,25 +3122,7 @@ export default function Home() {
         // If moving to a different bucket, change status
         if (activeStatus !== overStatus) {
           try {
-            // Update all topics in this chapter in the database
-            const updatePromises = activeChapter.studyPlans.map(plan =>
-              fetch('/api/study-plan', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  unique_id: plan.unique_id,
-                  learning_status: overStatus,
-                  // Update additional fields based on status
-                  learning_stage: overStatus === 'Done' ? 'Mastered' : plan.learning_stage,
-                  learning_proficiency: overStatus === 'Done' ? 100 : plan.learning_proficiency,
-                  progress_percentage: overStatus === 'Done' ? 100 : plan.progress_percentage
-                })
-              })
-            )
-
-            await Promise.all(updatePromises)
-
-            // Update local state after successful DB update
+            // Update local state directly for static deployment
             setStudyPlans(prev => prev.map(plan =>
               activeChapter.studyPlans.some(chapterPlan => chapterPlan.unique_id === plan.unique_id)
                 ? {
@@ -3155,9 +3135,23 @@ export default function Home() {
                 : plan
             ))
 
-            console.log(`✅ Chapter "${activeChapter.chapter_name}" moved to "${overStatus}" - Database updated`)
+            // Update localStorage
+            const updatedPlans = studyPlans.map(plan =>
+              activeChapter.studyPlans.some(chapterPlan => chapterPlan.unique_id === plan.unique_id)
+                ? {
+                    ...plan,
+                    learning_status: overStatus,
+                    learning_stage: overStatus === 'Done' ? 'Mastered' : plan.learning_stage,
+                    learning_proficiency: overStatus === 'Done' ? 100 : plan.learning_proficiency,
+                    progress_percentage: overStatus === 'Done' ? 100 : plan.progress_percentage
+                  }
+                : plan
+            )
+            localStorage.setItem('study-plans-data', JSON.stringify(updatedPlans))
+
+            console.log(`✅ Chapter "${activeChapter.chapter_name}" moved to "${overStatus}"`)
           } catch (error) {
-            console.error('Failed to update chapter in database:', error)
+            console.error('Failed to update chapter:', error)
             alert('Failed to save changes. Please try again.')
           }
         }
@@ -3182,46 +3176,36 @@ export default function Home() {
         }
 
         try {
-          // Update all study plans in this chapter to the new status
-          const chapters = groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
-          const draggedChapter = chapters.find(ch => ch.chapter_id === chapterId)
-
-          if (draggedChapter) {
-            // Update database for all topics in this chapter
-            const updatePromises = draggedChapter.studyPlans.map(plan =>
-              fetch('/api/study-plan', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  unique_id: plan.unique_id,
+          // Update local state directly for static deployment
+          setStudyPlans(prev => prev.map(plan =>
+            draggedChapter.studyPlans.some(chapterPlan => chapterPlan.unique_id === plan.unique_id)
+              ? {
+                  ...plan,
                   learning_status: targetBucket.status,
-                  // Update additional fields based on status
                   learning_stage: targetBucket.status === 'Done' ? 'Mastered' : plan.learning_stage,
                   learning_proficiency: targetBucket.status === 'Done' ? 100 : plan.learning_proficiency,
                   progress_percentage: targetBucket.status === 'Done' ? 100 : plan.progress_percentage
-                })
-              })
-            )
+                }
+              : plan
+          ))
 
-            await Promise.all(updatePromises)
+          // Update localStorage
+          const updatedPlans = studyPlans.map(plan =>
+            draggedChapter.studyPlans.some(chapterPlan => chapterPlan.unique_id === plan.unique_id)
+              ? {
+                  ...plan,
+                  learning_status: targetBucket.status,
+                  learning_stage: targetBucket.status === 'Done' ? 'Mastered' : plan.learning_stage,
+                  learning_proficiency: targetBucket.status === 'Done' ? 100 : plan.learning_proficiency,
+                  progress_percentage: targetBucket.status === 'Done' ? 100 : plan.progress_percentage
+                }
+              : plan
+          )
+          localStorage.setItem('study-plans-data', JSON.stringify(updatedPlans))
 
-            // Update local state after successful DB update
-            setStudyPlans(prev => prev.map(plan =>
-              draggedChapter.studyPlans.some(chapterPlan => chapterPlan.unique_id === plan.unique_id)
-                ? {
-                    ...plan,
-                    learning_status: targetBucket.status,
-                    learning_stage: targetBucket.status === 'Done' ? 'Mastered' : plan.learning_stage,
-                    learning_proficiency: targetBucket.status === 'Done' ? 100 : plan.learning_proficiency,
-                    progress_percentage: targetBucket.status === 'Done' ? 100 : plan.progress_percentage
-                  }
-                : plan
-            ))
-
-            console.log(`✅ Chapter "${draggedChapter.chapter_name}" moved to "${targetBucket.status}" - Database updated`)
-          }
+          console.log(`✅ Chapter "${draggedChapter.chapter_name}" moved to "${targetBucket.status}"`)
         } catch (error) {
-          console.error('Failed to update chapter in database:', error)
+          console.error('Failed to update chapter:', error)
           alert('Failed to save changes. Please try again.')
         }
       }
@@ -3235,25 +3219,7 @@ export default function Home() {
       const chapter = chapters.find(ch => ch.chapter_id === chapterId)
 
       if (chapter) {
-        // Update database for all topics in this chapter
-        const updatePromises = chapter.studyPlans.map(plan =>
-          fetch('/api/study-plan', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              unique_id: plan.unique_id,
-              learning_status: newStatus,
-              // Update additional fields based on status
-              learning_stage: newStatus === 'Done' ? 'Mastered' : plan.learning_stage,
-              learning_proficiency: newStatus === 'Done' ? 100 : plan.learning_proficiency,
-              progress_percentage: newStatus === 'Done' ? 100 : plan.progress_percentage
-            })
-          })
-        )
-
-        await Promise.all(updatePromises)
-
-        // Update local state after successful DB update
+        // Update local state directly for static deployment
         setStudyPlans(prev => prev.map(plan =>
           chapter.studyPlans.some(chapterPlan => chapterPlan.unique_id === plan.unique_id)
             ? {
@@ -3266,10 +3232,24 @@ export default function Home() {
             : plan
         ))
 
-        console.log(`✅ Chapter "${chapter.chapter_name}" status updated to "${newStatus}" - Database updated`)
+        // Update localStorage
+        const updatedPlans = studyPlans.map(plan =>
+          chapter.studyPlans.some(chapterPlan => chapterPlan.unique_id === plan.unique_id)
+            ? {
+                ...plan,
+                learning_status: newStatus,
+                learning_stage: newStatus === 'Done' ? 'Mastered' : plan.learning_stage,
+                learning_proficiency: newStatus === 'Done' ? 100 : plan.learning_proficiency,
+                progress_percentage: newStatus === 'Done' ? 100 : plan.progress_percentage
+              }
+            : plan
+        )
+        localStorage.setItem('study-plans-data', JSON.stringify(updatedPlans))
+
+        console.log(`✅ Chapter "${chapter.chapter_name}" status updated to "${newStatus}"`)
       }
     } catch (error) {
-      console.error('Failed to update chapter status in database:', error)
+      console.error('Failed to update chapter status:', error)
       alert('Failed to save changes. Please try again.')
     }
   }
@@ -4608,19 +4588,9 @@ export default function Home() {
                   </div>
                   <form onSubmit={async (e) => {
                     e.preventDefault()
-                    const formData = new FormData(e.target)
-                    await fetch('/api/subtasks', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        task_id: editingTask.task_id,
-                        title: formData.get('subtask')
-                      })
-                    })
+                    // Subtasks not available in static version
+                    alert('Subtasks are not available in the static version. Please use the full server version for task management.')
                     e.target.reset()
-                    const res = await fetch(`/api/subtasks?task_id=${editingTask.task_id}`)
-                    const data = await res.json()
-                    setSubtasks(data)
                   }}>
                     <div className="add-item">
                       <input name="subtask" placeholder="Add a subtask..." required />
@@ -4641,19 +4611,9 @@ export default function Home() {
                   </div>
                   <form onSubmit={async (e) => {
                     e.preventDefault()
-                    const formData = new FormData(e.target)
-                    await fetch('/api/comments', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        task_id: editingTask.task_id,
-                        content: formData.get('comment')
-                      })
-                    })
+                    // Comments not available in static version
+                    alert('Comments are not available in the static version. Please use the full server version for task management.')
                     e.target.reset()
-                    const res = await fetch(`/api/comments?task_id=${editingTask.task_id}`)
-                    const data = await res.json()
-                    setComments(data)
                   }}>
                     <div className="add-item">
                       <textarea name="comment" placeholder="Add a comment..." required rows="2" />
@@ -5243,35 +5203,25 @@ export default function Home() {
                 e.preventDefault()
                 const formData = new FormData(e.target)
 
-                // Update subtopic statuses in database
-                for (const subTopic of subTopics) {
-                  await fetch(`/api/subtopics/${subTopic.id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      status: subTopic.completed ? 'Completed' : 'Not Started'
-                    })
-                  })
-                }
-
-                // Calculate progress based on completed sub-topics
+                // For static deployment, subtopics are not saved to database
+                // Calculate progress based on completed sub-topics (local only)
                 const completedCount = subTopics.filter(st => st.completed).length
                 const totalCount = subTopics.length
                 const calculatedProgress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0
 
-                await fetch(`/api/study-plan/${editingStudyPlan.unique_id}`, {
-                  method: 'PUT',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    progress_percentage: calculatedProgress,
-                    notes: formData.get('notes')
-                  })
-                })
+                // Update study plan in localStorage
+                const updatedPlans = studyPlans.map(plan =>
+                  plan.unique_id === editingStudyPlan.unique_id
+                    ? { ...plan, progress_percentage: calculatedProgress, notes: formData.get('notes') }
+                    : plan
+                )
+                setStudyPlans(updatedPlans)
+                localStorage.setItem('study-plans-data', JSON.stringify(updatedPlans))
+
                 setEditingStudyPlan(null)
                 setSubTopics([])
                 setNewSubTopic('')
                 setVoiceRecordings([])
-                fetchStudyPlans()
               }}>
                 
                 {/* Chapter Sub-Topics Tracking - Main Purpose */}
