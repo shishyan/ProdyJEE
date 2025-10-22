@@ -1,0 +1,1 @@
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[88],{1020:(_,n,s)=>{(window.__NEXT_P=window.__NEXT_P||[]).push(["/goals",function(){return s(3141)}])}},_=>{_.O(0,[141,636,593,792],()=>_(_.s=1020)),_N_E=_.O()}]);

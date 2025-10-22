@@ -30,6 +30,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Export database
+        run: npm run export:db
+
       - name: Build
         run: npm run build
 
