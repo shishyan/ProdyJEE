@@ -1,6 +1,4 @@
-import type { CapacitorConfig } from '@capacitor/cli';
-
-const config: CapacitorConfig = {
+const config = {
   appId: 'com.prodyjee.app',
   appName: 'ProdyJEE',
   webDir: 'out',
@@ -31,4 +29,4 @@ const config: CapacitorConfig = {
   }
 };
 
-export default config;
+module.exports = config;
