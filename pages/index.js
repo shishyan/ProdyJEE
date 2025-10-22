@@ -28,6 +28,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
+import '../styles/modern-pages.css'
 
 // Modern Icons as SVG components
 const BookOpenIcon = () => (
@@ -267,6 +268,55 @@ const ExpandIcon = () => (
 const MoonIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+  </svg>
+)
+
+const EyeIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+  </svg>
+)
+
+const SunIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1m-16 0H1m15.364 1.636l-.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707m-12.02 12.02l-.707-.707M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+  </svg>
+)
+
+const UtensilsIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+  </svg>
+)
+
+const DumbbellIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+  </svg>
+)
+
+const PlayIcon = () => (
+  <svg className="w-5 h-5" fill="currentColor" stroke="none" viewBox="0 0 24 24">
+    <path d="M8 5v14l11-7z" />
+  </svg>
+)
+
+const PauseIcon = () => (
+  <svg className="w-5 h-5" fill="currentColor" stroke="none" viewBox="0 0 24 24">
+    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+  </svg>
+)
+
+const StopIcon = () => (
+  <svg className="w-5 h-5" fill="currentColor" stroke="none" viewBox="0 0 24 24">
+    <path d="M6 6h12v12H6z" />
+  </svg>
+)
+
+const ResetIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
   </svg>
 )
 
@@ -1737,15 +1787,15 @@ function ScheduleView() {
               <h3 className="text-lg font-semibold mb-4">Event Types</h3>
               <div className="space-y-2">
                 {[
-                  { type: 'school', label: 'School Period', icon: BookOpenIcon },
-                  { type: 'menstrual', label: 'Menstrual Period', icon: HeartIcon },
-                  { type: 'festival', label: 'Festival Holiday', icon: PartyIcon },
-                  { type: 'birthday', label: 'Birthday', icon: CakeIcon },
-                  { type: 'holiday', label: 'Public Holiday', icon: CalendarIcon }
-                ].map(({ type, label, icon: Icon }) => (
+                  { type: 'school', label: 'School Period', icon: <BookOpenIcon /> },
+                  { type: 'menstrual', label: 'Menstrual Period', icon: <HeartIcon /> },
+                  { type: 'festival', label: 'Festival Holiday', icon: <PartyIcon /> },
+                  { type: 'birthday', label: 'Birthday', icon: <CakeIcon /> },
+                  { type: 'holiday', label: 'Public Holiday', icon: <CalendarIcon /> }
+                ].map(({ type, label, icon }) => (
                   <div key={type} className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg ${getEventColor(type)}`}>
-                      <Icon />
+                      {icon}
                     </div>
                     <span className="text-sm">{label}</span>
                   </div>
@@ -1856,6 +1906,19 @@ function ScheduleView() {
   )
 }
 
+// Helper function to get icon component based on icon name
+function getIconComponent(iconName) {
+  switch(iconName) {
+    case 'moon': return <MoonIcon />
+    case 'eye': return <EyeIcon />
+    case 'clock': return <ClockIcon />
+    case 'sun': return <SunIcon />
+    case 'utensils': return <UtensilsIcon />
+    case 'dumbbell': return <DumbbellIcon />
+    default: return <ClockIcon />
+  }
+}
+
 // Timer View Component
 function TimerView() {
   const [timers, setTimers] = useState([])
@@ -1868,7 +1931,7 @@ function TimerView() {
         id: 'sleep',
         name: 'Sleep Timer',
         description: 'Time to wind down and sleep',
-        icon: <MoonIcon />,
+        iconName: 'moon',
         duration: 30 * 60, // 30 minutes
         timeLeft: 30 * 60,
         isRunning: false,
@@ -1878,7 +1941,7 @@ function TimerView() {
         id: 'screen',
         name: 'Screen Timer',
         description: 'Limit screen time for eye health',
-        icon: <EyeIcon />,
+        iconName: 'eye',
         duration: 60 * 60, // 1 hour
         timeLeft: 60 * 60,
         isRunning: false,
@@ -1888,7 +1951,7 @@ function TimerView() {
         id: 'break',
         name: 'Break Timer',
         description: 'Take a break from studying',
-        icon: <ClockIcon />,
+        iconName: 'clock',
         duration: 10 * 60, // 10 minutes
         timeLeft: 10 * 60,
         isRunning: false,
@@ -1898,7 +1961,7 @@ function TimerView() {
         id: 'wakeup',
         name: 'Wakeup Alarm',
         description: 'Gentle morning wake up',
-        icon: <SunIcon />,
+        iconName: 'sun',
         duration: 15 * 60, // 15 minutes
         timeLeft: 15 * 60,
         isRunning: false,
@@ -1908,7 +1971,7 @@ function TimerView() {
         id: 'food',
         name: 'Food Timer',
         description: 'Cooking or meal preparation',
-        icon: <UtensilsIcon />,
+        iconName: 'utensils',
         duration: 20 * 60, // 20 minutes
         timeLeft: 20 * 60,
         isRunning: false,
@@ -1918,7 +1981,7 @@ function TimerView() {
         id: 'fitness',
         name: 'Fitness Timer',
         description: 'Exercise and workout sessions',
-        icon: <DumbbellIcon />,
+        iconName: 'dumbbell',
         duration: 45 * 60, // 45 minutes
         timeLeft: 45 * 60,
         isRunning: false,
@@ -2047,160 +2110,143 @@ function TimerView() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
-      {/* Header */}
-      <div className="bg-pink-50 shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <ClockIcon />
-                Timer Dashboard
-              </h1>
-              <p className="text-gray-600 mt-1">Track time for various activities and routines</p>
-            </div>
-          </div>
-        </div>
+    <div className="timer-container">
+      <div className="timer-header-modern">
+        <h1>⏱️ Timer Dashboard</h1>
+        <p>Track time for various activities and routines</p>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {timers.map(timer => (
-            <div key={timer.id} className={`rounded-xl border-2 p-6 transition-all duration-300 ${timer.isRunning ? 'border-green-500 bg-green-50' : timer.timeLeft === 0 ? 'border-red-500 bg-red-50' : 'border-gray-300 bg-pink-50'}`}>
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gray-100 rounded-lg">
-                    {timer.icon}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">{timer.name}</h3>
-                    <p className="text-sm text-gray-600">{timer.description}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-mono font-bold">
-                    {(() => {
-                      const hours = Math.floor(timer.timeLeft / 3600)
-                      const minutes = Math.floor((timer.timeLeft % 3600) / 60)
-                      const secs = timer.timeLeft % 60
+      <div className="timer-grid-modern">
+        {timers.map(timer => (
+          <div key={timer.id} className="timer-card-modern">
+            <div className="timer-icon-display">
+              {getIconComponent(timer.iconName)}
+            </div>
+            
+            <h3 className="timer-title-modern">{timer.name}</h3>
+            <p className="timer-description-modern">{timer.description}</p>
 
-                      if (hours > 0) {
-                        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-                      }
-                      return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-                    })()}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    of {(() => {
-                      const hours = Math.floor(timer.duration / 3600)
-                      const minutes = Math.floor((timer.duration % 3600) / 60)
-                      const secs = timer.duration % 60
+            <div className="timer-display-modern">
+              {(() => {
+                const hours = Math.floor(timer.timeLeft / 3600)
+                const minutes = Math.floor((timer.timeLeft % 3600) / 60)
+                const secs = timer.timeLeft % 60
 
-                      if (hours > 0) {
-                        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-                      }
-                      return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-                    })()}
-                  </div>
-                </div>
-              </div>
+                if (hours > 0) {
+                  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+                }
+                return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+              })()}
+            </div>
 
-              {/* Progress Bar */}
-              <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-                <div
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    timer.isRunning ? 'bg-green-500' : timer.timeLeft === 0 ? 'bg-red-500' : 'bg-blue-500'
-                  }`}
-                  style={{ width: `${((timer.duration - timer.timeLeft) / timer.duration) * 100}%` }}
-                />
-              </div>
+            <div className="timer-progress-modern">
+              <div 
+                className="timer-progress-fill"
+                style={{ width: `${((timer.duration - timer.timeLeft) / timer.duration) * 100}%` }}
+              ></div>
+            </div>
 
-              {/* Controls */}
-              <div className="flex items-center justify-between">
-                <div className="flex gap-2">
-                  {!timer.isRunning && timer.timeLeft === timer.duration && (
-                    <button
-                      onClick={() => handleStart(timer.id)}
-                      className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                    >
-                      <PlayIcon />
-                    </button>
-                  )}
-
-                  {timer.isRunning && (
-                    <button
-                      onClick={() => handlePause(timer.id)}
-                      className="p-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
-                    >
-                      <PauseIcon />
-                    </button>
-                  )}
-
-                  {timer.isRunning || timer.timeLeft < timer.duration && (
-                    <button
-                      onClick={() => handleStop(timer.id)}
-                      className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                    >
-                      <StopIcon />
-                    </button>
-                  )}
-
-                  <button
-                    onClick={() => handleReset(timer.id)}
-                    className="p-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                  >
-                    <ResetIcon />
-                  </button>
-                </div>
-
-                <div className="flex gap-2">
-                  {timer.presets.map((preset, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleUpdateDuration(timer.id, preset * 60)}
-                      className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
-                    >
-                      {preset}m
-                    </button>
-                  ))}
-
-                  <button
-                    onClick={() => {
-                      const customDuration = prompt('Enter duration in minutes:')
-                      if (customDuration && parseInt(customDuration) > 0) {
-                        handleUpdateDuration(timer.id, parseInt(customDuration) * 60)
-                      }
-                    }}
-                    className="px-3 py-1 text-sm bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors"
-                  >
-                    Custom
-                  </button>
-                </div>
-              </div>
-
-              {/* Status Messages */}
-              {timer.timeLeft === 0 && !timer.isRunning && (
-                <div className="mt-4 p-3 bg-red-100 text-red-800 rounded-lg text-center font-medium">
-                  ⏰ Time's up! {timer.name} completed.
-                </div>
+            <div className="timer-controls-modern">
+              {!timer.isRunning && timer.timeLeft === timer.duration && (
+                <button
+                  onClick={() => handleStart(timer.id)}
+                  className="timer-btn-modern timer-btn-play"
+                >
+                  ▶️ Play
+                </button>
               )}
 
               {timer.isRunning && (
-                <div className="mt-4 p-3 bg-green-100 text-green-800 rounded-lg text-center font-medium">
-                  ▶️ {timer.name} is running...
-                </div>
+                <button
+                  onClick={() => handlePause(timer.id)}
+                  className="timer-btn-modern timer-btn-pause"
+                >
+                  ⏸️ Pause
+                </button>
               )}
-            </div>
-          ))}
-        </div>
 
-        {/* Instructions */}
-        <div className="mt-12 bg-pink-50 rounded-xl shadow-sm border p-6">
-          <h2 className="text-xl font-semibold mb-4">How to Use</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {(timer.isRunning || timer.timeLeft < timer.duration) && (
+                <button
+                  onClick={() => handleStop(timer.id)}
+                  className="timer-btn-modern timer-btn-stop"
+                >
+                  ⏹️ Stop
+                </button>
+              )}
+
+              <button
+                onClick={() => handleReset(timer.id)}
+                className="timer-btn-modern timer-btn-reset"
+              >
+                🔄 Reset
+              </button>
+            </div>
+
+            <div className="timer-presets-modern">
+              {timer.presets.map((preset, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleUpdateDuration(timer.id, preset * 60)}
+                  className="timer-preset-btn"
+                >
+                  {preset}m
+                </button>
+              ))}
+
+              <button
+                onClick={() => {
+                  const customDuration = prompt('Enter duration in minutes:')
+                  if (customDuration && parseInt(customDuration) > 0) {
+                    handleUpdateDuration(timer.id, parseInt(customDuration) * 60)
+                  }
+                }}
+                className="timer-preset-btn"
+                style={{ borderColor: '#8b5cf6', color: '#8b5cf6' }}
+              >
+                Custom
+              </button>
+            </div>
+
+            {timer.timeLeft === 0 && !timer.isRunning && (
+              <div className="timer-status-message timer-status-finished">
+                ⏰ Time's up! {timer.name} completed.
+              </div>
+            )}
+
+            {timer.isRunning && (
+              <div className="timer-status-message timer-status-running">
+                ▶️ {timer.name} is running...
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div style={{
+        maxWidth: '1200px',
+        margin: '60px auto 0',
+        position: 'relative',
+        zIndex: 1,
+        paddingBottom: '40px'
+      }}>
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.95)',
+          WebkitBackdropFilter: 'blur(20px)',
+          backdropFilter: 'blur(20px)',
+          borderRadius: '20px',
+          padding: '32px',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.12)',
+          border: '1px solid rgba(255, 255, 255, 0.6)'
+        }}>
+          <h2 style={{ fontSize: '1.3rem', fontWeight: 700, color: '#1f2937', marginBottom: '24px' }}>How to Use</h2>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+            gap: '24px' 
+          }}>
             <div>
-              <h3 className="font-medium mb-2">Timer Controls</h3>
-              <ul className="text-sm text-gray-600 space-y-1">
+              <h3 style={{ fontWeight: 600, marginBottom: '12px', color: '#374151' }}>Timer Controls</h3>
+              <ul style={{ fontSize: '0.95rem', color: '#6b7280', lineHeight: '1.8', margin: 0, paddingLeft: '20px' }}>
                 <li>• <strong>Play</strong>: Start the timer</li>
                 <li>• <strong>Pause</strong>: Pause the running timer</li>
                 <li>• <strong>Stop</strong>: Stop and reset to full duration</li>
@@ -2208,8 +2254,8 @@ function TimerView() {
               </ul>
             </div>
             <div>
-              <h3 className="font-medium mb-2">Duration Presets</h3>
-              <ul className="text-sm text-gray-600 space-y-1">
+              <h3 style={{ fontWeight: 600, marginBottom: '12px', color: '#374151' }}>Duration Presets</h3>
+              <ul style={{ fontSize: '0.95rem', color: '#6b7280', lineHeight: '1.8', margin: 0, paddingLeft: '20px' }}>
                 <li>• Quick preset buttons for common durations</li>
                 <li>• <strong>Custom</strong>: Set any duration in minutes</li>
                 <li>• All changes apply immediately</li>
@@ -2309,218 +2355,138 @@ function DashboardView() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <div className="bg-pink-50 shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <ChartBarIcon />
-                Dashboard
-              </h1>
-              <p className="text-gray-600 mt-1">Track your progress and productivity</p>
-            </div>
+    <div className="analytics-container">
+      <div className="analytics-header-modern">
+        <h1>📊 Dashboard</h1>
+        <p>Track your progress and productivity</p>
+      </div>
+
+      <div className="analytics-kpi-grid">
+        <div className="analytics-kpi-card">
+          <div className="kpi-label">Study Progress</div>
+          <div className="kpi-value">{studyData.averageProgress}%</div>
+          <div className="kpi-subtext">
+            <span>{studyData.completedTopics}/{studyData.totalTopics} topics completed</span>
           </div>
+          <div className="kpi-trend">
+            <span>📈 +5% this week</span>
+          </div>
+        </div>
+
+        <div className="analytics-kpi-card">
+          <div className="kpi-label">Active Timers</div>
+          <div className="kpi-value">{timerData?.activeTimers || 0}</div>
+          <div className="kpi-subtext">Currently running</div>
+          <div className="kpi-trend">Excellent focus!</div>
+        </div>
+
+        <div className="analytics-kpi-card">
+          <div className="kpi-label">Upcoming Events</div>
+          <div className="kpi-value">{scheduleData?.upcomingEvents || 0}</div>
+          <div className="kpi-subtext">This month</div>
+          <div className="kpi-trend">Stay organized</div>
+        </div>
+
+        <div className="analytics-kpi-card">
+          <div className="kpi-label">Study Streak</div>
+          <div className="kpi-value">7</div>
+          <div className="kpi-subtext">Days in a row</div>
+          <div className="kpi-trend">🔥 Keep it up!</div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="p-6 rounded-xl border bg-blue-50 border-blue-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-blue-600">Study Progress</p>
-                <p className="text-3xl font-bold text-blue-700">{studyData.averageProgress}%</p>
-                <p className="text-sm text-blue-600 mt-1">{studyData.completedTopics}/{studyData.totalTopics} topics</p>
-                <div className="flex items-center mt-2">
-                  <TrendingUpIcon />
-                  <span className="text-sm ml-1 text-blue-600">+5% this week</span>
-                </div>
-              </div>
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <BookOpenIcon />
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 rounded-xl border bg-green-50 border-green-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-green-600">Active Timers</p>
-                <p className="text-3xl font-bold text-green-700">{timerData?.activeTimers || 0}</p>
-                <p className="text-sm text-green-600 mt-1">Currently running</p>
-              </div>
-              <div className="p-3 bg-green-100 rounded-lg">
-                <ClockIcon />
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 rounded-xl border bg-yellow-50 border-yellow-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-yellow-600">Upcoming Events</p>
-                <p className="text-3xl font-bold text-yellow-700">{scheduleData?.upcomingEvents || 0}</p>
-                <p className="text-sm text-yellow-600 mt-1">This month</p>
-              </div>
-              <div className="p-3 bg-yellow-100 rounded-lg">
-                <CalendarIcon />
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 rounded-xl border bg-purple-50 border-purple-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-purple-600">Study Streak</p>
-                <p className="text-3xl font-bold text-purple-700">7</p>
-                <p className="text-sm text-purple-600 mt-1">Days in a row</p>
-                <p className="text-sm text-purple-600 mt-2">Keep it up!</p>
-              </div>
-              <div className="p-3 bg-purple-100 rounded-lg">
-                <TrophyIcon />
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <div className="bg-pink-50 p-6 rounded-xl shadow-sm border">
-            <h3 className="text-lg font-semibold mb-4">Weekly Study Progress</h3>
-            <div className="flex items-end justify-between h-32 gap-2">
-              {weeklyProgressData.map((item, index) => (
-                <div key={index} className="flex-1 flex flex-col items-center">
+        <div className="analytics-charts-grid">
+        <div className="analytics-chart-card">
+          <div className="chart-title">📈 Weekly Study Progress</div>
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: '200px', gap: '12px' }}>
+            {weeklyProgressData.map((item, index) => (
+              <div key={index} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div
+                  style={{
+                    width: '100%',
+                    background: 'linear-gradient(180deg, #667eea, #764ba2)',
+                    borderRadius: '8px 8px 0 0',
+                    height: `${(item.value / 100) * 100}%`,
+                    minHeight: '20px',
+                    transition: 'all 0.3s ease'
+                  }}
+                />
+                <span style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '8px', textAlign: 'center' }}>{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {subjectProgressData.length > 0 && (
+          <div className="analytics-chart-card">
+            <div className="chart-title">📊 Subject-wise Progress</div>
+            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', height: '200px', gap: '12px' }}>
+              {subjectProgressData.map((item, index) => (
+                <div key={index} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <div
-                    className="w-full bg-blue-500 rounded-t transition-all duration-300"
-                    style={{ height: `${(item.value / 100) * 100}%` }}
+                    style={{
+                      width: '100%',
+                      background: 'linear-gradient(180deg, #4facfe, #00f2fe)',
+                      borderRadius: '8px 8px 0 0',
+                      height: `${item.value}%`,
+                      minHeight: '20px',
+                      transition: 'all 0.3s ease'
+                    }}
                   />
-                  <span className="text-xs text-gray-600 mt-2 text-center">{item.label}</span>
+                  <span style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '8px', textAlign: 'center' }}>{item.label}</span>
                 </div>
               ))}
             </div>
           </div>
+        )}
+      </div>
 
-          {subjectProgressData.length > 0 && (
-            <div className="bg-pink-50 p-6 rounded-xl shadow-sm border">
-              <h3 className="text-lg font-semibold mb-4">Subject-wise Progress</h3>
-              <div className="flex items-end justify-between h-32 gap-2">
-                {subjectProgressData.map((item, index) => (
-                  <div key={index} className="flex-1 flex flex-col items-center">
-                    <div
-                      className="w-full bg-green-500 rounded-t transition-all duration-300"
-                      style={{ height: `${item.value}%` }}
-                    />
-                    <span className="text-xs text-gray-600 mt-2 text-center">{item.label}</span>
-                  </div>
-                ))}
+      <div style={{ maxWidth: '1400px', margin: '40px auto 0', position: 'relative', zIndex: 1, paddingBottom: '40px', paddingLeft: '20px', paddingRight: '20px' }}>
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.95)',
+          WebkitBackdropFilter: 'blur(20px)',
+          backdropFilter: 'blur(20px)',
+          borderRadius: '20px',
+          padding: '32px',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.12)',
+          border: '1px solid rgba(255, 255, 255, 0.6)'
+        }}>
+          <h2 style={{ fontSize: '1.3rem', fontWeight: 700, color: '#1f2937', marginBottom: '24px' }}>📌 Study Topics Progress</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' }}>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#374151' }}>Completed Topics</span>
+                <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>{studyData.completedTopics}/{studyData.totalTopics}</span>
               </div>
-            </div>
-          )}
-        </div>
-
-        {/* Progress Bars Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <div className="bg-pink-50 p-6 rounded-xl shadow-sm border">
-            <h3 className="text-lg font-semibold mb-4">Study Topics Progress</h3>
-            <div className="space-y-4">
-              <div className="w-full">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm font-medium text-gray-700">Completed Topics</span>
-                  <span className="text-sm text-gray-500">{studyData.completedTopics}/{studyData.totalTopics}</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="h-2 rounded-full transition-all duration-300 bg-green-500"
-                    style={{ width: `${(studyData.completedTopics / studyData.totalTopics) * 100}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="w-full">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm font-medium text-gray-700">In Progress Topics</span>
-                  <span className="text-sm text-gray-500">{studyData.inProgressTopics}/{studyData.totalTopics}</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="h-2 rounded-full transition-all duration-300 bg-blue-500"
-                    style={{ width: `${(studyData.inProgressTopics / studyData.totalTopics) * 100}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="w-full">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm font-medium text-gray-700">Remaining Topics</span>
-                  <span className="text-sm text-gray-500">{studyData.totalTopics - studyData.completedTopics - studyData.inProgressTopics}/{studyData.totalTopics}</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="h-2 rounded-full transition-all duration-300 bg-yellow-500"
-                    style={{ width: `${((studyData.totalTopics - studyData.completedTopics - studyData.inProgressTopics) / studyData.totalTopics) * 100}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-pink-50 p-6 rounded-xl shadow-sm border">
-            <h3 className="text-lg font-semibold mb-4">Subject Breakdown</h3>
-            <div className="space-y-4">
-              {Object.entries(studyData.subjectStats).map(([subject, stats]) => (
-                <div key={subject} className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{subject}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">
-                      {stats.completed}/{stats.total}
-                    </span>
-                    <div className="w-20 bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-blue-500 h-2 rounded-full"
-                        style={{ width: `${(stats.completed / stats.total) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="bg-pink-50 p-6 rounded-xl shadow-sm border">
-          <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
-          <div className="space-y-4">
-            <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <TargetIcon />
-              </div>
-              <div className="flex-1">
-                <p className="font-medium">Completed Physics Chapter 1</p>
-                <p className="text-sm text-gray-600">2 hours ago</p>
+              <div style={{ width: '100%', background: '#e5e7eb', borderRadius: '8px', height: '8px', overflow: 'hidden' }}>
+                <div
+                  style={{
+                    height: '8px',
+                    borderRadius: '8px',
+                    background: 'linear-gradient(90deg, #10b981, #059669)',
+                    width: `${(studyData.completedTopics / studyData.totalTopics) * 100}%`,
+                    transition: 'width 0.3s ease'
+                  }}
+                />
               </div>
             </div>
 
-            <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <ClockIcon />
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#374151' }}>In Progress Topics</span>
+                <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>{studyData.inProgressTopics}/{studyData.totalTopics}</span>
               </div>
-              <div className="flex-1">
-                <p className="font-medium">Started 25-minute study timer</p>
-                <p className="text-sm text-gray-600">4 hours ago</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <CalendarIcon />
-              </div>
-              <div className="flex-1">
-                <p className="font-medium">Added Diwali festival to schedule</p>
-                <p className="text-sm text-gray-600">1 day ago</p>
+              <div style={{ width: '100%', background: '#e5e7eb', borderRadius: '8px', height: '8px', overflow: 'hidden' }}>
+                <div
+                  style={{
+                    height: '8px',
+                    borderRadius: '8px',
+                    background: 'linear-gradient(90deg, #3b82f6, #1d4ed8)',
+                    width: `${(studyData.inProgressTopics / studyData.totalTopics) * 100}%`,
+                    transition: 'width 0.3s ease'
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -3509,94 +3475,9 @@ export default function Home() {
 
   return (
     <div className="app-container">
-      {/* SINGLE TOP HEADER CONTAINER - Brand + Search + Navigation + Actions */}
-      {showTopHeader && (
-        <header className="unified-header-container">
-          {/* Brand Section */}
-          <div className="header-brand">
-            <div>
-              <div className="brand-logo">
-                <span className="brand-main">Prody</span>
-                <span className="brand-jee">JEE</span>
-                <span className="brand-accent">™</span>
-              </div>
-              <div className="brand-subtitle">Peepal Prodigy School</div>
-            </div>
-          </div>
-
-          {/* Center - Study Summary Stats */}
-          <div className="header-summary-stats">
-            {selectedSubject && (
-              <>
-                <div className="header-stat">
-                  <span className="header-stat-icon"><BookOpenIcon /></span>
-                  <span className="header-stat-value">
-                    {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name)).length}
-                  </span>
-                  <span className="header-stat-label">Chapters</span>
-                </div>
-                {groupBy === 'status' && (
-                  <>
-                    <div className="header-stat backlog">
-                      <span className="header-stat-icon"><ClockIcon /></span>
-                      <span className="header-stat-value">
-                        {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
-                          .filter(chapter => chapter.aggregatedStatus === 'In Queue').length}
-                      </span>
-                      <span className="header-stat-label">Backlog</span>
-                    </div>
-                    <div className="header-stat progress">
-                      <span className="header-stat-icon"><LoaderIcon /></span>
-                      <span className="header-stat-value">
-                        {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
-                          .filter(chapter => chapter.aggregatedStatus === 'In Progress').length}
-                      </span>
-                      <span className="header-stat-label">In Progress</span>
-                    </div>
-                    <div className="header-stat done">
-                      <span className="header-stat-icon"><CheckCircleIcon /></span>
-                      <span className="header-stat-value">
-                        {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
-                          .filter(chapter => chapter.aggregatedStatus === 'Done').length}
-                      </span>
-                      <span className="header-stat-label">Completed</span>
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* Actions Section - Right Side */}
-          <div className="header-actions">
-            {/* Search Bar - Moved to Right */}
-            <div className="header-search" style={{ maxWidth: '300px' }}>
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input"
-              />
-            </div>
-
-            {/* Unified Settings Icon (includes Profile & Controls) */}
-            <div style={{ position: 'relative' }}>
-              <button
-                className={`header-action-btn ${showSettingsPanel ? 'active' : ''}`}
-                onClick={() => setShowSettingsPanel(!showSettingsPanel)}
-                title="Settings & Profile"
-              >
-                <SettingsIcon />
-              </button>
-            </div>
-          </div>
-        </header>
-      )}
-
       {/* Content Wrapper - Contains Sidebar + Main Content */}
       <div className="content-wrapper">
-        {/* 3. LEFT SIDEBAR CONTAINER */}
+        {/* 3. SIDEBAR CONTAINER (now has left and right child containers) */}
         {showSidebar && (
           <aside 
             className={`left-sidebar-container ${sidebarCollapsed ? 'collapsed' : 'expanded'}`}
@@ -3607,7 +3488,25 @@ export default function Home() {
               }
             }}
           >
-            <div className="sidebar-header">
+            {/* LEFT CONTAINER - Navigation */}
+            <div className="sidebar-left-container">
+              <div className="sidebar-header">
+                {/* APP TITLE - Top Left */}
+                <div className="sidebar-app-title" onClick={(e) => e.stopPropagation()}>
+                  {!sidebarCollapsed ? (
+                    <>
+                      <div className="title-logo">
+                        <span className="title-main">Prody</span>
+                        <span className="title-jee">JEE</span>
+                        <span className="title-accent">™</span>
+                      </div>
+                      <div className="title-subtitle">Peepal Prodigy School</div>
+                    </>
+                  ) : (
+                    <div className="title-collapsed">PJ</div>
+                  )}
+                </div>
+
               {/* Class Selector at the top */}
               <div className="sidebar-class-selector" onClick={(e) => e.stopPropagation()}>
                 {!sidebarCollapsed ? (
@@ -3713,11 +3612,97 @@ export default function Home() {
                 {sidebarCollapsed ? <ExpandIcon /> : <CollapseIcon />}
               </button>
             </div>
-          </aside>
-        )}
+            </div>
+            {/* END LEFT CONTAINER */}
 
-        {/* 4. MAIN CONTENT CONTAINER */}
-        <main className="main-content-container">
+            {/* RIGHT CONTAINER - Main Content */}
+            <div className="sidebar-right-container">
+            {/* 4. MAIN CONTENT CONTAINER (NOW IN RIGHT CONTAINER) */}
+            <main className="main-content-container">
+              {/* TOP HEADER - NOW INSIDE MAIN CONTENT */}
+              {showTopHeader && (
+                <header className="unified-header-container">
+                  {/* Brand Section - MOVED TO SIDEBAR LEFT */}
+                  {/* <div className="header-brand">
+                    <div>
+                      <div className="brand-logo">
+                        <span className="brand-main">Prody</span>
+                        <span className="brand-jee">JEE</span>
+                        <span className="brand-accent">™</span>
+                      </div>
+                      <div className="brand-subtitle">Peepal Prodigy School</div>
+                    </div>
+                  </div> */}
+
+                  {/* Center - Study Summary Stats */}
+                  <div className="header-summary-stats">
+                    {selectedSubject && (
+                      <>
+                        <div className="header-stat">
+                          <span className="header-stat-icon"><BookOpenIcon /></span>
+                          <span className="header-stat-value">
+                            {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name)).length}
+                          </span>
+                          <span className="header-stat-label">Chapters</span>
+                        </div>
+                        {groupBy === 'status' && (
+                          <>
+                            <div className="header-stat backlog">
+                              <span className="header-stat-icon"><ClockIcon /></span>
+                              <span className="header-stat-value">
+                                {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+                                  .filter(chapter => chapter.aggregatedStatus === 'In Queue').length}
+                              </span>
+                              <span className="header-stat-label">Backlog</span>
+                            </div>
+                            <div className="header-stat progress">
+                              <span className="header-stat-icon"><LoaderIcon /></span>
+                              <span className="header-stat-value">
+                                {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+                                  .filter(chapter => chapter.aggregatedStatus === 'In Progress').length}
+                              </span>
+                              <span className="header-stat-label">In Progress</span>
+                            </div>
+                            <div className="header-stat done">
+                              <span className="header-stat-icon"><CheckCircleIcon /></span>
+                              <span className="header-stat-value">
+                                {groupStudyPlansByChapter(studyPlans.filter(plan => plan.subject === selectedSubject.name))
+                                  .filter(chapter => chapter.aggregatedStatus === 'Done').length}
+                              </span>
+                              <span className="header-stat-label">Completed</span>
+                            </div>
+                          </>
+                        )}
+                      </>
+                    )}
+                  </div>
+
+                  {/* Actions Section - Right Side */}
+                  <div className="header-actions">
+                    {/* Search Bar - Moved to Right */}
+                    <div className="header-search" style={{ maxWidth: '300px' }}>
+                      <input
+                        type="text"
+                        placeholder="Search..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="search-input"
+                      />
+                    </div>
+
+                    {/* Unified Settings Icon (includes Profile & Controls) */}
+                    <div style={{ position: 'relative' }}>
+                      <button
+                        className={`header-action-btn ${showSettingsPanel ? 'active' : ''}`}
+                        onClick={() => setShowSettingsPanel(!showSettingsPanel)}
+                        title="Settings & Profile"
+                      >
+                        <SettingsIcon />
+                      </button>
+                    </div>
+                  </div>
+                </header>
+              )}
           {currentPage === 'kanban' && (
           <>
             {selectedSubject && viewMode === 'kanban' && (
@@ -4191,8 +4176,13 @@ export default function Home() {
             )}
           </>
         )}
-        </main>
-        {/* End of MAIN CONTENT CONTAINER */}
+            </main>
+            {/* End of MAIN CONTENT CONTAINER */}
+            </div>
+            {/* END RIGHT CONTAINER */}
+          </aside>
+        )}
+
       </div>
       {/* End of Content Wrapper */}
 
