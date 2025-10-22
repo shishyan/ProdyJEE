@@ -1,13 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // output: 'export', // DISABLED for development - API routes need server
+  output: 'export', // Enable static export for GitHub Pages
   trailingSlash: true,
-  // basePath: '/ProdyJEE', // DISABLED - Not needed for Capacitor
-  // assetPrefix: '/ProdyJEE/', // DISABLED - Not needed for Capacitor
-  // Enhanced Image Optimization
   images: {
     unoptimized: true, // Required for static export
     formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+  },
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
