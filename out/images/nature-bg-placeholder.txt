@@ -1,0 +1,15 @@
+Place your nature/scenery background images here:
+- nature-bg.jpg
+- flower-bg.jpg
+- mountains-bg.jpg
+- forest-bg.jpg
+- beach-bg.jpg
+- sunset-bg.jpg
+- garden-bg.jpg
+
+You can use free images from:
+- Unsplash.com
+- Pexels.com
+- Pixabay.com
+
+Recommended resolution: 1920x1080 or higher
