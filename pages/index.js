@@ -3594,11 +3594,11 @@ export default function Home() {
             </div>
             </div>
             {/* END LEFT CONTAINER */}
+          </aside>
+        )}
 
-            {/* RIGHT CONTAINER - Main Content */}
-            <div className="sidebar-right-container">
-            {/* 4. MAIN CONTENT CONTAINER (NOW IN RIGHT CONTAINER) */}
-            <main className="main-content-container">
+        {/* MAIN CONTENT CONTAINER - MOVED OUTSIDE SIDEBAR */}
+        <main className="main-content-container">
               {/* TOP HEADER - NOW INSIDE MAIN CONTENT */}
               {showTopHeader && (
                 <header className="unified-header-container">
@@ -4156,12 +4156,7 @@ export default function Home() {
             )}
           </>
         )}
-            </main>
-            {/* End of MAIN CONTENT CONTAINER */}
-            </div>
-            {/* END RIGHT CONTAINER */}
-          </aside>
-        )}
+        </main>
 
       </div>
       {/* End of Content Wrapper */}
