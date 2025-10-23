@@ -2,7 +2,7 @@
   "name": "ProdyJEE - JEE Study Planner",
   "short_name": "ProdyJEE",
   "description": "Professional JEE study planning and productivity app for students",
-  "start_url": "/",
+  "start_url": "/ProdyJEE/",
   "display": "standalone",
   "background_color": "#1a1a1a",
   "theme_color": "#2b6cb0",
@@ -11,13 +11,13 @@
   "lang": "en",
   "icons": [
     {
-      "src": "/icon-192x192.png",
+      "src": "/ProdyJEE/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon-512x512.png",
+      "src": "/ProdyJEE/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
